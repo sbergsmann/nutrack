@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { addFood, setMood } from "./data";
+import { addFood, setMood, removeFood } from "./data";
 import type { Mood } from "./types";
 import { z } from "zod";
 
@@ -51,6 +51,28 @@ export async function selectMood(formData: FormData) {
   }
 
   await setMood(validatedFields.data.date, validatedFields.data.mood);
+  revalidatePath("/");
+  revalidatePath(`/day/${validatedFields.data.date}`);
+}
+
+
+const DeleteFoodSchema = z.object({
+  food: z.string(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+});
+
+export async function deleteFood(formData: FormData) {
+  const validatedFields = DeleteFoodSchema.safeParse({
+    food: formData.get("food"),
+    date: formData.get("date"),
+  });
+
+  if (!validatedFields.success) {
+    console.error("Invalid food data for deletion:", validatedFields.error.flatten().fieldErrors);
+    return;
+  }
+  
+  await removeFood(validatedFields.data.date, validatedFields.data.food);
   revalidatePath("/");
   revalidatePath(`/day/${validatedFields.data.date}`);
 }

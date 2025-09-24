@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useTransition } from "react";
-import { logFood, selectMood } from "@/lib/actions";
+import { logFood, selectMood, deleteFood } from "@/lib/actions";
 import type { DailyEntry, Mood } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils } from "lucide-react";
+import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
@@ -51,6 +51,16 @@ export function DailyTracker({
       selectMood(formData);
     });
   };
+
+  const handleDeleteFood = (food: string) => {
+    if (!isToday) return;
+    const formData = new FormData();
+    formData.append("food", food);
+    formData.append("date", entry.date);
+    startTransition(() => {
+      deleteFood(formData);
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -118,13 +128,25 @@ export function DailyTracker({
             {entry.foods.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {entry.foods.map((food, index) => (
-                   <Card key={index} className="shadow-sm">
+                   <Card key={index} className="shadow-sm relative group">
                      <CardContent className="p-4 flex items-center gap-4">
                        <div className="bg-primary/20 text-primary p-2 rounded-full">
                          <Utensils className="h-5 w-5" />
                        </div>
                        <p className="text-sm font-medium">{food}</p>
                      </CardContent>
+                     {isToday && (
+                       <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => handleDeleteFood(food)}
+                          aria-label={`Delete ${food}`}
+                          disabled={isPending}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                     )}
                    </Card>
                 ))}
               </div>

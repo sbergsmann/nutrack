@@ -44,6 +44,12 @@ export async function addFood(date: string, food: string): Promise<DailyEntry> {
   return Promise.resolve(entry);
 }
 
+export async function removeFood(date: string, food: string): Promise<DailyEntry> {
+  const entry = getOrCreateEntry(date);
+  entry.foods = entry.foods.filter((f) => f !== food);
+  return Promise.resolve(entry);
+}
+
 export async function setMood(date: string, mood: Mood): Promise<DailyEntry> {
   const entry = getOrCreateEntry(date);
   entry.mood = mood;
