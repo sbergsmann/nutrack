@@ -65,7 +65,7 @@ export function DailyTracker({
   const displayDate = format(parseISO(entry.date), "MMMM d, yyyy");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <Card className="shadow-sm">
         <CardHeader>
           <CardTitle className="font-headline">
