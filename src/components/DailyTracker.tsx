@@ -44,7 +44,7 @@ export function DailyTracker({
   const [isPending, startTransition] = useTransition();
 
   const handleMoodChange = (mood: Mood) => {
-    if (mood === entry.mood || !isToday) return;
+    if (mood === entry.mood) return;
     const formData = new FormData();
     formData.append("mood", mood);
     formData.append("date", entry.date);
@@ -54,7 +54,6 @@ export function DailyTracker({
   };
 
   const handleDeleteFood = (food: string) => {
-    if (!isToday) return;
     const formData = new FormData();
     formData.append("food", food);
     formData.append("date", entry.date);
@@ -73,58 +72,54 @@ export function DailyTracker({
             {displayDate}
           </CardTitle>
           <CardDescription>
-            {isToday
-              ? "Log your food and mood for the day."
-              : "A summary of your food and mood."}
+            Log your food and mood for the day.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {isToday && (
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="font-medium text-sm">
-                  {entry.mood ? `You're feeling: ${entry.mood}` : "How are you feeling?"}
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {moodOptions.map((option) => (
-                    <Button
-                      key={option.value}
-                      variant={entry.mood === option.value ? "default" : "outline"}
-                      onClick={() => handleMoodChange(option.value)}
-                      disabled={isPending || !isToday}
-                      className={cn("flex-1 md:flex-none justify-center",
-                        entry.mood === option.value && "shadow-md"
-                      )}
-                    >
-                      {option.icon}
-                      <span className="ml-2">{option.label}</span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-               <form ref={formRef} action={formAction} className="space-y-2">
-                <label htmlFor="food-input" className="font-medium text-sm">
-                  Add a food item
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    id="food-input"
-                    name="food"
-                    placeholder="e.g., Avocado toast"
-                    className="flex-grow"
-                    required
-                  />
-                  <input type="hidden" name="date" value={entry.date} />
-                  <Button type="submit" size="icon" aria-label="Add food">
-                    <Plus />
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="font-medium text-sm">
+                {entry.mood ? `You're feeling: ${entry.mood}` : "How are you feeling?"}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {moodOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    variant={entry.mood === option.value ? "default" : "outline"}
+                    onClick={() => handleMoodChange(option.value)}
+                    disabled={isPending}
+                    className={cn("flex-1 md:flex-none justify-center",
+                      entry.mood === option.value && "shadow-md"
+                    )}
+                  >
+                    {option.icon}
+                    <span className="ml-2">{option.label}</span>
                   </Button>
-                </div>
-                {state.errors?.food && (
-                  <p className="text-sm text-destructive">{state.errors.food[0]}</p>
-                )}
-              </form>
+                ))}
+              </div>
             </div>
-          )}
+             <form ref={formRef} action={formAction} className="space-y-2">
+              <label htmlFor="food-input" className="font-medium text-sm">
+                Add a food item
+              </label>
+              <div className="flex gap-2">
+                <Input
+                  id="food-input"
+                  name="food"
+                  placeholder="e.g., Avocado toast"
+                  className="flex-grow"
+                  required
+                />
+                <input type="hidden" name="date" value={entry.date} />
+                <Button type="submit" size="icon" aria-label="Add food">
+                  <Plus />
+                </Button>
+              </div>
+              {state.errors?.food && (
+                <p className="text-sm text-destructive">{state.errors.food[0]}</p>
+              )}
+            </form>
+          </div>
 
           <div className="space-y-4">
             <h3 className="font-semibold text-sm">Logged Foods</h3>
@@ -138,18 +133,16 @@ export function DailyTracker({
                        </div>
                        <p className="text-sm font-medium">{food}</p>
                      </CardContent>
-                     {isToday && (
-                       <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute top-1/2 right-2 -translate-y-1/2"
-                          onClick={() => handleDeleteFood(food)}
-                          aria-label={`Delete ${food}`}
-                          disabled={isPending}
-                        >
-                          <Trash className="h-5 w-5 text-muted-foreground group-hover:text-destructive transition-colors" />
-                        </Button>
-                     )}
+                     <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-1/2 right-2 -translate-y-1/2"
+                        onClick={() => handleDeleteFood(food)}
+                        aria-label={`Delete ${food}`}
+                        disabled={isPending}
+                      >
+                        <Trash className="h-5 w-5 text-muted-foreground group-hover:text-destructive transition-colors" />
+                      </Button>
                    </Card>
                 ))}
               </div>
@@ -159,23 +152,6 @@ export function DailyTracker({
               </div>
             )}
           </div>
-          
-          {!isToday && (
-             <div className="space-y-2">
-                <h3 className="font-semibold text-sm">Mood</h3>
-                {entry.mood ? (
-                <div className="flex items-center gap-2 bg-background/50 p-3 rounded-md border w-fit text-sm">
-                    {moodOptions.find((o) => o.value === entry.mood)?.icon}
-                    <p>{entry.mood}</p>
-                </div>
-                ) : (
-                <div className="text-center text-muted-foreground text-sm p-4 bg-background/50 border rounded-md">
-                    <p>No mood selected for this day.</p>
-                </div>
-                )}
-            </div>
-          )}
-
         </CardContent>
       </Card>
     </div>
