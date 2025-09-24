@@ -13,7 +13,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils, X } from "lucide-react";
+import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
@@ -139,12 +139,12 @@ export function DailyTracker({
                        <Button
                           variant="ghost"
                           size="icon"
-                          className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute inset-0 h-full w-full flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => handleDeleteFood(food)}
                           aria-label={`Delete ${food}`}
                           disabled={isPending}
                         >
-                          <X className="h-4 w-4" />
+                          <Trash className="h-6 w-6 text-white" />
                         </Button>
                      )}
                    </Card>
