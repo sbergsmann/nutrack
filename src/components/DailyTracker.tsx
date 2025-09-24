@@ -7,27 +7,21 @@ import type { DailyEntry, Mood } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Plus, Smile, Meh, Frown, Zap, Battery } from "lucide-react";
+import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
-  { value: "Happy", label: "Happy", icon: <Smile className="h-4 w-4" /> },
-  { value: "Neutral", label: "Neutral", icon: <Meh className="h-4 w-4" /> },
-  { value: "Sad", label: "Sad", icon: <Frown className="h-4 w-4" /> },
-  { value: "Energetic", label: "Energetic", icon: <Zap className="h-4 w-4" /> },
-  { value: "Tired", label: "Tired", icon: <Battery className="h-4 w-4" /> },
+  { value: "Happy", label: "Happy", icon: <Smile /> },
+  { value: "Neutral", label: "Neutral", icon: <Meh /> },
+  { value: "Sad", label: "Sad", icon: <Frown /> },
+  { value: "Energetic", label: "Energetic", icon: <Zap /> },
+  { value: "Tired", label: "Tired", icon: <Battery /> },
 ];
 
 export function DailyTracker({
@@ -49,6 +43,7 @@ export function DailyTracker({
   const [isPending, startTransition] = useTransition();
 
   const handleMoodChange = (mood: Mood) => {
+    if (mood === entry.mood || !isToday) return;
     const formData = new FormData();
     formData.append("mood", mood);
     formData.append("date", entry.date);
@@ -72,8 +67,8 @@ export function DailyTracker({
         </CardHeader>
         <CardContent className="space-y-6">
           {isToday && (
-            <div className="grid md:grid-cols-2 gap-6 items-start">
-              <form ref={formRef} action={formAction} className="space-y-2">
+            <div className="space-y-6">
+               <form ref={formRef} action={formAction} className="space-y-2">
                 <label htmlFor="food-input" className="font-medium text-sm">
                   Add a food item
                 </label>
@@ -95,67 +90,67 @@ export function DailyTracker({
                 )}
               </form>
               <div className="space-y-2">
-                <label
-                  htmlFor="mood-select-trigger"
-                  className="font-medium text-sm"
-                >
-                  How are you feeling?
+                <label className="font-medium text-sm">
+                  {entry.mood ? `You're feeling: ${entry.mood}` : "How are you feeling?"}
                 </label>
-                <Select
-                  onValueChange={handleMoodChange}
-                  defaultValue={entry.mood || undefined}
-                  disabled={isPending}
-                >
-                  <SelectTrigger
-                    id="mood-select-trigger"
-                    className="w-full"
-                    aria-label="Select mood"
-                  >
-                    <SelectValue placeholder="Select your mood..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {moodOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className="flex items-center gap-2">
-                          {option.icon}
-                          <span>{option.label}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-wrap gap-2">
+                  {moodOptions.map((option) => (
+                    <Button
+                      key={option.value}
+                      variant={entry.mood === option.value ? "default" : "outline"}
+                      onClick={() => handleMoodChange(option.value)}
+                      disabled={isPending || !isToday}
+                      className={cn("flex-1 md:flex-none justify-center",
+                        entry.mood === option.value && "shadow-md"
+                      )}
+                    >
+                      {option.icon}
+                      <span className="ml-2">{option.label}</span>
+                    </Button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
-          <div className="space-y-2">
+          <div className="space-y-4">
             <h3 className="font-semibold text-sm">Logged Foods</h3>
             {entry.foods.length > 0 ? (
-              <ul className="list-disc list-inside bg-background/50 p-4 rounded-md border space-y-1 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {entry.foods.map((food, index) => (
-                  <li key={index}>{food}</li>
+                   <Card key={index} className="shadow-sm">
+                     <CardContent className="p-4 flex items-center gap-4">
+                       <div className="bg-primary/20 text-primary p-2 rounded-full">
+                         <Utensils className="h-5 w-5" />
+                       </div>
+                       <p className="text-sm font-medium">{food}</p>
+                     </CardContent>
+                   </Card>
                 ))}
-              </ul>
+              </div>
             ) : (
               <div className="text-center text-muted-foreground text-sm p-4 bg-background/50 border rounded-md">
                 <p>No food logged for this day yet.</p>
               </div>
             )}
           </div>
+          
+          {!isToday && (
+             <div className="space-y-2">
+                <h3 className="font-semibold text-sm">Mood</h3>
+                {entry.mood ? (
+                <div className="flex items-center gap-2 bg-background/50 p-3 rounded-md border w-fit text-sm">
+                    {moodOptions.find((o) => o.value === entry.mood)?.icon}
+                    <p>{entry.mood}</p>
+                </div>
+                ) : (
+                <div className="text-center text-muted-foreground text-sm p-4 bg-background/50 border rounded-md">
+                    <p>No mood selected for this day.</p>
+                </div>
+                )}
+            </div>
+          )}
 
-          <div className="space-y-2">
-            <h3 className="font-semibold text-sm">Mood</h3>
-            {entry.mood ? (
-              <div className="flex items-center gap-2 bg-background/50 p-3 rounded-md border w-fit text-sm">
-                {moodOptions.find((o) => o.value === entry.mood)?.icon}
-                <p>{entry.mood}</p>
-              </div>
-            ) : (
-               <div className="text-center text-muted-foreground text-sm p-4 bg-background/50 border rounded-md">
-                <p>No mood selected for this day.</p>
-              </div>
-            )}
-          </div>
         </CardContent>
       </Card>
     </div>
