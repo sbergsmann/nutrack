@@ -1,7 +1,6 @@
 "use client";
 
-import { useFormState } from "react-dom";
-import { useEffect, useRef, useTransition } from "react";
+import { useActionState, useEffect, useRef, useTransition } from "react";
 import { logFood, selectMood } from "@/lib/actions";
 import type { DailyEntry, Mood } from "@/lib/types";
 
@@ -38,7 +37,7 @@ export function DailyTracker({
   entry: DailyEntry;
   isToday: boolean;
 }) {
-  const [state, formAction] = useFormState(logFood, {});
+  const [state, formAction] = useActionState(logFood, {});
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
