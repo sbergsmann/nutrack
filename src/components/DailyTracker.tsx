@@ -139,12 +139,12 @@ export function DailyTracker({
                        <Button
                           variant="ghost"
                           size="icon"
-                          className="absolute top-1/2 right-2 -translate-y-1/2 transition-opacity hover:bg-transparent"
+                          className="absolute top-1/2 right-2 -translate-y-1/2 hover:bg-transparent"
                           onClick={() => handleDeleteFood(food)}
                           aria-label={`Delete ${food}`}
                           disabled={isPending}
                         >
-                          <Trash className="h-5 w-5 text-muted-foreground hover:text-destructive transition-colors" />
+                          <Trash className="h-5 w-5 text-muted-foreground group-hover:text-destructive transition-colors" />
                         </Button>
                      )}
                    </Card>
