@@ -81,27 +81,6 @@ export function DailyTracker({
         <CardContent className="space-y-6">
           {isToday && (
             <div className="space-y-6">
-               <form ref={formRef} action={formAction} className="space-y-2">
-                <label htmlFor="food-input" className="font-medium text-sm">
-                  Add a food item
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    id="food-input"
-                    name="food"
-                    placeholder="e.g., Avocado toast"
-                    className="flex-grow"
-                    required
-                  />
-                  <input type="hidden" name="date" value={entry.date} />
-                  <Button type="submit" size="icon" aria-label="Add food">
-                    <Plus />
-                  </Button>
-                </div>
-                {state.errors?.food && (
-                  <p className="text-sm text-destructive">{state.errors.food[0]}</p>
-                )}
-              </form>
               <div className="space-y-2">
                 <label className="font-medium text-sm">
                   {entry.mood ? `You're feeling: ${entry.mood}` : "How are you feeling?"}
@@ -123,6 +102,27 @@ export function DailyTracker({
                   ))}
                 </div>
               </div>
+               <form ref={formRef} action={formAction} className="space-y-2">
+                <label htmlFor="food-input" className="font-medium text-sm">
+                  Add a food item
+                </label>
+                <div className="flex gap-2">
+                  <Input
+                    id="food-input"
+                    name="food"
+                    placeholder="e.g., Avocado toast"
+                    className="flex-grow"
+                    required
+                  />
+                  <input type="hidden" name="date" value={entry.date} />
+                  <Button type="submit" size="icon" aria-label="Add food">
+                    <Plus />
+                  </Button>
+                </div>
+                {state.errors?.food && (
+                  <p className="text-sm text-destructive">{state.errors.food[0]}</p>
+                )}
+              </form>
             </div>
           )}
 
