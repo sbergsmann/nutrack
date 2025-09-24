@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
 
 export const metadata: Metadata = {
-  title: "NutriTrack",
+  title: "Nutrack",
   description: "Track your daily food intake and mood.",
 };
 
