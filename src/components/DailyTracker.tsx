@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useTransition } from "react";
 import { logFood, selectMood, deleteFood } from "@/lib/actions";
 import type { DailyEntry, Mood } from "@/lib/types";
+import { format, parseISO } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,12 +63,14 @@ export function DailyTracker({
     });
   }
 
+  const displayDate = format(parseISO(entry.date), "MMMM d, yyyy");
+
   return (
     <div className="space-y-6">
       <Card className="shadow-sm">
         <CardHeader>
           <CardTitle className="font-headline">
-            {isToday ? "Today's Log" : `Log for ${entry.date}`}
+            {displayDate}
           </CardTitle>
           <CardDescription>
             {isToday
@@ -139,7 +142,7 @@ export function DailyTracker({
                        <Button
                           variant="ghost"
                           size="icon"
-                          className="absolute top-1/2 right-2 -translate-y-1/2 hover:bg-transparent"
+                          className="absolute top-1/2 right-2 -translate-y-1/2"
                           onClick={() => handleDeleteFood(food)}
                           aria-label={`Delete ${food}`}
                           disabled={isPending}
