@@ -17,14 +17,9 @@ export default async function HomePage() {
     .map((entry) => entry.date);
 
   return (
-    <div className="container mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 p-4 md:p-8">
-      <div className="lg:col-span-2 space-y-6">
-        <DailyTracker entry={todayEntry} isToday={true} />
-      </div>
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold font-headline">Calendar</h2>
-        <CalendarView trackedDates={trackedDates} />
-      </div>
+    <div className="container mx-auto space-y-8 p-4 md:p-8">
+      <CalendarView selectedDate={today} trackedDates={trackedDates} />
+      <DailyTracker entry={todayEntry} isToday={true} />
     </div>
   );
 }
