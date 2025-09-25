@@ -4,8 +4,31 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { addFood, removeFood, setMood } from "@/lib/data";
-import { auth } from "@/firebase/client";
 import { headers } from "next/headers";
+import { getFirestore } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
+import { initializeApp, getApps } from "firebase-admin/app";
+
+// This is a temporary solution to get the user from a server action.
+// In a real app, you would have a more robust session management system.
+async function getUserIdFromSession(): Promise<string | null> {
+    try {
+        if (!getApps().length) {
+            initializeApp();
+        }
+        const authHeader = headers().get('Authorization');
+        if (authHeader) {
+            const idToken = authHeader.split('Bearer ')[1];
+            const decodedToken = await getAuth().verifyIdToken(idToken);
+            return decodedToken.uid;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error verifying token:", error);
+        return null;
+    }
+}
+
 
 const FoodSchema = z.object({
   food: z.string().min(1, "Food item cannot be empty."),
@@ -32,7 +55,8 @@ export async function logFood(prevState: any, formData: FormData) {
     };
   }
   
-  if (!auth.currentUser) {
+  const userId = await getUserIdFromSession();
+  if (!userId) {
     return {
       errors: {
         _form: ["You must be logged in to log food."],
@@ -40,8 +64,11 @@ export async function logFood(prevState: any, formData: FormData) {
     }
   }
 
+  // We are in a server component, so we can use the admin SDK
+  const firestore = getFirestore();
   await addFood(
-    auth.currentUser.uid,
+    firestore,
+    userId,
     validatedFields.data.date,
     validatedFields.data.food
   );
@@ -67,13 +94,16 @@ export async function selectMood(formData: FormData) {
     return;
   }
   
-  if (!auth.currentUser) {
+  const userId = await getUserIdFromSession();
+  if (!userId) {
     console.error("User not logged in");
     return;
   }
-
+  
+  const firestore = getFirestore();
   await setMood(
-    auth.currentUser.uid,
+    firestore,
+    userId,
     validatedFields.data.date,
     validatedFields.data.mood
   );
@@ -92,13 +122,16 @@ export async function deleteFood(formData: FormData) {
         return;
     }
 
-    if (!auth.currentUser) {
+    const userId = await getUserIdFromSession();
+    if (!userId) {
         console.error("User not logged in");
         return;
     }
-
+    
+    const firestore = getFirestore();
     await removeFood(
-      auth.currentUser.uid,
+      firestore,
+      userId,
       validatedFields.data.date, 
       validatedFields.data.food
     );

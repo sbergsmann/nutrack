@@ -9,10 +9,12 @@ import { useUser } from "@/firebase/auth/use-user";
 import { useEffect, useState } from "react";
 import type { DailyEntry } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useFirestore } from "@/firebase/provider";
 
 
 export default function HomePage() {
   const { data: user, loading: userLoading } = useUser();
+  const firestore = useFirestore();
   const today = new Date();
   const todayDateString = format(today, "yyyy-MM-dd");
 
@@ -26,8 +28,8 @@ export default function HomePage() {
     const fetchData = async () => {
       setLoading(true);
       const [todayEntryData, allEntriesData] = await Promise.all([
-        getEntry(user.uid, todayDateString),
-        getAllEntries(user.uid),
+        getEntry(firestore, user.uid, todayDateString),
+        getAllEntries(firestore, user.uid),
       ]);
       setTodayEntry(todayEntryData);
       setAllEntries(allEntriesData);
@@ -35,7 +37,7 @@ export default function HomePage() {
     };
 
     fetchData();
-  }, [user, todayDateString]);
+  }, [user, todayDateString, firestore]);
 
   const trackedDates = allEntries
     .filter((entry) => entry.foods.length > 0 || entry.mood)

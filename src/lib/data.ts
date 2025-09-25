@@ -1,6 +1,4 @@
 
-"use client";
-
 import {
   doc,
   getDoc,
@@ -13,16 +11,16 @@ import {
   type Firestore,
 } from "firebase/firestore";
 import type { DailyEntry, Mood } from "@/lib/types";
-import { firestore } from "@/firebase/client";
 
-const getEntriesCollection = (userId: string) =>
+const getEntriesCollection = (firestore: Firestore, userId: string) =>
   collection(firestore, "users", userId, "entries");
 
 export async function getEntry(
+  firestore: Firestore,
   userId: string,
   date: string
 ): Promise<DailyEntry> {
-  const entryDocRef = doc(getEntriesCollection(userId), date);
+  const entryDocRef = doc(getEntriesCollection(firestore, userId), date);
   const entryDoc = await getDoc(entryDocRef);
 
   if (!entryDoc.exists()) {
@@ -37,18 +35,20 @@ export async function getEntry(
 }
 
 export async function getAllEntries(
+  firestore: Firestore,
   userId: string
 ): Promise<DailyEntry[]> {
-  const snapshot = await getDocs(getEntriesCollection(userId));
+  const snapshot = await getDocs(getEntriesCollection(firestore, userId));
   return snapshot.docs.map((doc) => doc.data() as DailyEntry);
 }
 
 export async function addFood(
+  firestore: Firestore,
   userId: string,
   date: string,
   food: string
 ): Promise<void> {
-  const entryRef = doc(getEntriesCollection(userId), date);
+  const entryRef = doc(getEntriesCollection(firestore, userId), date);
   
   try {
     await updateDoc(entryRef, {
@@ -68,22 +68,24 @@ export async function addFood(
 }
 
 export async function removeFood(
+  firestore: Firestore,
   userId: string,
   date: string,
   food: string
 ): Promise<void> {
-  const entryRef = doc(getEntriesCollection(userId), date);
+  const entryRef = doc(getEntriesCollection(firestore, userId), date);
   await updateDoc(entryRef, {
     foods: arrayRemove(food),
   });
 }
 
 export async function setMood(
+  firestore: Firestore,
   userId: string,
   date: string,
   mood: Mood
 ): Promise<void> {
-  const entryRef = doc(getEntriesCollection(userId), date);
+  const entryRef = doc(getEntriesCollection(firestore, userId), date);
   await setDoc(
     entryRef,
     {

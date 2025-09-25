@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useActionState, useEffect, useRef, useTransition } from "react";
+import { useEffect, useRef, useTransition } from "react";
 import { logFood, selectMood, deleteFood } from "@/lib/actions";
 import type { DailyEntry, Mood } from "@/lib/types";
 import { format, parseISO } from "date-fns";
@@ -17,6 +18,7 @@ import {
 import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase/auth/use-user";
+import { useFormState } from "react-dom";
 
 const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
   { value: "Happy", label: "Happy", icon: <Smile /> },
@@ -26,6 +28,28 @@ const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
   { value: "Tired", label: "Tired", icon: <Battery /> },
 ];
 
+async function clientSideAction(action: (formData: FormData) => Promise<any>, formData: FormData) {
+    const user = (window as any).currentUser;
+    if (user) {
+        const token = await user.getIdToken();
+        const headers = new Headers();
+        headers.append('Authorization', `Bearer ${token}`);
+        
+        const newFormData = new FormData();
+        for (const [key, value] of formData.entries()) {
+            newFormData.append(key, value);
+        }
+
+        return fetch(action.name, {
+            method: 'POST',
+            headers,
+            body: newFormData,
+        }).then(res => res.json());
+    }
+    return action(formData);
+}
+
+
 export function DailyTracker({
   entry,
   isToday,
@@ -34,8 +58,14 @@ export function DailyTracker({
   isToday: boolean;
 }) {
   const { data: user } = useUser();
-  const [state, formAction] = useActionState(logFood, {});
+  const [state, formAction] = useFormState(logFood, {});
   const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (user) {
+      (window as any).currentUser = user;
+    }
+  }, [user]);
 
   useEffect(() => {
     if (Object.keys(state).length === 0) {
@@ -52,7 +82,7 @@ export function DailyTracker({
     formData.append("mood", mood);
     formData.append("date", entry.date);
     startTransition(() => {
-      selectMood(formData);
+      clientSideAction(selectMood, formData);
     });
   };
 
@@ -62,7 +92,7 @@ export function DailyTracker({
     formData.append("food", food);
     formData.append("date", entry.date);
     startTransition(() => {
-      deleteFood(formData);
+      clientSideAction(deleteFood, formData);
     });
   }
 
@@ -121,8 +151,8 @@ export function DailyTracker({
                       <Plus />
                     </Button>
                   </div>
-                  {state.errors?.food && (
-                    <p className="text-sm text-destructive">{state.errors.food[0]}</p>
+                  {(state as any).errors?.food && (
+                    <p className="text-sm text-destructive">{(state as any).errors.food[0]}</p>
                   )}
                 </form>
               </div>
