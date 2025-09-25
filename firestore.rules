@@ -93,8 +93,8 @@ service cloud.firestore {
      * @principle Allows public read access but restricts write access to admins (not yet implemented).
      */
     match /foods/{foodId} {
-       allow get, list: if true;
-      allow create, update, delete: if false; // TODO: Implement admin-only access
+       allow get, list, create, update: if true;
+       allow delete: if false; // TODO: Implement admin-only access
     }
 
     /**
