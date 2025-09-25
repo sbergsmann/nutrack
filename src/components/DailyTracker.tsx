@@ -397,46 +397,71 @@ export function DailyTracker({
                   <div className="flex flex-col gap-2">
                     {loggedFoods.map(({food, quantity}) => (
                       <Card key={food.id} className="shadow-sm">
-                        <CardContent className="p-4 flex items-center justify-between gap-4">
-                           <div className="flex items-center gap-4 overflow-hidden flex-1">
-                            <div className="bg-primary/20 text-primary p-2 rounded-full">
-                                <FoodIcon iconName={food.icon} className="h-5 w-5" />
+                        <CardContent className="p-4 flex flex-col gap-4">
+                           <div className="flex items-center justify-between gap-4">
+                              <div className="flex items-center gap-4 overflow-hidden flex-1">
+                                <div className="bg-primary/20 text-primary p-2 rounded-full">
+                                    <FoodIcon iconName={food.icon} className="h-5 w-5" />
+                                </div>
+                                <div className="flex-1 overflow-hidden">
+                                  <p className="text-sm font-medium truncate">{food.name}</p>
+                                  {food.description && <p className="text-xs text-muted-foreground truncate">{food.description}</p>}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  onClick={() => handleQuantityChange(food, -1)}
+                                  disabled={isPending || quantity <= 1}
+                                  aria-label={`Decrease quantity of ${food.name}`}
+                                >
+                                  <Minus className="h-4 w-4" />
+                                </Button>
+                                <span className="font-bold text-sm w-4 text-center">{quantity}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  onClick={() => handleQuantityChange(food, 1)}
+                                  disabled={isPending}
+                                  aria-label={`Increase quantity of ${food.name}`}
+                                >
+                                  <Plus className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-destructive/70 hover:text-destructive"
+                                onClick={() => handleDeleteFood(food.id)}
+                                disabled={isPending}
+                                aria-label={`Delete ${food.name}`}
+                              >
+                                <Trash className="h-4 w-4" />
+                              </Button>
+                           </div>
+                           {food.portion && (food.carbs || food.proteins || food.fats) && (
+                            <div className="flex items-center justify-end gap-6 text-xs text-muted-foreground pt-2 border-t -mx-4 px-4">
+                              <div className="flex flex-col items-center">
+                                <span>{food.carbs?.toFixed(0) ?? '–'}g</span>
+                                <span className="font-medium">Carbs</span>
+                              </div>
+                              <div className="flex flex-col items-center">
+                                <span>{food.proteins?.toFixed(0) ?? '–'}g</span>
+                                <span className="font-medium">Protein</span>
+                              </div>
+                              <div className="flex flex-col items-center">
+                                <span>{food.fats?.toFixed(0) ?? '–'}g</span>
+                                <span className="font-medium">Fat</span>
+                              </div>
+                                <div className="flex flex-col items-center text-primary font-bold">
+                                <span>{food.portion}g</span>
+                                <span className="font-medium">Portion</span>
+                              </div>
                             </div>
-                            <p className="text-sm font-medium truncate">{food.name}</p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                             <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7"
-                              onClick={() => handleQuantityChange(food, -1)}
-                              disabled={isPending || quantity <= 1}
-                              aria-label={`Decrease quantity of ${food.name}`}
-                            >
-                              <Minus className="h-4 w-4" />
-                            </Button>
-                            <span className="font-bold text-sm w-4 text-center">{quantity}</span>
-                             <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7"
-                              onClick={() => handleQuantityChange(food, 1)}
-                              disabled={isPending}
-                              aria-label={`Increase quantity of ${food.name}`}
-                            >
-                              <Plus className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-destructive/70 hover:text-destructive"
-                            onClick={() => handleDeleteFood(food.id)}
-                            disabled={isPending}
-                            aria-label={`Delete ${food.name}`}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
+                           )}
                         </CardContent>
                       </Card>
                     ))}
@@ -455,3 +480,5 @@ export function DailyTracker({
     </div>
   );
 }
+
+    
