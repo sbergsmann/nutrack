@@ -23,7 +23,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !firestore) return;
 
     const fetchData = async () => {
       setLoading(true);

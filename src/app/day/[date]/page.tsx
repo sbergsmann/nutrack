@@ -38,7 +38,7 @@ export default function DayPage({ params }: { params: Promise<{ date: string }> 
   const isToday = isSameDay(selectedDate, today);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !firestore) return;
 
     const fetchData = async () => {
       setLoading(true);
