@@ -135,6 +135,7 @@ export function DailyTracker({
         if (currentFood && currentFood.quantity > 1) {
           await updateFoodQuantity(firestore, user.uid, entry.date, food.id, currentFood.quantity - 1);
         } else {
+          // This case is handled optimistically, but we still need the backend call for deletion
           await removeFood(firestore, user.uid, entry.date, food.id);
         }
       }
@@ -325,9 +326,9 @@ export function DailyTracker({
                 {loggedFoods && loggedFoods.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {loggedFoods.map(({food, quantity}) => (
-                      <Card key={food.id} className="shadow-sm relative group">
+                      <Card key={food.id} className="shadow-sm">
                         <CardContent className="p-4 flex items-center justify-between gap-4">
-                           <div className="flex items-center gap-4 overflow-hidden">
+                           <div className="flex items-center gap-4 overflow-hidden flex-1">
                             <div className="bg-primary/20 text-primary p-2 rounded-full">
                                 <Utensils className="h-5 w-5" />
                             </div>
@@ -339,10 +340,10 @@ export function DailyTracker({
                               size="icon"
                               className="h-7 w-7"
                               onClick={() => handleQuantityChange(food, -1)}
-                              disabled={isPending}
+                              disabled={isPending || quantity <= 1}
                               aria-label={`Decrease quantity of ${food.name}`}
                             >
-                              {quantity > 1 ? <Minus className="h-4 w-4" /> : <Trash className="h-4 w-4 text-destructive" />}
+                              <Minus className="h-4 w-4" />
                             </Button>
                             <span className="font-bold text-sm w-4 text-center">{quantity}</span>
                              <Button
@@ -356,6 +357,16 @@ export function DailyTracker({
                               <Plus className="h-4 w-4" />
                             </Button>
                           </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive/70 hover:text-destructive"
+                            onClick={() => handleDeleteFood(food.id)}
+                            disabled={isPending}
+                            aria-label={`Delete ${food.name}`}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
                         </CardContent>
                       </Card>
                     ))}
@@ -374,5 +385,3 @@ export function DailyTracker({
     </div>
   );
 }
-
-    
