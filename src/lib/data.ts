@@ -17,7 +17,7 @@ const getEntriesCollection = (firestore: Firestore | AdminFirestore, userId: str
   collection(firestore as Firestore, "users", userId, "dailyLogs");
 
 export async function getEntry(
-  firestore: Firestore,
+  firestore: Firestore | AdminFirestore,
   userId: string,
   date: string
 ): Promise<DailyEntry> {
@@ -36,7 +36,7 @@ export async function getEntry(
 }
 
 export async function getAllEntries(
-  firestore: Firestore,
+  firestore: Firestore | AdminFirestore,
   userId: string
 ): Promise<DailyEntry[]> {
   const snapshot = await getDocs(getEntriesCollection(firestore, userId));
@@ -44,7 +44,7 @@ export async function getAllEntries(
 }
 
 export async function addFood(
-  firestore: Firestore,
+  firestore: Firestore | AdminFirestore,
   userId: string,
   date: string,
   food: string
@@ -71,7 +71,7 @@ export async function addFood(
 }
 
 export async function removeFood(
-  firestore: Firestore,
+  firestore: Firestore | AdminFirestore,
   userId: string,
   date: string,
   food: string
@@ -83,7 +83,7 @@ export async function removeFood(
 }
 
 export async function setMood(
-  firestore: Firestore,
+  firestore: Firestore | AdminFirestore,
   userId: string,
   date: string,
   mood: Mood

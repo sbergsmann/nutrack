@@ -1,10 +1,15 @@
 
 "use client";
 
-import { useEffect, useRef, useTransition, useActionState } from "react";
-import { logFood, selectMood, deleteFood } from "@/lib/actions";
+import { useEffect, useRef, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { removeFood, setMood } from "@/lib/data";
 import type { DailyEntry, Mood } from "@/lib/types";
 import { format, parseISO } from "date-fns";
+import { useUser } from "@/firebase/auth/use-user";
+import { useFirestore } from "@/firebase/provider";
+import { useFormState } from "react-dom";
+import { logFood } from "@/lib/actions";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +23,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useUser } from "@/firebase/auth/use-user";
 
 const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
   { value: "Happy", label: "Happy", icon: <Smile /> },
@@ -27,28 +31,6 @@ const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
   { value: "Energetic", label: "Energetic", icon: <Zap /> },
   { value: "Tired", label: "Tired", icon: <Battery /> },
 ];
-
-async function clientSideAction(action: (formData: FormData) => Promise<any>, formData: FormData) {
-    const user = (window as any).currentUser;
-    if (user) {
-        const token = await user.getIdToken();
-        const headers = new Headers();
-        headers.append('Authorization', `Bearer ${token}`);
-        
-        const newFormData = new FormData();
-        for (const [key, value] of formData.entries()) {
-            newFormData.append(key, value);
-        }
-
-        return fetch(action.name, {
-            method: 'POST',
-            headers,
-            body: newFormData,
-        }).then(res => res.json());
-    }
-    return action(formData);
-}
-
 
 export function DailyTracker({
   entry,
@@ -60,41 +42,36 @@ export function DailyTracker({
   isLoading: boolean;
 }) {
   const { data: user } = useUser();
-  const [state, formAction] = useActionState(logFood, {});
-  const formRef = useRef<HTMLFormElement>(null);
+  const firestore = useFirestore();
+  const router = useRouter();
 
-  useEffect(() => {
-    if (user) {
-      (window as any).currentUser = user;
-    }
-  }, [user]);
+  const [state, formAction, isFormPending] = useFormState(logFood, {});
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (Object.keys(state).length === 0) {
       formRef.current?.reset();
+      router.refresh();
     }
-  }, [state]);
+  }, [state, router]);
 
   const [isPending, startTransition] = useTransition();
+  const isMutationPending = isPending || isFormPending;
 
   const handleMoodChange = (mood: Mood) => {
-    if (!user) return;
+    if (!user || !firestore) return;
     if (mood === entry.mood) return;
-    const formData = new FormData();
-    formData.append("mood", mood);
-    formData.append("date", entry.date);
-    startTransition(() => {
-      clientSideAction(selectMood, formData);
+    startTransition(async () => {
+      await setMood(firestore, user.uid, entry.date, mood);
+      router.refresh();
     });
   };
 
   const handleDeleteFood = (food: string) => {
-    if (!user) return;
-    const formData = new FormData();
-    formData.append("food", food);
-    formData.append("date", entry.date);
-    startTransition(() => {
-      clientSideAction(deleteFood, formData);
+    if (!user || !firestore) return;
+    startTransition(async () => {
+      await removeFood(firestore, user.uid, entry.date, food);
+      router.refresh();
     });
   }
 
@@ -162,7 +139,7 @@ export function DailyTracker({
                         key={option.value}
                         variant={entry.mood === option.value ? "default" : "outline"}
                         onClick={() => handleMoodChange(option.value)}
-                        disabled={isPending}
+                        disabled={isMutationPending}
                         className={cn("flex-1 md:flex-none justify-center",
                           entry.mood === option.value && "shadow-md"
                         )}
@@ -184,14 +161,18 @@ export function DailyTracker({
                       placeholder="e.g., Avocado toast"
                       className="flex-grow"
                       required
+                      disabled={isMutationPending}
                     />
                     <input type="hidden" name="date" value={entry.date} />
-                    <Button type="submit" size="icon" aria-label="Add food">
+                    <Button type="submit" size="icon" aria-label="Add food" disabled={isMutationPending}>
                       <Plus />
                     </Button>
                   </div>
                   {(state as any).errors?.food && (
                     <p className="text-sm text-destructive">{(state as any).errors.food[0]}</p>
+                  )}
+                  {(state as any).errors?._form && (
+                    <p className="text-sm text-destructive">{(state as any).errors._form[0]}</p>
                   )}
                 </form>
               </div>
@@ -214,7 +195,7 @@ export function DailyTracker({
                           className="absolute top-1/2 right-2 -translate-y-1/2"
                           onClick={() => handleDeleteFood(food)}
                           aria-label={`Delete ${food}`}
-                          disabled={isPending}
+                          disabled={isMutationPending}
                         >
                           <Trash className="h-5 w-5 text-muted-foreground group-hover:text-destructive transition-colors" />
                         </Button>

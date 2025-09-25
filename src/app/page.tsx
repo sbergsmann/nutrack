@@ -22,7 +22,14 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user || !firestore) return;
+    if (!user || !firestore) {
+      if (!userLoading) {
+        setTodayEntry({ date: todayDateString, foods: [], mood: null });
+        setAllEntries([]);
+        setLoading(false);
+      }
+      return;
+    }
 
     const fetchData = async () => {
       setLoading(true);
@@ -36,13 +43,13 @@ export default function HomePage() {
     };
 
     fetchData();
-  }, [user, todayDateString, firestore]);
+  }, [user, todayDateString, firestore, userLoading]);
 
   const trackedDates = allEntries
     .filter((entry) => entry.foods.length > 0 || entry.mood)
     .map((entry) => entry.date);
 
-  const isLoading = userLoading || (user && loading);
+  const isLoading = userLoading || loading;
 
   return (
     <div className="container mx-auto space-y-8 p-4 md:p-8">

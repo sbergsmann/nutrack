@@ -3,7 +3,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { addFood, removeFood, setMood } from "@/lib/data";
+import { addFood } from "@/lib/data";
 import { headers } from "next/headers";
 import { getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
@@ -24,6 +24,11 @@ async function getUserIdFromSession(): Promise<string | null> {
         }
         return null;
     } catch (error) {
+        // This will happen if the user is not logged in.
+        // We can ignore this error and let the action handle the null userId.
+        if ((error as any).code === 'auth/id-token-expired' || (error as any).code === 'auth/argument-error') {
+             return null;
+        }
         console.error("Error verifying token:", error);
         return null;
     }
@@ -35,14 +40,7 @@ const FoodSchema = z.object({
   date: z.string(),
 });
 
-const MoodSchema = z.object({
-  mood: z.enum(["Happy", "Neutral", "Sad", "Energetic", "Tired"]),
-  date: z.string(),
-});
-
 export async function logFood(prevState: any, formData: FormData) {
-  const headersList = headers();
-  const referer = (await headersList).get("referer");
 
   const validatedFields = FoodSchema.safeParse({
     food: formData.get("food"),
@@ -72,69 +70,8 @@ export async function logFood(prevState: any, formData: FormData) {
     validatedFields.data.date,
     validatedFields.data.food
   );
-
-  if (referer) {
-    revalidatePath(new URL(referer).pathname);
-  } else {
-    revalidatePath("/");
-    revalidatePath(`/day/${validatedFields.data.date}`);
-  }
   
   return {};
 }
 
-export async function selectMood(formData: FormData) {
-  const validatedFields = MoodSchema.safeParse({
-    mood: formData.get("mood"),
-    date: formData.get("date"),
-  });
-
-  if (!validatedFields.success) {
-    console.error(validatedFields.error.flatten().fieldErrors);
-    return;
-  }
-  
-  const userId = await getUserIdFromSession();
-  if (!userId) {
-    console.error("User not logged in");
-    return;
-  }
-  
-  const firestore = getFirestore();
-  await setMood(
-    firestore,
-    userId,
-    validatedFields.data.date,
-    validatedFields.data.mood
-  );
-  revalidatePath("/");
-  revalidatePath(`/day/${validatedFields.data.date}`);
-}
-
-export async function deleteFood(formData: FormData) {
-    const validatedFields = FoodSchema.safeParse({
-        food: formData.get("food"),
-        date: formData.get("date"),
-    });
-
-    if (!validatedFields.success) {
-        console.error(validatedFields.error.flatten().fieldErrors);
-        return;
-    }
-
-    const userId = await getUserIdFromSession();
-    if (!userId) {
-        console.error("User not logged in");
-        return;
-    }
     
-    const firestore = getFirestore();
-    await removeFood(
-      firestore,
-      userId,
-      validatedFields.data.date, 
-      validatedFields.data.food
-    );
-    revalidatePath("/");
-    revalidatePath(`/day/${validatedFields.data.date}`);
-}
