@@ -413,7 +413,7 @@ export function DailyTracker({
                                       <FoodIcon iconName={food.icon} className="h-5 w-5" />
                                   </div>
                                 </TooltipTrigger>
-                                {food.description && <TooltipContent><p>{food.description}</p></TooltipContent>}
+                                {food.description && <TooltipContent className="max-w-xs text-center"><p>{food.description}</p></TooltipContent>}
                               </Tooltip>
 
                               <div className="flex-1 overflow-hidden">
