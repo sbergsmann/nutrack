@@ -55,7 +55,7 @@ export function CalendarView({
   const trackedDateObjects = trackedDates.map(dateStr => parseISO(dateStr));
 
   return (
-    <div className="flex items-center justify-between gap-2 p-4 rounded-lg bg-card border shadow-sm animate-fade-in">
+    <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-card border shadow-sm animate-fade-in">
       <Button
         variant="ghost"
         size="icon"
@@ -64,7 +64,7 @@ export function CalendarView({
         <ChevronLeft className="h-5 w-5" />
       </Button>
 
-      <div className="flex-1 grid grid-cols-3 sm:grid-cols-7 gap-2 text-center">
+      <div className="flex-1 grid grid-cols-3 sm:grid-cols-7 gap-1 text-center">
         {weekDays.map((day) => {
           const formattedDate = format(day, "yyyy-MM-dd");
           const isTracked = trackedDates.includes(formattedDate);
@@ -75,7 +75,7 @@ export function CalendarView({
               key={formattedDate}
               variant={isSameDay(day, selectedDate) ? "default" : "ghost"}
               className={cn(
-                "flex flex-col h-auto p-2",
+                "flex flex-col h-auto p-1",
                 isToday && !isSameDay(day, selectedDate) && "bg-accent/80 text-accent-foreground",
                 isTracked && !isSameDay(day, selectedDate) && "bg-primary/30 text-primary-foreground font-bold"
               )}
@@ -84,7 +84,7 @@ export function CalendarView({
               <span className="text-xs font-medium uppercase">
                 {format(day, "eee")}
               </span>
-              <span className="text-lg font-bold">{format(day, "d")}</span>
+              <span className="text-base font-bold">{format(day, "d")}</span>
             </Button>
           );
         })}
