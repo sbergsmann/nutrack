@@ -1,5 +1,6 @@
 import { Leaf } from "lucide-react";
 import Link from "next/link";
+import { UserProfile } from "./UserProfile";
 
 export default function Header() {
   return (
@@ -12,6 +13,7 @@ export default function Header() {
           <Leaf className="h-6 w-6 text-primary" />
           <span className="font-headline">Nutrack</span>
         </Link>
+        <UserProfile />
       </div>
     </header>
   );

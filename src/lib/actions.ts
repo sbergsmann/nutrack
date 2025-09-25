@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { addFood, setMood, removeFood } from "./data";
-import type { Mood } from "./types";
 import { z } from "zod";
+import type { Mood } from "./types";
 
 const FoodSchema = z.object({
   food: z.string().min(1, "Food item cannot be empty.").max(100),
@@ -50,7 +50,7 @@ export async function selectMood(formData: FormData) {
     return;
   }
 
-  await setMood(validatedFields.data.date, validatedFields.data.mood);
+  await setMood(validatedFields.data.date, validatedFields.data.mood as Mood);
   revalidatePath("/");
   revalidatePath(`/day/${validatedFields.data.date}`);
 }
@@ -58,7 +58,7 @@ export async function selectMood(formData: FormData) {
 
 const DeleteFoodSchema = z.object({
   food: z.string(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: z.string().regex(/^\d{4-}-\d{2}-\d{2}$/),
 });
 
 export async function deleteFood(formData: FormData) {
@@ -74,5 +74,4 @@ export async function deleteFood(formData: FormData) {
   
   await removeFood(validatedFields.data.date, validatedFields.data.food);
   revalidatePath("/");
-  revalidatePath(`/day/${validatedFields.data.date}`);
-}
+  revalidatePath(`/day/${validatedFields

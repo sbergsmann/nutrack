@@ -3,6 +3,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
+import { FirebaseClientProvider } from "@/firebase/client-provider";
 
 export const metadata: Metadata = {
   title: "Nutrack",
@@ -22,14 +23,9 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className={cn("font-body antialiased h-full")}>
-        <div className="flex flex-col h-full">
-          <Header />
-          <main className="flex-1 overflow-y-auto">
-            {children}
-          </main>
-        </div>
-        <Toaster />
-      </body>
-    </html>
-  );
-}
+        <FirebaseClientProvider>
+          <div className="flex flex-col h-full">
+            <Header />
+            <main className="flex-1 overflow-y-auto">
+              {children}
+            </
