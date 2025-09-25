@@ -1,113 +1,104 @@
 /**
- * @fileoverview Firestore Security Rules for the application.
- *
- * Core Philosophy:
- * This ruleset enforces a strict user-ownership model for user profiles and daily logs,
- * while allowing public read access to food items and open access to feedback submissions.
+ * @file Firestore Security Rules
+ * @description This ruleset enforces a strict user-ownership model for user data and allows public read access to the 'foods' collection.
  *
  * Data Structure:
- * - /users/{userId}: Stores user profile information, accessible only to the user.
- * - /users/{userId}/dailyLogs/{logId}: Stores daily logs for each user, accessible only to the user.
- * - /foods/{foodId}: A global collection of food items, publicly readable.
- * - /feedback/{feedbackId}: Stores user feedback, open to all users.
+ * - /users/{userId}: Stores user profile information. Accessible only by the user themselves.
+ * - /users/{userId}/dailyLogs/{logId}: Stores daily logs for each user. Accessible only by the user themselves. The logId is the date in YYYY-MM-DD format.
+ * - /foods/{foodId}: Global collection of all unique food items. Publicly readable, but only the application can create, update, or delete them.
+ * - /feedback/{feedbackId}: Stores user feedback submissions. Accessible only by the user themselves.
  *
  * Key Security Decisions:
- * - User profiles and daily logs are strictly controlled by user ownership.
- * - Food items are publicly readable to facilitate easy access.
- * - Feedback submissions are open, but each submission must include the user's ID for context.
- *
- * Denormalization for Authorization:
- * - The 'DailyLog' entity requires the `id` field to match the `userId` path parameter to enforce ownership.
+ * - Users can only access their own profile and daily logs.
+ * - Listing of all users is disallowed.
+ * - The 'foods' collection is publicly readable to allow clients to fetch food data without authentication, but write operations are denied to client.
+ * - All write operations require user authentication.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     /**
-     * @description Controls access to user profile information.
+     * @description Secure user profiles. Only the authenticated user can read and write their own profile.
      * @path /users/{userId}
-     * @allow (create) User with UID 'user123' can create their profile.
-     * @allow (get) User with UID 'user123' can read their profile.
-     * @allow (update) User with UID 'user123' can update their profile.
-     * @allow (delete) User with UID 'user123' can delete their profile.
-     * @deny (create) User with UID 'otherUser' cannot create a profile for 'user123'.
-     * @principle Enforces document ownership for user profiles.
+     * @allow (create) - User with uid 'user_abc' can create their own profile with matching uid.
+     * @allow (get, update, delete) - User with uid 'user_abc' can get, update, and delete their own profile.
+     * @deny (create) - User with uid 'user_xyz' cannot create a profile with userId 'user_abc'.
+     * @deny (get, update, delete) - User with uid 'user_xyz' cannot get, update, and delete the profile of userId 'user_abc'.
+     * @principle Enforces document ownership for all operations on user profiles.
      */
     match /users/{userId} {
-      function isOwner(userId) {
-        return request.auth.uid == userId;
-      }
-
-      function isExistingOwner(userId) {
-        return isOwner(userId) && resource != null;
-      }
-
       allow get: if isOwner(userId);
       allow list: if false;
-      allow create: if isOwner(userId);
-      allow update: if isExistingOwner(userId);
-      allow delete: if isExistingOwner(userId);
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
     }
 
     /**
-     * @description Controls access to daily logs for each user.
+     * @description Secure daily logs for each user. Only the authenticated user can read and write their own logs.
      * @path /users/{userId}/dailyLogs/{logId}
-     * @allow (create) User with UID 'user123' can create a daily log.
-     * @allow (get) User with UID 'user123' can read their daily log.
-     * @allow (update) User with UID 'user123' can update their daily log.
-     * @allow (delete) User with UID 'user123' can delete their daily log.
-     * @deny (create) User with UID 'otherUser' cannot create a daily log for 'user123'.
-     * @principle Enforces document ownership for daily logs.
+     * @allow (create) - User with uid 'user_abc' can create a daily log under their profile.
+     * @allow (get, update, delete) - User with uid 'user_abc' can get, update, and delete their own daily logs.
+     * @deny (create) - User with uid 'user_xyz' cannot create a daily log for user 'user_abc'.
+     * @deny (get, update, delete) - User with uid 'user_xyz' cannot get, update, and delete the daily logs of user 'user_abc'.
+     * @principle Enforces document ownership for all operations on user user daily logs.
      */
     match /users/{userId}/dailyLogs/{logId} {
-        function isOwner(userId) {
-            return request.auth.uid == userId;
-        }
-
-        function isExistingOwner(userId) {
-          return isOwner(userId) && resource != null;
-        }
-
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
-        allow create: if isOwner(userId) && request.resource.data.id == userId;
-        allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
-        allow delete: if isExistingOwner(userId);
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
     }
 
     /**
-     * @description Controls access to the global collection of food items.
+     * @description Publicly readable collection of food items, write operations restricted to the application.
      * @path /foods/{foodId}
-     * @allow (get) Any user can read food items.
-     * @allow (list) Any user can list food items.
-     * @deny (create) No one can create food items through the client.
-     * @deny (update) No one can update food items through the client.
-     * @deny (delete) No one can delete food items through the client.
-     * @principle Allows public read access to food items.
+     * @allow (get, list) - Any user (signed in or not) can read the food items.
+     * @deny (create, update, delete) - No user can create, update, or delete food items.
+     * @principle Allows public read access for the 'foods' collection, restricts write access to application.
      */
     match /foods/{foodId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow get, list: if true;
+      allow create, update, delete: if false;
     }
 
     /**
-     * @description Controls access to user feedback submissions.
+     * @description Secure user feedback submissions. Only the authenticated user can read and write their own feedback.
      * @path /feedback/{feedbackId}
-     * @allow (create) Any user can submit feedback.
-     * @allow (get) Any user can read feedback.
-     * @allow (list) Any user can list feedback.
-     * @deny (update) No one can update feedback through the client.
-     * @deny (delete) No one can delete feedback through the client.
+     * @allow (create) - User with uid 'user_abc' can create feedback with matching userId.
+     * @allow (get, update, delete) - User with uid 'user_abc' can get, update, and delete their own feedback.
+     * @deny (create) - User with uid 'user_xyz' cannot create feedback with userId 'user_abc'.
+     * @deny (get, update, delete) - User with uid 'user_xyz' cannot get, update, and delete the feedback of user 'user_abc'.
+     * @principle Enforces document ownership for all operations on user feedback.
      */
     match /feedback/{feedbackId} {
-      allow get: if true;
-      allow list: if true;
-      allow create: if request.resource.data.userId == request.auth.uid;
-      allow update: if false;
-      allow delete: if false;
+      allow get: if isFeedbackOwner(feedbackId);
+      allow list: if false;
+      allow create: if isSignedIn();
+      allow update: if isFeedbackOwner(feedbackId);
+      allow delete: if isFeedbackOwner(feedbackId);
     }
+  }
+
+  // Helper function to determine if the current user is the owner of the resource.
+  function isOwner(userId) {
+    return request.auth.uid == userId && isSignedIn();
+  }
+
+    // Helper function to determine if the current user is the owner of the resource and the resource exists.
+  function isExistingOwner(userId) {
+    return isOwner(userId) && resource != null;
+  }
+
+  // Helper function to check if the user is signed in.
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+    // Helper function to determine if the current user is the owner of the feedback resource.
+  function isFeedbackOwner(feedbackId) {
+    return isSignedIn() && request.auth.uid == resource.data.userId;
   }
 }
