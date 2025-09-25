@@ -36,7 +36,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Smile, Meh, Frown, Zap, Battery, Trash, Minus, Calendar as CalendarIcon, Flame, Beef, Droplet } from "lucide-react";
+import { Plus, Smile, Meh, Frown, Zap, Battery, Trash, Minus, Calendar as CalendarIcon, Flame, Beef, Droplet, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FeedbackDialog } from "./FeedbackDialog";
 import FoodIcon from "./FoodIcon";
@@ -248,12 +248,13 @@ export function DailyTracker({
   const nutrientTotals = useMemo(() => {
     return loggedFoods.reduce(
       (acc, { food, quantity }) => {
+        acc.calories += (food.calories ?? 0) * quantity;
         acc.carbs += (food.carbs ?? 0) * quantity;
         acc.proteins += (food.proteins ?? 0) * quantity;
         acc.fats += (food.fats ?? 0) * quantity;
         return acc;
       },
-      { carbs: 0, proteins: 0, fats: 0 }
+      { calories: 0, carbs: 0, proteins: 0, fats: 0 }
     );
   }, [loggedFoods]);
 
@@ -414,7 +415,14 @@ export function DailyTracker({
 
                 {loggedFoods && loggedFoods.length > 0 ? (
                   <>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                       <Card className="flex items-center p-3 gap-3 bg-purple-500/10 border-purple-500/20">
+                        <Sparkles className="h-6 w-6 text-purple-400" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Calories</p>
+                          <p className="font-bold">{nutrientTotals.calories.toFixed(0)}</p>
+                        </div>
+                      </Card>
                       <Card className="flex items-center p-3 gap-3 bg-orange-500/10 border-orange-500/20">
                         <Flame className="h-6 w-6 text-orange-400" />
                         <div>
@@ -455,8 +463,12 @@ export function DailyTracker({
 
                                 <div className="flex-1 overflow-hidden">
                                   <p className="text-sm font-medium truncate">{food.name}</p>
-                                  {food.portion != null && (food.carbs != null || food.proteins != null || food.fats != null) ? (
+                                  {food.portion != null && (food.calories != null || food.carbs != null || food.proteins != null || food.fats != null) ? (
                                     <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                                      <div className="flex items-center gap-1" title="Calories">
+                                        <Sparkles className="h-3 w-3 text-purple-400" />
+                                        <span>{food.calories?.toFixed(0) ?? '–'}</span>
+                                      </div>
                                       <div className="flex items-center gap-1" title="Carbs">
                                         <Flame className="h-3 w-3 text-orange-400" />
                                         <span>{food.carbs?.toFixed(0) ?? '–'}g</span>

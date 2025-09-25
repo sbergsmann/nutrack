@@ -181,10 +181,11 @@ export async function getOrCreateFood(
 
   if (!querySnapshot.empty) {
     const foodDoc = querySnapshot.docs[0];
+    const foodData = foodDoc.data();
     const foodRef = doc(foodsRef as Firestore, foodDoc.id);
     updateDoc(foodRef, { lastAddedAt: serverTimestamp() });
     
-    const needsEnrichment = !foodDoc.data().portion;
+    const needsEnrichment = !foodData.portion || foodData.calories === undefined || foodData.carbs === undefined || foodData.proteins === undefined || foodData.fats === undefined;
     if (needsEnrichment) {
       triggerFoodEnrichment(firestore, foodDoc.id, trimmedFoodName);
     }

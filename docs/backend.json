@@ -95,6 +95,10 @@
           "type": "number",
           "description": "The typical portion size in grams."
         },
+        "calories": {
+          "type": "number",
+          "description": "Calories per portion."
+        },
         "carbs": {
           "type": "number",
           "description": "Grams of carbohydrates per portion."

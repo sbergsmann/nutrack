@@ -20,6 +20,7 @@ export type EnrichFoodInput = z.infer<typeof EnrichFoodInputSchema>;
 const EnrichFoodOutputSchema = z.object({
   description: z.string().describe('A brief, one-sentence description of the food item.'),
   portion: z.number().describe('A typical portion size for this food in grams.'),
+  calories: z.number().describe('Calories per portion.'),
   carbs: z.number().describe('Grams of carbohydrates per portion.'),
   proteins: z.number().describe('Grams of protein per portion.'),
   fats: z.number().describe('Grams of fat per portion.'),
@@ -43,6 +44,7 @@ Food Name: {{{foodName}}}
 Provide the following details:
 - A brief, one-sentence description of the food.
 - A typical portion size in grams.
+- The number of calories for that portion size.
 - The grams of carbohydrates, protein, and fat for that portion size.
 - The name of a single, relevant icon from the lucide-react library. The icon name must be in PascalCase.
 

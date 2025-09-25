@@ -7,6 +7,7 @@ export type FoodItem = {
   lastAddedAt: Date;
   description?: string;
   portion?: number;
+  calories?: number;
   carbs?: number;
   proteins?: number;
   fats?: number;
