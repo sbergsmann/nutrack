@@ -1,6 +1,8 @@
+
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { format, isSameDay, addDays, subDays } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -13,6 +15,7 @@ export function CalendarView({
   selectedDate: Date;
   trackedDates: string[];
 }) {
+  const router = useRouter();
 
   const getDayLink = (day: Date) => {
     const formattedDate = format(day, "yyyy-MM-dd");
@@ -20,6 +23,11 @@ export function CalendarView({
       return `/`;
     }
     return `/day/${formattedDate}`;
+  };
+
+  const handleDayClick = (day: Date) => {
+    const href = getDayLink(day);
+    router.push(href, { scroll: false });
   };
   
   const today = new Date();
@@ -36,10 +44,8 @@ export function CalendarView({
 
   return (
     <div className="flex items-center justify-between gap-2 p-4 rounded-lg bg-card border shadow-sm">
-       <Button variant="ghost" size="icon" asChild>
-        <Link href={getDayLink(prevDay)} scroll={false}>
+       <Button variant="ghost" size="icon" onClick={() => handleDayClick(prevDay)}>
           <ChevronLeft className="h-5 w-5" />
-        </Link>
       </Button>
       <div className="flex-1 grid grid-cols-3 sm:grid-cols-7 gap-2 text-center">
         {weekDays.map((day) => {
@@ -55,22 +61,18 @@ export function CalendarView({
                 isToday && !isSameDay(day, selectedDate) && "bg-accent/80 text-accent-foreground",
                 isTracked && !isSameDay(day, selectedDate) && "bg-primary/30 text-primary-foreground font-bold"
               )}
-              asChild
+              onClick={() => handleDayClick(day)}
             >
-              <Link href={getDayLink(day)} scroll={false}>
                 <span className="text-xs font-medium uppercase">
                   {format(day, "eee")}
                 </span>
                 <span className="text-lg font-bold">{format(day, "d")}</span>
-              </Link>
             </Button>
           );
         })}
       </div>
-      <Button variant="ghost" size="icon" asChild>
-         <Link href={getDayLink(nextDay)} scroll={false}>
+      <Button variant="ghost" size="icon" onClick={() => handleDayClick(nextDay)}>
           <ChevronRight className="h-5 w-5" />
-        </Link>
       </Button>
     </div>
   );
