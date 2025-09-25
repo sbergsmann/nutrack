@@ -172,6 +172,7 @@ export async function getOrCreateFood(
     // Check if it needs enrichment
     const needsEnrichment = !foodDoc.data().portion;
     if (needsEnrichment) {
+      // Do not await this call, let it run in the background
       enrichFoodInBackground(foodDoc.id, trimmedFoodName);
     }
     
@@ -183,6 +184,7 @@ export async function getOrCreateFood(
       lastAddedAt: serverTimestamp(),
     };
     const newFoodDocRef = await addDoc(foodsRef, newFoodData);
+    // Do not await this call, let it run in the background
     enrichFoodInBackground(newFoodDocRef.id, trimmedFoodName);
     return { foodId: newFoodDocRef.id, needsEnrichment: true };
   }
