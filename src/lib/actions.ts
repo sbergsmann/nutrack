@@ -16,7 +16,7 @@ async function getUserIdFromSession(): Promise<string | null> {
         if (!getApps().length) {
             initializeApp();
         }
-        const authHeader = headers().get('Authorization');
+        const authHeader = (await headers()).get('Authorization');
         if (authHeader) {
             const idToken = authHeader.split('Bearer ')[1];
             const decodedToken = await getAuth().verifyIdToken(idToken);
@@ -42,7 +42,7 @@ const MoodSchema = z.object({
 
 export async function logFood(prevState: any, formData: FormData) {
   const headersList = headers();
-  const referer = headersList.get("referer");
+  const referer = (await headersList).get("referer");
 
   const validatedFields = FoodSchema.safeParse({
     food: formData.get("food"),

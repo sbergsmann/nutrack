@@ -10,10 +10,11 @@ import {
   arrayRemove,
   type Firestore,
 } from "firebase/firestore";
+import type { Firestore as AdminFirestore } from "firebase-admin/firestore";
 import type { DailyEntry, Mood } from "@/lib/types";
 
-const getEntriesCollection = (firestore: Firestore, userId: string) =>
-  collection(firestore, "users", userId, "entries");
+const getEntriesCollection = (firestore: Firestore | AdminFirestore, userId: string) =>
+  collection(firestore as Firestore, "users", userId, "entries");
 
 export async function getEntry(
   firestore: Firestore,
@@ -43,51 +44,52 @@ export async function getAllEntries(
 }
 
 export async function addFood(
-  firestore: Firestore,
+  firestore: AdminFirestore,
   userId: string,
   date: string,
   food: string
 ): Promise<void> {
-  const entryRef = doc(getEntriesCollection(firestore, userId), date);
+  const entryRef = firestore.collection("users").doc(userId).collection("entries").doc(date);
   
   try {
-    await updateDoc(entryRef, {
-      foods: arrayUnion(food),
-    });
-  } catch (error: any) {
-    if (error.code === 'not-found') {
-      await setDoc(entryRef, {
-        date: date,
-        foods: [food],
-        mood: null
-      }, { merge: true });
+    const doc = await entryRef.get();
+    if (doc.exists) {
+        await entryRef.update({
+            foods: arrayUnion(food),
+        });
     } else {
-      throw error;
+        await entryRef.set({
+            date: date,
+            foods: [food],
+            mood: null
+        }, { merge: true });
     }
+  } catch (error: any) {
+      console.error("Error adding food:", error);
+      throw error;
   }
 }
 
 export async function removeFood(
-  firestore: Firestore,
+  firestore: AdminFirestore,
   userId: string,
   date: string,
   food: string
 ): Promise<void> {
-  const entryRef = doc(getEntriesCollection(firestore, userId), date);
-  await updateDoc(entryRef, {
+  const entryRef = firestore.collection("users").doc(userId).collection("entries").doc(date);
+  await entryRef.update({
     foods: arrayRemove(food),
   });
 }
 
 export async function setMood(
-  firestore: Firestore,
+  firestore: AdminFirestore,
   userId: string,
   date: string,
   mood: Mood
 ): Promise<void> {
-  const entryRef = doc(getEntriesCollection(firestore, userId), date);
-  await setDoc(
-    entryRef,
+  const entryRef = firestore.collection("users").doc(userId).collection("entries").doc(date);
+  await entryRef.set(
     {
       date,
       mood,
