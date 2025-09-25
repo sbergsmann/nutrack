@@ -108,11 +108,14 @@ export function DailyTracker({
     });
   }
 
-  const handleQuantityChange = async (food: FoodItem, change: 1 | -1) => {
+  const handleQuantityChange = (food: FoodItem, change: 1 | -1) => {
     if (!user || !firestore) return;
-
+  
     setIsPending(true);
-
+  
+    // Find the original quantity before optimistic update
+    const originalQuantity = loggedFoods.find(f => f.food.id === food.id)?.quantity ?? 0;
+  
     // Optimistic update
     setLoggedFoods(currentFoods => {
       const existingFood = currentFoods.find(f => f.food.id === food.id);
@@ -126,27 +129,27 @@ export function DailyTracker({
       }
       return currentFoods;
     });
-
-    try {
-      if (change === 1) {
-        await addFood(firestore, user.uid, entry.date, food.name);
+  
+    let dbPromise;
+    if (change === 1) {
+      dbPromise = addFood(firestore, user.uid, entry.date, food.name);
+    } else {
+      if (originalQuantity > 1) {
+        dbPromise = updateFoodQuantity(firestore, user.uid, entry.date, food.id, originalQuantity - 1);
       } else {
-        const currentFood = loggedFoods.find(f => f.food.id === food.id);
-        if (currentFood && currentFood.quantity > 1) {
-          await updateFoodQuantity(firestore, user.uid, entry.date, food.id, currentFood.quantity - 1);
-        } else {
-          // This case is handled optimistically, but we still need the backend call for deletion
-          await removeFood(firestore, user.uid, entry.date, food.id);
-        }
+        dbPromise = removeFood(firestore, user.uid, entry.date, food.id);
       }
+    }
+  
+    dbPromise.then(() => {
       router.refresh();
-    } catch (error) {
+    }).catch(error => {
       console.error("Failed to update quantity:", error);
       toast({ variant: "destructive", title: "Failed to update quantity" });
       setLoggedFoods(entry.foods); // Revert on error
-    } finally {
+    }).finally(() => {
       setIsPending(false);
-    }
+    });
   };
 
 
