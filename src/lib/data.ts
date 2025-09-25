@@ -70,7 +70,8 @@ export async function addFood(
       const newEntry: DailyEntry = {
         date: date,
         foods: [food],
-        mood: null
+        mood: null,
+        id: userId,
       };
       setDoc(entryRef, newEntry, { merge: true })
       .catch(async (serverError) => {
@@ -113,6 +114,7 @@ export async function setMood(
   const data = {
     date,
     mood,
+    id: userId,
   };
   setDoc(
     entryRef,
