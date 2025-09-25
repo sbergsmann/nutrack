@@ -153,7 +153,7 @@ export function DailyTracker({
   };
 
 
-  const handleAddFood = async (foodName: string) => {
+  const handleAddFood = (foodName: string) => {
     if (!user || !firestore) return;
     
     const trimmedFoodName = foodName.trim();
@@ -181,14 +181,13 @@ export function DailyTracker({
       }
     });
 
-    try {
-      await addFood(firestore, user.uid, entry.date, trimmedFoodName);
+    addFood(firestore, user.uid, entry.date, trimmedFoodName).then(() => {
       toast({
         title: "Food logged!",
         description: `${trimmedFoodName} has been added to your log.`,
       });
       router.refresh();
-    } catch (error) {
+    }).catch(error => {
       console.error("Failed to log food:", error);
       toast({
         variant: "destructive",
@@ -197,9 +196,9 @@ export function DailyTracker({
       });
       // Revert optimistic update on failure
       setLoggedFoods(entry.foods);
-    } finally {
+    }).finally(() => {
       setIsPending(false);
-    }
+    });
   };
 
   const displayDate = format(parseISO(entry.date), "MMMM d, yyyy");
@@ -327,7 +326,7 @@ export function DailyTracker({
               <div className="space-y-4">
                 <h3 className="font-semibold text-sm">Logged Foods</h3>
                 {loggedFoods && loggedFoods.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="flex flex-col gap-2">
                     {loggedFoods.map(({food, quantity}) => (
                       <Card key={food.id} className="shadow-sm">
                         <CardContent className="p-4 flex items-center justify-between gap-4">
@@ -388,3 +387,5 @@ export function DailyTracker({
     </div>
   );
 }
+
+    
