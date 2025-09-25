@@ -168,7 +168,7 @@ export async function getAllEntries(
 export async function getOrCreateFood(
   firestore: Firestore,
   foodName: string
-): Promise<{foodId: string}> {
+): Promise<FoodItem> {
   const trimmedFoodName = foodName.trim();
   const foodsRef = getFoodsCollection(firestore);
 
@@ -190,7 +190,12 @@ export async function getOrCreateFood(
       triggerFoodEnrichment(firestore, foodDoc.id, trimmedFoodName);
     }
     
-    return { foodId: foodDoc.id };
+    return {
+      id: foodDoc.id,
+      name: foodData.name,
+      lastAddedAt: (foodData.lastAddedAt as Timestamp)?.toDate() ?? new Date(),
+      ...foodData
+    } as FoodItem;
 
   } else {
     const newFoodData = {
@@ -199,7 +204,11 @@ export async function getOrCreateFood(
     };
     const newFoodDocRef = await addDoc(foodsRef, newFoodData);
     triggerFoodEnrichment(firestore, newFoodDocRef.id, trimmedFoodName);
-    return { foodId: newFoodDocRef.id };
+    return {
+      id: newFoodDocRef.id,
+      name: trimmedFoodName,
+      lastAddedAt: new Date(),
+    } as FoodItem;
   }
 }
 
@@ -208,8 +217,8 @@ export async function addFood(
   userId: string,
   date: string,
   foodName: string
-): Promise<void> {
-  const { foodId } = await getOrCreateFood(firestore, foodName);
+): Promise<FoodItem> {
+  const foodItem = await getOrCreateFood(firestore, foodName);
   const entryRef = doc(getEntriesCollection(firestore, userId), date);
 
   try {
@@ -218,25 +227,26 @@ export async function addFood(
       if (!entryDoc.exists()) {
         const newEntry = {
           date: date,
-          foods: [{ foodId, quantity: 1 }],
+          foods: [{ foodId: foodItem.id, quantity: 1 }],
           mood: null,
           userId: userId,
         };
         transaction.set(entryRef, newEntry);
       } else {
         const currentFoods = (entryDoc.data().foods || []) as { foodId: string; quantity: number }[];
-        const foodIndex = currentFoods.findIndex(f => f.foodId === foodId);
+        const foodIndex = currentFoods.findIndex(f => f.foodId === foodItem.id);
         
         if (foodIndex > -1) {
           // Increment quantity
           currentFoods[foodIndex].quantity += 1;
         } else {
           // Add new food
-          currentFoods.push({ foodId, quantity: 1 });
+          currentFoods.push({ foodId: foodItem.id, quantity: 1 });
         }
         transaction.update(entryRef, { foods: currentFoods });
       }
     });
+    return foodItem;
   } catch (e) {
     console.error("Transaction failure:", e);
     const permissionError = new FirestorePermissionError({
@@ -248,6 +258,8 @@ export async function addFood(
     if (!(e instanceof FirestorePermissionError)) {
       throw e;
     }
+    // Rethrow to be caught by the caller
+    throw e;
   }
 }
 
@@ -405,3 +417,5 @@ export async function getUser(
         return null;
     }
 }
+
+    

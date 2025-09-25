@@ -173,7 +173,7 @@ export function DailyTracker({
     });
   };
 
-  const handleAddFood = (foodName: string) => {
+  const handleAddFood = async (foodName: string) => {
     if (!user || !firestore) return;
     
     const trimmedFoodName = foodName.trim();
@@ -183,55 +183,62 @@ export function DailyTracker({
     setShowSuggestions(false);
     setFoodInput("");
 
-    let newFoodAdded = false;
-    let newFoods: LoggedFood[] = [];
+    // Optimistically update UI first
+    const existingFood = loggedFoods.find(f => f.food.name.toLowerCase() === trimmedFoodName.toLowerCase());
+    
+    if (existingFood) {
+      setLoggedFoods(currentFoods => 
+        currentFoods.map(f => 
+          f.food.id === existingFood.food.id 
+            ? { ...f, quantity: f.quantity + 1 } 
+            : f
+        )
+      );
+    }
 
-    setLoggedFoods(currentFoods => {
-      const existingFood = currentFoods.find(f => f.food.name.toLowerCase() === trimmedFoodName.toLowerCase());
-      if (existingFood) {
-        newFoods = currentFoods.map(f => f.food.name.toLowerCase() === trimmedFoodName.toLowerCase() ? { ...f, quantity: f.quantity + 1 } : f);
-      } else {
-        newFoodAdded = true;
-        const newFood: LoggedFood = {
-          food: {
-            id: `temp-${Date.now()}`,
-            name: trimmedFoodName,
-            lastAddedAt: new Date(),
-          },
-          quantity: 1,
-        };
-        newFoods = [...currentFoods, newFood];
-      }
+    try {
+      const addedFood = await addFood(firestore, user.uid, entry.date, trimmedFoodName);
       
-      // Check for feedback condition
-      if (newFoodAdded && newFoods.length === 5) {
-        const hasShownFeedback = localStorage.getItem("hasShownFifthFoodFeedback");
-        if (!hasShownFeedback) {
-          setFeedbackOpen(true);
-          localStorage.setItem("hasShownFifthFoodFeedback", "true");
+      setLoggedFoods(currentFoods => {
+        const foodExists = currentFoods.some(f => f.food.id === addedFood.id);
+        let newFoods;
+        if (foodExists) {
+          newFoods = currentFoods.map(f => 
+            f.food.id === addedFood.id 
+              ? { ...f, quantity: f.quantity + 1, food: addedFood } 
+              : f
+          );
+        } else {
+          newFoods = [...currentFoods, { food: addedFood, quantity: 1 }];
         }
-      }
-      
-      return newFoods;
-    });
 
-    addFood(firestore, user.uid, entry.date, trimmedFoodName).then(() => {
+        // Check for feedback condition
+        if (!foodExists && newFoods.length === 5) {
+          const hasShownFeedback = localStorage.getItem("hasShownFifthFoodFeedback");
+          if (!hasShownFeedback) {
+            setFeedbackOpen(true);
+            localStorage.setItem("hasShownFifthFoodFeedback", "true");
+          }
+        }
+        return newFoods;
+      });
+
       toast({
         title: "Food logged!",
         description: `${trimmedFoodName} has been added to your log.`,
       });
       router.refresh();
-    }).catch(error => {
+    } catch (error) {
       console.error("Failed to log food:", error);
       toast({
         variant: "destructive",
         title: "Failed to log food",
         description: "Please try again.",
       });
-      setLoggedFoods(entry.foods);
-    }).finally(() => {
+      setLoggedFoods(entry.foods); // Revert optimistic update on error
+    } finally {
       setIsPending(false);
-    });
+    }
   };
 
   const handleDayClick = (day: Date | undefined) => {
@@ -543,3 +550,5 @@ export function DailyTracker({
     </div>
   );
 }
+
+    
