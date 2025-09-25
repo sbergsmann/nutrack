@@ -1,7 +1,7 @@
 
 "use client";
 
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, StarIcon } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,10 +32,22 @@ const plans: {
   isPopular: boolean;
 }[] = [
   {
+    name: "Basic",
+    price: "Free",
+    pricePeriod: "",
+    description: "The essentials for getting started.",
+    features: [
+        "Daily food and mood logging",
+        "Calendar view",
+        "Basic food suggestions"
+    ],
+    isPopular: false,
+  },
+  {
     name: "Monthly",
     price: "$10",
     pricePeriod: "/month",
-    description: "Get started with our basic features.",
+    description: "Unlock advanced insights.",
     features: [
       "Unlimited daily logs",
       "Advanced mood analysis",
@@ -47,7 +59,7 @@ const plans: {
     name: "Yearly",
     price: "$100",
     pricePeriod: "/year",
-    description: "Save 20% and unlock all features.",
+    description: "Save 20% and get all features.",
     features: [
       "All features from the Monthly plan",
       "AI-powered meal suggestions",
@@ -82,7 +94,9 @@ export default function PremiumPage() {
         title: "Plan updated!",
         description: `You are now on the ${planName} plan.`,
       });
-      router.push("/");
+      if (planName !== 'Basic') {
+        router.push("/");
+      }
     } catch (error) {
       console.error("Failed to update plan:", error);
       toast({
@@ -98,7 +112,7 @@ export default function PremiumPage() {
   const isLoading = userLoading || !!isPending;
 
   return (
-    <div className="container mx-auto max-w-4xl p-4 md:p-8 animate-fade-in">
+    <div className="container mx-auto max-w-5xl p-4 md:p-8 animate-fade-in">
       <div className="mb-8">
         <Link
           href="/"
@@ -118,7 +132,7 @@ export default function PremiumPage() {
         </p>
       </div>
 
-      <div className="mt-12 grid gap-8 md:grid-cols-2">
+      <div className="mt-12 grid gap-8 md:grid-cols-3">
         {plans.map((plan) => (
           <Card
             key={plan.name}
@@ -129,7 +143,8 @@ export default function PremiumPage() {
             )}
           >
             {plan.isPopular && (
-              <div className="py-1 px-4 bg-primary text-primary-foreground text-center text-sm font-semibold rounded-t-lg">
+              <div className="py-1 px-4 bg-primary text-primary-foreground text-center text-sm font-semibold rounded-t-lg flex items-center justify-center gap-2">
+                <StarIcon className="h-4 w-4" />
                 Most Popular
               </div>
             )}
@@ -144,17 +159,17 @@ export default function PremiumPage() {
               </div>
               <ul className="space-y-4">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center">
-                    <Check className="mr-3 h-5 w-5 text-primary" />
+                  <li key={feature} className="flex items-start">
+                    <Check className="mr-3 h-5 w-5 text-primary flex-shrink-0 mt-1" />
                     <span>{feature}</span>
                   </li>
                 ))}
               </ul>
             </CardContent>
             <CardFooter>
-              <Button
+            <Button
                 className="w-full"
-                variant={plan.isPopular ? "default" : "outline"}
+                variant={plan.name === 'Basic' || plan.isPopular ? "default" : "outline"}
                 onClick={() => handleChoosePlan(plan.name)}
                 disabled={isLoading}
               >
@@ -162,7 +177,9 @@ export default function PremiumPage() {
                   ? "Current Plan"
                   : isPending === plan.name
                   ? "Choosing..."
-                  : "Choose Plan"}
+                  : plan.name === 'Basic'
+                  ? 'Downgrade to Basic'
+                  : `Upgrade to ${plan.name}`}
               </Button>
             </CardFooter>
           </Card>
