@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useRef, useTransition, useActionState } from "react";
+import { useEffect, useRef, useTransition, useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import { removeFood, setMood } from "@/lib/data";
 import type { DailyEntry, Mood } from "@/lib/types";
@@ -9,6 +9,8 @@ import { format, parseISO } from "date-fns";
 import { useUser } from "@/firebase/auth/use-user";
 import { useFirestore } from "@/firebase/provider";
 import { logFood } from "@/lib/actions";
+import { useToast } from "@/hooks/use-toast";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,6 +45,13 @@ export function DailyTracker({
   const { data: user } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
+  const { toast } = useToast();
+
+  const [currentMood, setCurrentMood] = useState<Mood | null>(entry.mood);
+
+  useEffect(() => {
+    setCurrentMood(entry.mood);
+  }, [entry.mood]);
 
   const [state, formAction, isFormPending] = useActionState(logFood, {});
   const formRef = useRef<HTMLFormElement>(null);
@@ -59,10 +68,18 @@ export function DailyTracker({
 
   const handleMoodChange = (mood: Mood) => {
     if (!user || !firestore) return;
-    if (mood === entry.mood) return;
+    if (mood === currentMood) return;
+
+    // Optimistic UI update
+    setCurrentMood(mood);
+
     startTransition(async () => {
       await setMood(firestore, user.uid, entry.date, mood);
-      router.refresh();
+      toast({
+        title: "Mood updated!",
+        description: `Your mood has been set to ${mood}.`,
+      });
+      // No need to call router.refresh() here since we updated locally
     });
   };
 
@@ -130,17 +147,17 @@ export function DailyTracker({
               <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="font-medium text-sm">
-                    {entry.mood ? `You're feeling: ${entry.mood}` : "How are you feeling?"}
+                    {currentMood ? `You're feeling: ${currentMood}` : "How are you feeling?"}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {moodOptions.map((option) => (
                       <Button
                         key={option.value}
-                        variant={entry.mood === option.value ? "default" : "outline"}
+                        variant={currentMood === option.value ? "default" : "outline"}
                         onClick={() => handleMoodChange(option.value)}
                         disabled={isMutationPending}
                         className={cn("flex-1 md:flex-none justify-center",
-                          entry.mood === option.value && "shadow-md"
+                          currentMood === option.value && "shadow-md"
                         )}
                       >
                         {option.icon}
