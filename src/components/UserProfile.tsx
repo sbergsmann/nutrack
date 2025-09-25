@@ -11,10 +11,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LogIn, LogOut, MessageSquare, User as UserIcon } from "lucide-react";
+import { LogIn, LogOut, MessageSquare, User as UserIcon, Star } from "lucide-react";
 import { useUser } from "@/firebase/auth/use-user";
 import { signInWithGoogle, signOut } from "@/firebase/auth/actions";
 import { FeedbackDialog } from "./FeedbackDialog";
+import Link from "next/link";
 
 export function UserProfile() {
   const { data: user, loading } = useUser();
@@ -59,6 +60,12 @@ export function UserProfile() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/premium">
+            <Star className="mr-2 h-4 w-4" />
+            <span>Go Premium</span>
+          </Link>
+        </DropdownMenuItem>
         <FeedbackDialog>
           <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
             <MessageSquare className="mr-2 h-4 w-4" />
