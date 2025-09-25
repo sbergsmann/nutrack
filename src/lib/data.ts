@@ -23,6 +23,7 @@ import {
   FirestorePermissionError,
   type SecurityRuleContext,
 } from "@/firebase/errors";
+import { stripe } from "./stripe";
 
 const getEntriesCollection = (
   firestore: Firestore | AdminFirestore,
@@ -218,7 +219,6 @@ export async function addFood(
       requestResourceData: { foodName },
     } satisfies SecurityRuleContext);
     errorEmitter.emit("permission-error", permissionError);
-    // Re-throw the original error if it's not a permission issue
     if (!(e instanceof FirestorePermissionError)) {
       throw e;
     }
@@ -344,18 +344,38 @@ export async function addFeedback(
 }
 
 export async function updateUserPlan(
-  firestore: Firestore,
+  firestore: Firestore | AdminFirestore,
   userId: string,
   plan: UserProfile['plan']
 ): Promise<void> {
-  const userRef = doc(firestore, 'users', userId);
+  const userRef = doc(firestore as Firestore, 'users', userId);
   const data = { plan };
-  updateDoc(userRef, data).catch(async (serverError) => {
-    const permissionError = new FirestorePermissionError({
-      path: userRef.path,
-      operation: 'update',
-      requestResourceData: data,
-    } satisfies SecurityRuleContext);
-    errorEmitter.emit('permission-error', permissionError);
-  });
+  // Use client-side SDK for optimistic updates if on client
+  if (typeof window !== "undefined") {
+    updateDoc(userRef, data).catch(async (serverError) => {
+      const permissionError = new FirestorePermissionError({
+        path: userRef.path,
+        operation: 'update',
+        requestResourceData: data,
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit('permission-error', permissionError);
+    });
+  } else {
+    // Use admin SDK on server
+    await (firestore as AdminFirestore).collection('users').doc(userId).update(data);
+  }
+}
+
+export async function getUser(
+    firestore: Firestore | AdminFirestore,
+    userId: string
+): Promise<UserProfile | null> {
+    const userRef = doc(firestore as Firestore, 'users', userId);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+        return userSnap.data() as UserProfile;
+    } else {
+        return null;
+    }
 }

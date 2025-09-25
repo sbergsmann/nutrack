@@ -17,9 +17,12 @@ import { useUser } from "@/firebase/auth/use-user";
 import { useFirestore } from "@/firebase/provider";
 import { updateUserPlan } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import type { UserProfile } from "@/lib/types";
+import { createCheckoutSession } from "@/lib/actions";
+import { loadStripe } from "@stripe/stripe-js";
+import { auth } from "@/firebase/client";
 
 type PlanName = UserProfile["plan"];
 
@@ -74,33 +77,82 @@ export default function PremiumPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, setIsPending] = useState<PlanName | null>(null);
+
+  useEffect(() => {
+    if (searchParams?.get("success")) {
+      toast({
+        title: "Subscription successful!",
+        description: "Welcome to your new plan.",
+      });
+      router.replace("/premium", { scroll: false });
+    } else if (searchParams?.get("canceled")) {
+      toast({
+        variant: "destructive",
+        title: "Subscription canceled.",
+        description: "Your subscription process was canceled. You can try again anytime.",
+      });
+      router.replace("/premium", { scroll: false });
+    }
+  }, [searchParams, router, toast]);
 
   const handleChoosePlan = async (planName: PlanName) => {
     if (!user || !firestore) return;
+    setIsPending(planName);
 
-    if (user.plan === planName) {
-      toast({
-        title: "You are already on this plan.",
-      });
+    if (planName === "Basic") {
+      try {
+        await updateUserPlan(firestore, user.uid, "Basic");
+        toast({
+          title: "Plan updated!",
+          description: `You have been downgraded to the Basic plan.`,
+        });
+        router.push("/");
+      } catch (error) {
+        console.error("Failed to update plan:", error);
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: "Could not update your plan.",
+        });
+      } finally {
+        setIsPending(null);
+      }
       return;
     }
 
-    setIsPending(planName);
-
     try {
-      await updateUserPlan(firestore, user.uid, planName);
-      toast({
-        title: "Plan updated!",
-        description: `You are now on the ${planName} plan.`,
-      });
-      router.push("/");
+      const idToken = await auth.currentUser?.getIdToken();
+      if (!idToken) {
+        throw new Error("You must be logged in to subscribe.");
+      }
+
+      const formData = new FormData();
+      formData.append("plan", planName);
+      formData.append("idToken", idToken);
+      
+      const { sessionId, error } = await createCheckoutSession(formData);
+
+      if (error) {
+        throw new Error(error);
+      }
+
+      if (sessionId) {
+        const stripe = await loadStripe(
+          process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+        );
+        if (stripe) {
+          await stripe.redirectToCheckout({ sessionId });
+        }
+      }
     } catch (error) {
-      console.error("Failed to update plan:", error);
+      console.error("Failed to create checkout session:", error);
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
-        description: "Could not update your plan.",
+        description:
+          error instanceof Error ? error.message : "Could not start checkout.",
       });
     } finally {
       setIsPending(null);
@@ -167,14 +219,14 @@ export default function PremiumPage() {
             <CardFooter>
             <Button
                 className="w-full"
-                variant={plan.name === 'Basic' || plan.isPopular ? "default" : "outline"}
+                variant={plan.isPopular ? "default" : "outline"}
                 onClick={() => handleChoosePlan(plan.name)}
                 disabled={isLoading || user?.plan === plan.name}
               >
                 {user?.plan === plan.name
                   ? "Current Plan"
                   : isPending === plan.name
-                  ? "Choosing..."
+                  ? "Processing..."
                   : plan.name === 'Basic'
                   ? 'Downgrade to Basic'
                   : `Upgrade to ${plan.name}`}
