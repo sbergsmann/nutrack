@@ -36,7 +36,6 @@ import { updateUserProfile } from "@/lib/data";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { UserProfile } from "@/lib/types";
-import { RecommendedIntake } from "@/components/RecommendedIntake";
 
 const activityLevels: UserProfile['activityLevel'][] = ["Sedentary", "Lightly active", "Moderately active", "Very active", "Extra active"];
 
@@ -138,14 +137,6 @@ export default function SettingsPage() {
 
   const appVersion = "0.1.0";
   const hasMeasurements = !!(user?.height || user?.weight || user?.age || user?.gender || user?.activityLevel);
-
-  const profileIsComplete = !!(
-    form.watch('height') &&
-    form.watch('weight') &&
-    form.watch('age') &&
-    form.watch('gender') &&
-    form.watch('activityLevel')
-  );
 
   return (
     <div className="container mx-auto max-w-5xl space-y-8 p-4 md:p-8 animate-fade-in">
@@ -310,10 +301,6 @@ export default function SettingsPage() {
           )}
         </CardContent>
       </Card>
-
-      {profileIsComplete && (
-         <RecommendedIntake userProfile={form.getValues() as UserProfile} />
-      )}
 
       <div className="text-center text-sm text-muted-foreground">
         <p>Version {appVersion}</p>
