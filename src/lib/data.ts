@@ -23,6 +23,7 @@ import {
   FirestorePermissionError,
   type SecurityRuleContext,
 } from "@/firebase/errors";
+import { enrichFoodInBackground } from "./actions";
 
 const getEntriesCollection = (
   firestore: Firestore | AdminFirestore,
@@ -58,6 +59,7 @@ export async function searchFoods(
       id: doc.id,
       name: data.name,
       lastAddedAt: (data.lastAddedAt as Timestamp)?.toDate() ?? new Date(),
+      ...data
     };
   });
 }
@@ -76,6 +78,7 @@ export async function getFoodItem(
     id: foodDoc.id,
     name: data.name,
     lastAddedAt: (data.lastAddedAt as Timestamp)?.toDate() ?? new Date(),
+    ...data,
   };
 }
 
@@ -150,7 +153,7 @@ export async function getAllEntries(
 export async function getOrCreateFood(
   firestore: Firestore | AdminFirestore,
   foodName: string
-): Promise<string> {
+): Promise<{foodId: string, needsEnrichment: boolean}> {
   const trimmedFoodName = foodName.trim();
   const foodsRef = getFoodsCollection(firestore);
 
@@ -165,14 +168,23 @@ export async function getOrCreateFood(
     const foodDoc = querySnapshot.docs[0];
     const foodRef = doc(foodsRef as Firestore, foodDoc.id);
     setDoc(foodRef, { lastAddedAt: serverTimestamp() }, { merge: true });
-    return foodDoc.id;
+    
+    // Check if it needs enrichment
+    const needsEnrichment = !foodDoc.data().portion;
+    if (needsEnrichment) {
+      enrichFoodInBackground(foodDoc.id, trimmedFoodName);
+    }
+    
+    return { foodId: foodDoc.id, needsEnrichment };
+
   } else {
     const newFoodData = {
       name: trimmedFoodName,
       lastAddedAt: serverTimestamp(),
     };
     const newFoodDocRef = await addDoc(foodsRef, newFoodData);
-    return newFoodDocRef.id;
+    enrichFoodInBackground(newFoodDocRef.id, trimmedFoodName);
+    return { foodId: newFoodDocRef.id, needsEnrichment: true };
   }
 }
 
@@ -182,7 +194,7 @@ export async function addFood(
   date: string,
   foodName: string
 ): Promise<void> {
-  const foodId = await getOrCreateFood(firestore, foodName);
+  const { foodId } = await getOrCreateFood(firestore, foodName);
   const entryRef = doc(getEntriesCollection(firestore, userId), date);
 
   try {

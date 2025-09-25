@@ -86,6 +86,30 @@
           "type": "string",
           "format": "date-time",
           "description": "The timestamp when the food was last added."
+        },
+        "description": {
+          "type": "string",
+          "description": "A short description of the food item."
+        },
+        "portion": {
+          "type": "number",
+          "description": "The typical portion size in grams."
+        },
+        "carbs": {
+          "type": "number",
+          "description": "Grams of carbohydrates per portion."
+        },
+        "proteins": {
+          "type": "number",
+          "description": "Grams of protein per portion."
+        },
+        "fats": {
+          "type": "number",
+          "description": "Grams of fat per portion."
+        },
+        "icon": {
+          "type": "string",
+          "description": "The name of a lucide-react icon."
         }
       },
       "required": ["name", "lastAddedAt"]

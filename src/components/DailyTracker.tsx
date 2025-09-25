@@ -30,9 +30,10 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils, Trash, Minus, Calendar as CalendarIcon } from "lucide-react";
+import { Plus, Smile, Meh, Frown, Zap, Battery, Trash, Minus, Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FeedbackDialog } from "./FeedbackDialog";
+import FoodIcon from "./FoodIcon";
 
 const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
   { value: "Happy", label: "Happy", icon: <Smile className="h-4 w-4" /> },
@@ -399,7 +400,7 @@ export function DailyTracker({
                         <CardContent className="p-4 flex items-center justify-between gap-4">
                            <div className="flex items-center gap-4 overflow-hidden flex-1">
                             <div className="bg-primary/20 text-primary p-2 rounded-full">
-                                <Utensils className="h-5 w-5" />
+                                <FoodIcon iconName={food.icon} className="h-5 w-5" />
                             </div>
                             <p className="text-sm font-medium truncate">{food.name}</p>
                           </div>
@@ -454,6 +455,3 @@ export function DailyTracker({
     </div>
   );
 }
-
-    
-    

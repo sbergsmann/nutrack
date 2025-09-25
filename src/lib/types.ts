@@ -5,6 +5,12 @@ export type FoodItem = {
   id: string;
   name: string;
   lastAddedAt: Date;
+  description?: string;
+  portion?: number;
+  carbs?: number;
+  proteins?: number;
+  fats?: number;
+  icon?: string;
 };
 
 export type LoggedFood = {
