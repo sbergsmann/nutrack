@@ -50,9 +50,12 @@ export default function HomePage() {
         <div className="space-y-6">
           <Skeleton className="h-48 w-full" />
         </div>
-      ) : todayEntry ? (
-        <DailyTracker entry={todayEntry} isToday={true} />
-      ) : <DailyTracker entry={{date: todayDateString, foods: [], mood: null}} isToday={true}/>}
+      ) : (
+        <DailyTracker 
+          entry={todayEntry ?? {date: todayDateString, foods: [], mood: null}} 
+          isToday={true} 
+        />
+      )}
     </div>
   );
 }

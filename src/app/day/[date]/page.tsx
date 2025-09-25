@@ -69,9 +69,12 @@ export default function DayPage({ params }: { params: Promise<{ date: string }> 
         )}
         {isLoading ? (
           <Skeleton className="h-48 w-full" />
-        ) : dayEntry ? (
-          <DailyTracker entry={dayEntry} isToday={isToday} />
-        ) : <DailyTracker entry={{date: dateString, foods: [], mood: null}} isToday={isToday}/>}
+        ) : (
+          <DailyTracker 
+            entry={dayEntry ?? {date: dateString, foods: [], mood: null}} 
+            isToday={isToday} 
+          />
+        )}
       </div>
     </div>
   );
