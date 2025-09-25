@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/card";
 
 export default function SettingsPage() {
+  const appVersion = "0.1.0"; // From package.json
+
   return (
     <div className="container mx-auto max-w-5xl p-4 md:p-8 animate-fade-in">
       <div className="mb-8">
@@ -47,6 +49,10 @@ export default function SettingsPage() {
             </p>
           </CardContent>
         </Card>
+
+        <div className="text-center text-sm text-muted-foreground">
+          <p>Version {appVersion}</p>
+        </div>
       </div>
     </div>
   );
