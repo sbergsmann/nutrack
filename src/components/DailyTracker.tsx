@@ -127,9 +127,6 @@ export function DailyTracker({
     if (!user || !firestore) return;
     setLoggedFoods(currentFoods => currentFoods.filter(f => f.food.id !== foodId));
     removeFood(firestore, user.uid, entry.date, foodId).then(() => {
-      toast({
-        title: "Food removed",
-      });
       router.refresh();
     });
   }
