@@ -29,6 +29,14 @@
             "description": "The user's subscription plan.",
             "enum": ["Basic", "Monthly", "Yearly"],
             "default": "Basic"
+        },
+        "height": {
+          "type": "number",
+          "description": "The user's height in centimeters."
+        },
+        "weight": {
+          "type": "number",
+          "description": "The user's body weight in kilograms."
         }
       },
       "required": ["uid", "email", "plan"]

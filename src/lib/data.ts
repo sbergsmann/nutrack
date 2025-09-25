@@ -404,6 +404,22 @@ export async function updateUserPlan(
   }
 }
 
+export async function updateUserProfile(
+    firestore: Firestore,
+    userId: string,
+    data: Partial<Pick<UserProfile, 'height' | 'weight'>>
+): Promise<void> {
+    const userRef = doc(firestore, 'users', userId);
+    updateDoc(userRef, data).catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+            path: userRef.path,
+            operation: 'update',
+            requestResourceData: data,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+    });
+}
+
 export async function getUser(
     firestore: Firestore | AdminFirestore,
     userId: string
@@ -417,5 +433,3 @@ export async function getUser(
         return null;
     }
 }
-
-    

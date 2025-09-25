@@ -32,4 +32,6 @@ export type UserProfile = {
   displayName: string | null;
   photoURL: string | null;
   plan: 'Basic' | 'Monthly' | 'Yearly';
+  height?: number; // in cm
+  weight?: number; // in kg
 };

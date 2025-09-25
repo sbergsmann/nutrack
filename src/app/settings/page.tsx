@@ -10,8 +10,83 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useUser } from "@/firebase/auth/use-user";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { useFirestore } from "@/firebase/provider";
+import { updateUserProfile } from "@/lib/data";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const profileFormSchema = z.object({
+  height: z.preprocess(
+    (a) => (a === "" ? undefined : parseFloat(String(a))),
+    z.number({ invalid_type_error: "Must be a number" }).positive().optional()
+  ),
+  weight: z.preprocess(
+    (a) => (a === "" ? undefined : parseFloat(String(a))),
+    z.number({ invalid_type_error: "Must be a number" }).positive().optional()
+  ),
+});
+
+type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export default function SettingsPage() {
+  const { data: user, loading: userLoading } = useUser();
+  const firestore = useFirestore();
+  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      height: undefined,
+      weight: undefined,
+    },
+  });
+
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        height: user.height || undefined,
+        weight: user.weight || undefined,
+      });
+    }
+  }, [user, form]);
+
+  async function onSubmit(data: ProfileFormValues) {
+    if (!user || !firestore) return;
+    setIsSaving(true);
+    try {
+      await updateUserProfile(firestore, user.uid, data);
+      toast({
+        title: "Profile updated",
+        description: "Your measurements have been saved successfully.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "Could not save your profile.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   const appVersion = "0.1.0"; // From package.json
 
   return (
@@ -40,13 +115,70 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle>Account Settings</CardTitle>
             <CardDescription>
-              User account settings will be available here in a future update.
+              Manage your body measurements. This helps in providing more
+              accurate nutritional feedback in the future.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              This section is under construction.
-            </p>
+            {userLoading ? (
+              <div className="space-y-4">
+                <Skeleton className="h-8 w-1/4" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-8 w-1/4" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : (
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-8"
+                >
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <FormField
+                      control={form.control}
+                      name="height"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Height (cm)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="e.g., 175"
+                              {...field}
+                              onChange={(e) => field.onChange(e.target.value)}
+                              value={field.value ?? ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="weight"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Weight (kg)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="e.g., 70"
+                              {...field}
+                              onChange={(e) => field.onChange(e.target.value)}
+                              value={field.value ?? ""}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <Button type="submit" disabled={isSaving || !form.formState.isDirty}>
+                    {isSaving ? "Saving..." : "Save Changes"}
+                  </Button>
+                </form>
+              </Form>
+            )}
           </CardContent>
         </Card>
 
