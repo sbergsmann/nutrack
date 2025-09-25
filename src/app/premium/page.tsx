@@ -94,9 +94,7 @@ export default function PremiumPage() {
         title: "Plan updated!",
         description: `You are now on the ${planName} plan.`,
       });
-      if (planName !== 'Basic') {
-        router.push("/");
-      }
+      router.push("/");
     } catch (error) {
       console.error("Failed to update plan:", error);
       toast({
@@ -171,7 +169,7 @@ export default function PremiumPage() {
                 className="w-full"
                 variant={plan.name === 'Basic' || plan.isPopular ? "default" : "outline"}
                 onClick={() => handleChoosePlan(plan.name)}
-                disabled={isLoading}
+                disabled={isLoading || user?.plan === plan.name}
               >
                 {user?.plan === plan.name
                   ? "Current Plan"
