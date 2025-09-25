@@ -47,3 +47,4 @@ export const useAuth = () => {
 export const useFirestore = () => {
   const { firestore } = useFirebase();
   return firestore;
+}
