@@ -20,6 +20,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 
 import {
   Card,
@@ -30,7 +37,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Smile, Meh, Frown, Zap, Battery, Trash, Minus, Calendar as CalendarIcon } from "lucide-react";
+import { Plus, Smile, Meh, Frown, Zap, Battery, Trash, Minus, Calendar as CalendarIcon, Flame, Beef, Droplet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FeedbackDialog } from "./FeedbackDialog";
 import FoodIcon from "./FoodIcon";
@@ -394,82 +401,88 @@ export function DailyTracker({
               <div className="space-y-4">
                 <h3 className="font-semibold text-sm">Logged Foods</h3>
                 {loggedFoods && loggedFoods.length > 0 ? (
-                  <div className="flex flex-col gap-2">
-                    {loggedFoods.map(({food, quantity}) => (
-                      <Card key={food.id} className="shadow-sm">
-                        <CardContent className="p-4 flex flex-col gap-4">
-                           <div className="flex items-center justify-between gap-4">
-                              <div className="flex items-center gap-4 overflow-hidden flex-1">
-                                <div className="bg-primary/20 text-primary p-2 rounded-full">
-                                    <FoodIcon iconName={food.icon} className="h-5 w-5" />
-                                </div>
-                                <div className="flex-1 overflow-hidden">
-                                  <p className="text-sm font-medium truncate">{food.name}</p>
-                                  {food.description && <p className="text-xs text-muted-foreground truncate">{food.description}</p>}
-                                </div>
+                  <TooltipProvider>
+                    <div className="flex flex-col gap-2">
+                      {loggedFoods.map(({food, quantity}) => (
+                        <Card key={food.id} className="shadow-sm">
+                          <CardContent className="p-4 flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-4 overflow-hidden flex-1">
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="bg-primary/20 text-primary p-2 rounded-full">
+                                      <FoodIcon iconName={food.icon} className="h-5 w-5" />
+                                  </div>
+                                </TooltipTrigger>
+                                {food.description && <TooltipContent><p>{food.description}</p></TooltipContent>}
+                              </Tooltip>
+
+                              <div className="flex-1 overflow-hidden">
+                                <p className="text-sm font-medium truncate">{food.name}</p>
+                                {food.portion && (food.carbs || food.proteins || food.fats) ? (
+                                  <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                                    <div className="flex items-center gap-1" title="Carbs">
+                                      <Flame className="h-3 w-3 text-orange-400" />
+                                      <span>{food.carbs?.toFixed(0) ?? '–'}g</span>
+                                    </div>
+                                    <div className="flex items-center gap-1" title="Protein">
+                                      <Beef className="h-3 w-3 text-red-400" />
+                                      <span>{food.proteins?.toFixed(0) ?? '–'}g</span>
+                                    </div>
+                                    <div className="flex items-center gap-1" title="Fat">
+                                      <Droplet className="h-3 w-3 text-yellow-400" />
+                                      <span>{food.fats?.toFixed(0) ?? '–'}g</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 font-bold text-primary/80" title="Total Portion">
+                                        <span>
+                                            {quantity > 1 ? `${quantity}x${food.portion}g` : `${food.portion}g`}
+                                        </span>
+                                    </div>
+                                  </div>
+                                ) : <div className="h-4" /> /* Placeholder for height consistency */
+                                }
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-7 w-7"
-                                  onClick={() => handleQuantityChange(food, -1)}
-                                  disabled={isPending || quantity <= 1}
-                                  aria-label={`Decrease quantity of ${food.name}`}
-                                >
-                                  <Minus className="h-4 w-4" />
-                                </Button>
-                                <span className="font-bold text-sm w-4 text-center">{quantity}</span>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-7 w-7"
-                                  onClick={() => handleQuantityChange(food, 1)}
-                                  disabled={isPending}
-                                  aria-label={`Increase quantity of ${food.name}`}
-                                >
-                                  <Plus className="h-4 w-4" />
-                                </Button>
-                              </div>
+                            </div>
+                            <div className="flex items-center gap-1">
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 text-destructive/70 hover:text-destructive"
-                                onClick={() => handleDeleteFood(food.id)}
+                                className="h-7 w-7"
+                                onClick={() => handleQuantityChange(food, -1)}
                                 disabled={isPending}
-                                aria-label={`Delete ${food.name}`}
+                                aria-label={`Decrease quantity of ${food.name}`}
                               >
-                                <Trash className="h-4 w-4" />
+                                <Minus className="h-4 w-4" />
                               </Button>
-                           </div>
-                           {food.portion && (food.carbs || food.proteins || food.fats) && (
-                            <div className="flex items-center justify-end gap-6 text-xs text-muted-foreground pt-2 border-t -mx-4 px-4">
-                              <div className="flex flex-col items-center">
-                                <span>{food.carbs?.toFixed(0) ?? '–'}g</span>
-                                <span className="font-medium">Carbs</span>
-                              </div>
-                              <div className="flex flex-col items-center">
-                                <span>{food.proteins?.toFixed(0) ?? '–'}g</span>
-                                <span className="font-medium">Protein</span>
-                              </div>
-                              <div className="flex flex-col items-center">
-                                <span>{food.fats?.toFixed(0) ?? '–'}g</span>
-                                <span className="font-medium">Fat</span>
-                              </div>
-                                <div className="flex flex-col items-center text-primary font-bold">
-                                <span>{food.portion}g</span>
-                                <span className="font-medium">Portion</span>
-                              </div>
+                              <span className="font-bold text-sm w-4 text-center">{quantity}</span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => handleQuantityChange(food, 1)}
+                                disabled={isPending}
+                                aria-label={`Increase quantity of ${food.name}`}
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
                             </div>
-                           )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-destructive/70 hover:text-destructive"
+                              onClick={() => handleDeleteFood(food.id)}
+                              disabled={isPending}
+                              aria-label={`Delete ${food.name}`}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </TooltipProvider>
                 ) : (
                   <div className="text-center text-muted-foreground text-sm p-4 bg-background/50 border rounded-md">
                     <p>No food logged for this day yet.</p>
-
                   </div>
                 )}
               </div>
