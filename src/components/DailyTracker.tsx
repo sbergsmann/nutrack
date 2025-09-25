@@ -1,16 +1,14 @@
 
 "use client";
 
-import { useEffect, useRef, useTransition, useActionState, useState } from "react";
+import { useEffect, useRef, useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 import { removeFood, setMood } from "@/lib/data";
 import type { DailyEntry, FoodItem, Mood } from "@/lib/types";
 import { format, parseISO } from "date-fns";
 import { useUser } from "@/firebase/auth/use-user";
 import { useFirestore } from "@/firebase/provider";
-import { logFood } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
-
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,29 +46,18 @@ export function DailyTracker({
   const { toast } = useToast();
 
   const [currentMood, setCurrentMood] = useState<Mood | null>(entry.mood);
+  const [foodInput, setFoodInput] = useState("");
 
   useEffect(() => {
     setCurrentMood(entry.mood);
   }, [entry.mood]);
 
-  const [state, formAction, isFormPending] = useActionState(logFood, {});
-  const formRef = useRef<HTMLFormElement>(null);
-  
-  useEffect(() => {
-    if (Object.keys(state).length === 0 && formRef.current) {
-      formRef.current?.reset();
-      router.refresh();
-    }
-  }, [state, router]);
-
   const [isPending, startTransition] = useTransition();
-  const isMutationPending = isPending || isFormPending;
 
   const handleMoodChange = (mood: Mood) => {
     if (!user || !firestore) return;
     if (mood === currentMood) return;
 
-    // Optimistic UI update
     setCurrentMood(mood);
 
     startTransition(async () => {
@@ -90,6 +77,44 @@ export function DailyTracker({
       router.refresh();
     });
   }
+
+  const handleAddFood = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !foodInput.trim()) return;
+
+    const token = await user.getIdToken();
+
+    startTransition(async () => {
+      try {
+        const response = await fetch('/api/log-food', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ food: foodInput, date: entry.date }),
+        });
+
+        if (!response.ok) {
+          const { error } = await response.json();
+          throw new Error(error || "Failed to log food.");
+        }
+        
+        setFoodInput("");
+        router.refresh();
+        toast({
+          title: "Food logged!",
+          description: `${foodInput} has been added to your log.`,
+        });
+      } catch (error: any) {
+        toast({
+          variant: "destructive",
+          title: "Uh oh! Something went wrong.",
+          description: error.message || "Could not log food.",
+        });
+      }
+    });
+  };
 
   const displayDate = format(parseISO(entry.date), "MMMM d, yyyy");
 
@@ -155,7 +180,7 @@ export function DailyTracker({
                         key={option.value}
                         variant={currentMood === option.value ? "default" : "outline"}
                         onClick={() => handleMoodChange(option.value)}
-                        disabled={isMutationPending}
+                        disabled={isPending}
                         className={cn("flex-1 md:flex-none justify-center",
                           currentMood === option.value && "shadow-md"
                         )}
@@ -166,7 +191,7 @@ export function DailyTracker({
                     ))}
                   </div>
                 </div>
-                <form ref={formRef} action={formAction} className="space-y-2">
+                <form onSubmit={handleAddFood} className="space-y-2">
                   <label htmlFor="food-input" className="font-medium text-sm">
                     Add a food item
                   </label>
@@ -177,19 +202,14 @@ export function DailyTracker({
                       placeholder="e.g., Avocado toast"
                       className="flex-grow"
                       required
-                      disabled={isMutationPending}
+                      disabled={isPending}
+                      value={foodInput}
+                      onChange={(e) => setFoodInput(e.target.value)}
                     />
-                    <input type="hidden" name="date" value={entry.date} />
-                    <Button type="submit" size="icon" aria-label="Add food" disabled={isMutationPending}>
+                    <Button type="submit" size="icon" aria-label="Add food" disabled={isPending}>
                       <Plus />
                     </Button>
                   </div>
-                  {(state as any).errors?.food && (
-                    <p className="text-sm text-destructive">{(state as any).errors.food[0]}</p>
-                  )}
-                  {(state as any).errors?._form && (
-                    <p className="text-sm text-destructive">{(state as any).errors._form[0]}</p>
-                  )}
                 </form>
               </div>
 
@@ -211,7 +231,7 @@ export function DailyTracker({
                           className="absolute top-1/2 right-2 -translate-y-1/2"
                           onClick={() => handleDeleteFood(food.id)}
                           aria-label={`Delete ${food.name}`}
-                          disabled={isMutationPending}
+                          disabled={isPending}
                         >
                           <Trash className="h-5 w-5 text-muted-foreground group-hover:text-destructive transition-colors" />
                         </Button>
