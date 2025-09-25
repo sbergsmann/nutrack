@@ -1,14 +1,13 @@
 
 "use client";
 
-import { useEffect, useRef, useTransition } from "react";
+import { useEffect, useRef, useTransition, useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { removeFood, setMood } from "@/lib/data";
 import type { DailyEntry, Mood } from "@/lib/types";
 import { format, parseISO } from "date-fns";
 import { useUser } from "@/firebase/auth/use-user";
 import { useFirestore } from "@/firebase/provider";
-import { useFormState } from "react-dom";
 import { logFood } from "@/lib/actions";
 
 import { Button } from "@/components/ui/button";
@@ -45,7 +44,7 @@ export function DailyTracker({
   const firestore = useFirestore();
   const router = useRouter();
 
-  const [state, formAction, isFormPending] = useFormState(logFood, {});
+  const [state, formAction, isFormPending] = useActionState(logFood, {});
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
