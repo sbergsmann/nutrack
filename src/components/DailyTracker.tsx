@@ -160,4 +160,8 @@ export function DailyTracker({
               </div>
             </>
           )}
-        
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

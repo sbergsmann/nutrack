@@ -28,4 +28,11 @@ export default function RootLayout({
             <Header />
             <main className="flex-1 overflow-y-auto">
               {children}
-            </
+            </main>
+            <Toaster />
+          </div>
+        </FirebaseClientProvider>
+      </body>
+    </html>
+  );
+}

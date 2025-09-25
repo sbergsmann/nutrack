@@ -20,4 +20,4 @@ if (getApps().length === 0) {
   firestore = getFirestore(firebaseApp);
 }
 
-export
+export { firebaseApp, auth, firestore };
