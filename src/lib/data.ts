@@ -23,7 +23,7 @@ import {
   FirestorePermissionError,
   type SecurityRuleContext,
 } from "@/firebase/errors";
-import { enrichFoodInBackground } from "./actions";
+import { enrichFood } from "@/ai/flows/enrich-food-flow";
 
 const getEntriesCollection = (
   firestore: Firestore | AdminFirestore,
@@ -35,6 +35,21 @@ const getFoodsCollection = (firestore: Firestore | AdminFirestore) =>
 
 const getFeedbackCollection = (firestore: Firestore | AdminFirestore) =>
   collection(firestore as Firestore, "feedback");
+
+async function triggerFoodEnrichment(firestore: Firestore, foodId: string, foodName: string) {
+    try {
+        console.log(`Enriching food: ${foodName} (${foodId})`);
+        const enrichedData = await enrichFood({ foodName });
+
+        if (enrichedData) {
+            await updateDoc(doc(firestore, "foods", foodId), enrichedData);
+            console.log(`Successfully enriched food: ${foodName} (${foodId})`);
+        }
+    } catch (error) {
+        console.error(`Failed to enrich food: ${foodName} (${foodId})`, error);
+    }
+}
+
 
 export async function searchFoods(
   firestore: Firestore,
@@ -151,9 +166,9 @@ export async function getAllEntries(
 }
 
 export async function getOrCreateFood(
-  firestore: Firestore | AdminFirestore,
+  firestore: Firestore,
   foodName: string
-): Promise<{foodId: string, needsEnrichment: boolean}> {
+): Promise<{foodId: string}> {
   const trimmedFoodName = foodName.trim();
   const foodsRef = getFoodsCollection(firestore);
 
@@ -167,16 +182,14 @@ export async function getOrCreateFood(
   if (!querySnapshot.empty) {
     const foodDoc = querySnapshot.docs[0];
     const foodRef = doc(foodsRef as Firestore, foodDoc.id);
-    setDoc(foodRef, { lastAddedAt: serverTimestamp() }, { merge: true });
+    updateDoc(foodRef, { lastAddedAt: serverTimestamp() });
     
-    // Check if it needs enrichment
     const needsEnrichment = !foodDoc.data().portion;
     if (needsEnrichment) {
-      // Do not await this call, let it run in the background
-      enrichFoodInBackground(foodDoc.id, trimmedFoodName);
+      triggerFoodEnrichment(firestore, foodDoc.id, trimmedFoodName);
     }
     
-    return { foodId: foodDoc.id, needsEnrichment };
+    return { foodId: foodDoc.id };
 
   } else {
     const newFoodData = {
@@ -184,9 +197,8 @@ export async function getOrCreateFood(
       lastAddedAt: serverTimestamp(),
     };
     const newFoodDocRef = await addDoc(foodsRef, newFoodData);
-    // Do not await this call, let it run in the background
-    enrichFoodInBackground(newFoodDocRef.id, trimmedFoodName);
-    return { foodId: newFoodDocRef.id, needsEnrichment: true };
+    triggerFoodEnrichment(firestore, newFoodDocRef.id, trimmedFoodName);
+    return { foodId: newFoodDocRef.id };
   }
 }
 

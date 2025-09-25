@@ -30,20 +30,3 @@ if (!getApps().length) {
 } else {
     firestore = getFirestore();
 }
-
-export async function enrichFoodInBackground(foodId: string, foodName: string) {
-    if (!firestore) {
-        console.error("Firestore is not initialized. Cannot enrich food.");
-        return;
-    }
-    try {
-        const enrichedData = await enrichFood({ foodName });
-
-        if (enrichedData) {
-            await firestore.collection("foods").doc(foodId).update(enrichedData);
-            console.log(`Enriched food: ${foodName} (${foodId})`);
-        }
-    } catch (error) {
-        console.error(`Failed to enrich food: ${foodName} (${foodId})`, error);
-    }
-}
