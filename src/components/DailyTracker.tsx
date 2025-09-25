@@ -36,7 +36,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Smile, Meh, Frown, Zap, Battery, Trash, Minus, Calendar as CalendarIcon, Flame, Beef, Droplet, Sparkles } from "lucide-react";
+import { Plus, Smile, Meh, Frown, Zap, Battery, Trash, Minus, Calendar as CalendarIcon, Flame, Beef, Droplet, Sparkles, ArrowDownUp, SortAsc, SortDesc, Utensils } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FeedbackDialog } from "./FeedbackDialog";
 import FoodIcon from "./FoodIcon";
@@ -48,6 +48,9 @@ const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
   { value: "Energetic", label: "Energetic", icon: <Zap className="h-4 w-4" /> },
   { value: "Tired", label: "Tired", icon: <Battery className="h-4 w-4" /> },
 ];
+
+type SortKey = "name" | "calories" | "carbs" | "proteins" | "fats";
+type SortDirection = "asc" | "desc";
 
 export function DailyTracker({
   entry,
@@ -73,6 +76,8 @@ export function DailyTracker({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -183,19 +188,6 @@ export function DailyTracker({
     setShowSuggestions(false);
     setFoodInput("");
 
-    // Optimistically update UI first
-    const existingFood = loggedFoods.find(f => f.food.name.toLowerCase() === trimmedFoodName.toLowerCase());
-    
-    if (existingFood) {
-      setLoggedFoods(currentFoods => 
-        currentFoods.map(f => 
-          f.food.id === existingFood.food.id 
-            ? { ...f, quantity: f.quantity + 1 } 
-            : f
-        )
-      );
-    }
-
     try {
       const addedFood = await addFood(firestore, user.uid, entry.date, trimmedFoodName);
       
@@ -264,6 +256,37 @@ export function DailyTracker({
       { calories: 0, carbs: 0, proteins: 0, fats: 0 }
     );
   }, [loggedFoods]);
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedLoggedFoods = useMemo(() => {
+    return [...loggedFoods].sort((a, b) => {
+      const aVal = sortKey === 'name' ? a.food.name : (a.food[sortKey] ?? 0) * a.quantity;
+      const bVal = sortKey === 'name' ? b.food.name : (b.food[sortKey] ?? 0) * b.quantity;
+
+      if (typeof aVal === 'string' && typeof bVal === 'string') {
+        return sortDirection === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+      }
+      return 0;
+    });
+  }, [loggedFoods, sortKey, sortDirection]);
+
+  const renderSortIcon = (key: SortKey) => {
+    if (sortKey !== key) {
+      return <ArrowDownUp className="h-3 w-3 text-muted-foreground" />;
+    }
+    return sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />;
+  };
 
   if (isLoading) {
     return (
@@ -422,40 +445,51 @@ export function DailyTracker({
 
                 {loggedFoods && loggedFoods.length > 0 ? (
                   <>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                       <Card className="flex items-center p-3 gap-3 bg-purple-500/10 border-purple-500/20">
-                        <Sparkles className="h-6 w-6 text-purple-400" />
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                       <Button variant={sortKey === 'name' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3" onClick={() => handleSort('name')}>
+                        {renderSortIcon('name')}
+                        <div>
+                          <p className="text-xs text-muted-foreground">Sort by</p>
+                          <p className="font-bold">Name</p>
+                        </div>
+                      </Button>
+                      <Button variant={sortKey === 'calories' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-purple-500/10 border-purple-500/20 hover:bg-purple-500/20" onClick={() => handleSort('calories')}>
+                        {renderSortIcon('calories')}
+                        <Sparkles className="h-5 w-5 text-purple-400" />
                         <div>
                           <p className="text-xs text-muted-foreground">Calories</p>
                           <p className="font-bold">{nutrientTotals.calories.toFixed(0)}</p>
                         </div>
-                      </Card>
-                      <Card className="flex items-center p-3 gap-3 bg-orange-500/10 border-orange-500/20">
-                        <Flame className="h-6 w-6 text-orange-400" />
+                      </Button>
+                      <Button variant={sortKey === 'carbs' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-orange-500/10 border-orange-500/20 hover:bg-orange-500/20" onClick={() => handleSort('carbs')}>
+                        {renderSortIcon('carbs')}
+                        <Flame className="h-5 w-5 text-orange-400" />
                         <div>
                           <p className="text-xs text-muted-foreground">Carbs</p>
                           <p className="font-bold">{nutrientTotals.carbs.toFixed(0)}g</p>
                         </div>
-                      </Card>
-                      <Card className="flex items-center p-3 gap-3 bg-red-500/10 border-red-500/20">
-                        <Beef className="h-6 w-6 text-red-400" />
+                      </Button>
+                      <Button variant={sortKey === 'proteins' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-red-500/10 border-red-500/20 hover:bg-red-500/20" onClick={() => handleSort('proteins')}>
+                        {renderSortIcon('proteins')}
+                        <Beef className="h-5 w-5 text-red-400" />
                         <div>
                           <p className="text-xs text-muted-foreground">Protein</p>
                           <p className="font-bold">{nutrientTotals.proteins.toFixed(0)}g</p>
                         </div>
-                      </Card>
-                      <Card className="flex items-center p-3 gap-3 bg-yellow-500/10 border-yellow-500/20">
-                        <Droplet className="h-6 w-6 text-yellow-400" />
+                      </Button>
+                      <Button variant={sortKey === 'fats' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20" onClick={() => handleSort('fats')}>
+                         {renderSortIcon('fats')}
+                        <Droplet className="h-5 w-5 text-yellow-400" />
                         <div>
                           <p className="text-xs text-muted-foreground">Fat</p>
                           <p className="font-bold">{nutrientTotals.fats.toFixed(0)}g</p>
                         </div>
-                      </Card>
+                      </Button>
                     </div>
 
                     <TooltipProvider>
                       <div className="flex flex-col gap-2">
-                        {loggedFoods.map(({food, quantity}) => (
+                        {sortedLoggedFoods.map(({food, quantity}) => (
                           <Card key={food.id} className="shadow-sm">
                             <CardContent className="p-4 flex items-center justify-between gap-4">
                               <div className="flex items-center gap-4 overflow-hidden flex-1">
@@ -470,7 +504,7 @@ export function DailyTracker({
 
                                 <div className="flex-1 overflow-hidden">
                                   <p className="text-sm font-medium truncate">{food.name}</p>
-                                  {food.portion != null && (food.calories != null || food.carbs != null || food.proteins != null || food.fats != null) ? (
+                                  {(food.portion != null && (food.calories != null || food.carbs != null || food.proteins != null || food.fats != null)) ? (
                                     <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
                                       <div className="flex items-center gap-1" title="Calories">
                                         <Sparkles className="h-3 w-3 text-purple-400" />
@@ -550,5 +584,7 @@ export function DailyTracker({
     </div>
   );
 }
+
+    
 
     
