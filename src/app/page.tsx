@@ -9,6 +9,8 @@ import { useUser } from "@/firebase/auth/use-user";
 import { useState, useEffect } from "react";
 import type { DailyEntry } from "@/lib/types";
 import { useFirestore } from "@/firebase/provider";
+import { WelcomePage } from "@/components/WelcomePage";
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 export default function HomePage() {
@@ -50,6 +52,19 @@ export default function HomePage() {
     .map((entry) => entry.date);
 
   const isLoading = userLoading || loading;
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto space-y-8 p-4 md:p-8">
+        <Skeleton className="h-28 w-full" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <WelcomePage />;
+  }
 
   return (
     <div className="container mx-auto space-y-8 p-4 md:p-8">
