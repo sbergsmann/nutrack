@@ -3,7 +3,6 @@
 
 import { format } from "date-fns";
 import { getAllEntries, getEntry } from "@/lib/data";
-import { CalendarView } from "@/components/CalendarView";
 import { DailyTracker } from "@/components/DailyTracker";
 import { useUser } from "@/firebase/auth/use-user";
 import { useState, useEffect } from "react";
@@ -56,7 +55,6 @@ export default function HomePage() {
   if (isLoading) {
     return (
       <div className="container mx-auto space-y-8 p-4 md:p-8">
-        <Skeleton className="h-28 w-full" />
         <Skeleton className="h-96 w-full" />
       </div>
     );
@@ -68,11 +66,11 @@ export default function HomePage() {
 
   return (
     <div className="container mx-auto space-y-8 p-4 md:p-8">
-      <CalendarView selectedDate={today} trackedDates={trackedDates} />
       <DailyTracker 
         entry={todayEntry ?? {date: todayDateString, foods: [], mood: null}} 
         isToday={true} 
         isLoading={isLoading}
+        trackedDates={trackedDates}
       />
     </div>
   );

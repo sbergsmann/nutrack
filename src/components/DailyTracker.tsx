@@ -1,11 +1,11 @@
 
 "use client";
 
-import { useEffect, useRef, useState }from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { addFood, removeFood, searchFoods, setMood, updateFoodQuantity } from "@/lib/data";
 import type { DailyEntry, FoodItem, LoggedFood, Mood } from "@/lib/types";
-import { format, parseISO } from "date-fns";
+import { format, isSameDay, parseISO } from "date-fns";
 import { useUser } from "@/firebase/auth/use-user";
 import { useFirestore } from "@/firebase/provider";
 import { useToast } from "@/hooks/use-toast";
@@ -13,6 +13,13 @@ import { useDebounce } from "@/hooks/use-debounce";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
 import {
   Card,
   CardContent,
@@ -21,7 +28,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils, Trash, Minus } from "lucide-react";
+import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils, Trash, Minus, Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
@@ -36,10 +43,12 @@ export function DailyTracker({
   entry,
   isToday,
   isLoading,
+  trackedDates = [],
 }: {
   entry: DailyEntry;
   isToday: boolean;
   isLoading: boolean;
+  trackedDates?: string[];
 }) {
   const { data: user } = useUser();
   const firestore = useFirestore();
@@ -52,11 +61,14 @@ export function DailyTracker({
   const [isPending, setIsPending] = useState(false);
   const [suggestions, setSuggestions] = useState<FoodItem[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+
 
   const formRef = useRef<HTMLFormElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const debouncedFoodInput = useDebounce(foodInput, 300);
+  const selectedDate = parseISO(entry.date);
 
   useEffect(() => {
     setCurrentMood(entry.mood);
@@ -152,7 +164,6 @@ export function DailyTracker({
     });
   };
 
-
   const handleAddFood = (foodName: string) => {
     if (!user || !firestore) return;
     
@@ -201,7 +212,16 @@ export function DailyTracker({
     });
   };
 
-  const displayDate = format(parseISO(entry.date), "MMMM d, yyyy");
+  const handleDayClick = (day: Date | undefined) => {
+    if (!day) return;
+    const formattedDate = format(day, "yyyy-MM-dd");
+    const href = isSameDay(day, new Date()) ? `/` : `/day/${formattedDate}`;
+    router.push(href, { scroll: false });
+    setCalendarOpen(false);
+  };
+  
+  const trackedDateObjects = trackedDates.map(dateStr => parseISO(dateStr));
+  const displayDate = format(selectedDate, "MMMM d, yyyy");
 
   if (isLoading) {
     return (
@@ -244,9 +264,30 @@ export function DailyTracker({
     <div className="space-y-6 animate-fade-in">
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle className="font-headline">
-            {displayDate}
-          </CardTitle>
+          <div className="flex items-center gap-2">
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <CalendarIcon className="h-5 w-5" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={handleDayClick}
+                  initialFocus
+                  modifiers={{
+                    tracked: trackedDateObjects,
+                  }}
+                  modifiersClassNames={{
+                    tracked: "bg-primary/30 text-primary-foreground font-bold",
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+            <CardTitle className="font-headline">{displayDate}</CardTitle>
+          </div>
           <CardDescription>
             { user ? "Log your food and mood for the day." : "Please log in to track your food and mood."}
           </CardDescription>
@@ -387,5 +428,3 @@ export function DailyTracker({
     </div>
   );
 }
-
-    

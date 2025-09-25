@@ -12,7 +12,6 @@ import { getAllEntries, getEntry } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { CalendarView } from "@/components/CalendarView";
 import { DailyTracker } from "@/components/DailyTracker";
 
 function DayPageClient({ dateString }: { dateString: string }) {
@@ -67,7 +66,6 @@ function DayPageClient({ dateString }: { dateString: string }) {
 
   return (
     <div className="container mx-auto space-y-8 p-4 md:p-8">
-      <CalendarView selectedDate={selectedDate} trackedDates={trackedDates} />
        <div className="space-y-6">
         {!isToday && (
           <Button asChild variant="outline">
@@ -78,6 +76,7 @@ function DayPageClient({ dateString }: { dateString: string }) {
           entry={dayEntry ?? {date: dateString, foods: [], mood: null}} 
           isToday={isToday} 
           isLoading={isLoading}
+          trackedDates={trackedDates}
         />
       </div>
     </div>
