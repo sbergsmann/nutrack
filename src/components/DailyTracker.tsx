@@ -418,7 +418,7 @@ export function DailyTracker({
 
                               <div className="flex-1 overflow-hidden">
                                 <p className="text-sm font-medium truncate">{food.name}</p>
-                                {food.portion && (food.carbs || food.proteins || food.fats) ? (
+                                {food.portion != null && (food.carbs != null || food.proteins != null || food.fats != null) ? (
                                   <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
                                     <div className="flex items-center gap-1" title="Carbs">
                                       <Flame className="h-3 w-3 text-orange-400" />
@@ -493,5 +493,7 @@ export function DailyTracker({
     </div>
   );
 }
+
+    
 
     
