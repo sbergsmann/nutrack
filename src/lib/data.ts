@@ -1,3 +1,4 @@
+
 import {
   doc,
   getDoc,
@@ -14,6 +15,7 @@ import {
   where,
   limit,
   addDoc,
+  orderBy,
 } from "firebase/firestore";
 import type { Firestore as AdminFirestore } from "firebase-admin/firestore";
 import type { DailyEntry, FoodItem, Mood } from "@/lib/types";
@@ -30,6 +32,33 @@ const getEntriesCollection = (
 
 const getFoodsCollection = (firestore: Firestore | AdminFirestore) =>
   collection(firestore as Firestore, "foods");
+
+export async function searchFoods(
+  firestore: Firestore,
+  searchTerm: string
+): Promise<FoodItem[]> {
+  const foodsRef = getFoodsCollection(firestore);
+  const q = query(
+    foodsRef,
+    where("name", ">=", searchTerm),
+    where("name", "<=", searchTerm + "\uf8ff"),
+    orderBy("name"),
+    limit(5)
+  );
+
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) {
+    return [];
+  }
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      name: data.name,
+      lastAddedAt: (data.lastAddedAt as Timestamp)?.toDate() ?? new Date(),
+    };
+  });
+}
 
 export async function getFoodItem(
   firestore: Firestore | AdminFirestore,
@@ -75,7 +104,9 @@ export async function getEntry(
 
   return {
     ...entryData,
-    foods: foodItems,
+    date: entryData.date,
+    mood: entryData.mood,
+    foods: foodItems.sort((a, b) => (a.name > b.name ? 1 : -1)),
   } as DailyEntry;
 }
 
@@ -97,7 +128,9 @@ export async function getAllEntries(
 
       return {
         ...entryData,
-        foods: foodItems,
+        date: entryData.date,
+        mood: entryData.mood,
+        foods: foodItems.sort((a, b) => (a.name > b.name ? 1 : -1)),
       } as DailyEntry;
     })
   );
@@ -111,7 +144,6 @@ export async function getOrCreateFood(
   const trimmedFoodName = foodName.trim();
   const foodsRef = getFoodsCollection(firestore);
 
-  // Query to see if the food item already exists
   const q = query(
     foodsRef,
     where("name", "==", trimmedFoodName),
@@ -120,17 +152,16 @@ export async function getOrCreateFood(
   const querySnapshot = await getDocs(q);
 
   if (!querySnapshot.empty) {
-    // Food exists, update timestamp and return its ID
     const foodDoc = querySnapshot.docs[0];
     const foodRef = doc(foodsRef, foodDoc.id);
     await updateDoc(foodRef, { lastAddedAt: serverTimestamp() });
     return foodDoc.id;
   } else {
-    // Food doesn't exist, create it with an auto-generated ID
-    const newFoodDocRef = await addDoc(foodsRef, {
+    const newFoodData = {
       name: trimmedFoodName,
       lastAddedAt: serverTimestamp(),
-    });
+    };
+    const newFoodDocRef = await addDoc(foodsRef, newFoodData);
     return newFoodDocRef.id;
   }
 }
@@ -181,16 +212,24 @@ export async function removeFood(
   foodId: string
 ): Promise<void> {
   const entryRef = doc(getEntriesCollection(firestore, userId), date);
-  updateDoc(entryRef, {
-    foods: arrayRemove(foodId),
-  }).catch(async (serverError) => {
-    const permissionError = new FirestorePermissionError({
-      path: entryRef.path,
-      operation: "update",
-      requestResourceData: { foods: arrayRemove(foodId) },
-    } satisfies SecurityRuleContext);
-    errorEmitter.emit("permission-error", permissionError);
-  });
+  const docSnap = await getDoc(entryRef);
+  if (!docSnap.exists()) return; // Nothing to remove from
+
+  const foodItems = docSnap.data().foods as string[];
+  const itemToRemove = foodItems.find(id => id === foodId)
+  
+  if (itemToRemove) {
+    updateDoc(entryRef, {
+      foods: arrayRemove(foodId),
+    }).catch(async (serverError) => {
+      const permissionError = new FirestorePermissionError({
+        path: entryRef.path,
+        operation: "update",
+        requestResourceData: { foods: arrayRemove(foodId) },
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit("permission-error", permissionError);
+    });
+  }
 }
 
 export async function setMood(

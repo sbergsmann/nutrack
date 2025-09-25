@@ -3,12 +3,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { addFood, removeFood, setMood } from "@/lib/data";
+import { addFood, removeFood, searchFoods, setMood } from "@/lib/data";
 import type { DailyEntry, FoodItem, Mood } from "@/lib/types";
 import { format, parseISO } from "date-fns";
 import { useUser } from "@/firebase/auth/use-user";
 import { useFirestore } from "@/firebase/provider";
 import { useToast } from "@/hooks/use-toast";
+import { useDebounce } from "@/hooks/use-debounce";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,40 +50,56 @@ export function DailyTracker({
   const [loggedFoods, setLoggedFoods] = useState<FoodItem[]>(entry.foods);
   const [foodInput, setFoodInput] = useState("");
   const [isPending, setIsPending] = useState(false);
+  const [suggestions, setSuggestions] = useState<FoodItem[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const formRef = useRef<HTMLFormElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
+  const debouncedFoodInput = useDebounce(foodInput, 300);
 
   useEffect(() => {
     setCurrentMood(entry.mood);
     setLoggedFoods(entry.foods);
   }, [entry]);
 
+  useEffect(() => {
+    if (debouncedFoodInput.length > 1 && firestore) {
+      searchFoods(firestore, debouncedFoodInput).then(setSuggestions);
+    } else {
+      setSuggestions([]);
+    }
+  }, [debouncedFoodInput, firestore]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const handleMoodChange = (mood: Mood) => {
     if (!user || !firestore) return;
     if (mood === currentMood) return;
 
-    // Optimistic update
     setCurrentMood(mood);
-
-    // Backend request
     setMood(firestore, user.uid, entry.date, mood).then(() => {
       toast({
         title: "Mood updated!",
         description: `Your mood has been set to ${mood}.`,
       });
-      // While we do an optimistic update, we also refresh to ensure consistency
       router.refresh();
     });
   };
 
   const handleDeleteFood = (foodId: string) => {
     if (!user || !firestore) return;
-
-    // Optimistic update
     setLoggedFoods(currentFoods => currentFoods.filter(f => f.id !== foodId));
-    
-    // Backend request
     removeFood(firestore, user.uid, entry.date, foodId).then(() => {
       toast({
         title: "Food removed",
@@ -91,30 +108,28 @@ export function DailyTracker({
     });
   }
 
-  const handleAddFood = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleAddFood = async (foodName: string) => {
     if (!user || !firestore) return;
     
-    const foodName = foodInput.trim();
-    if (!foodName) return;
+    const trimmedFoodName = foodName.trim();
+    if (!trimmedFoodName) return;
 
     setIsPending(true);
+    setShowSuggestions(false);
 
-    // Optimistic update
     const newFood: FoodItem = {
       id: `temp-${Date.now()}`,
-      name: foodName,
+      name: trimmedFoodName,
       lastAddedAt: new Date(),
     };
     setLoggedFoods(currentFoods => [...currentFoods, newFood]);
     setFoodInput("");
 
-    // Backend request
     try {
-      await addFood(firestore, user.uid, entry.date, foodName);
+      await addFood(firestore, user.uid, entry.date, trimmedFoodName);
       toast({
         title: "Food logged!",
-        description: `${foodName} has been added to your log.`,
+        description: `${trimmedFoodName} has been added to your log.`,
       });
       router.refresh();
     } catch (error) {
@@ -124,13 +139,11 @@ export function DailyTracker({
         title: "Failed to log food",
         description: "Please try again.",
       });
-      // Revert optimistic update
       setLoggedFoods(currentFoods => currentFoods.filter(f => f.id !== newFood.id));
     } finally {
       setIsPending(false);
     }
   };
-  
 
   const displayDate = format(parseISO(entry.date), "MMMM d, yyyy");
 
@@ -209,13 +222,16 @@ export function DailyTracker({
                 </div>
                  <form
                   ref={formRef}
-                  onSubmit={handleAddFood}
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleAddFood(foodInput);
+                  }}
                   className="space-y-2"
                 >
                   <label htmlFor="food-input" className="font-medium text-sm">
                     Add a food item
                   </label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 relative" ref={containerRef}>
                      <Input
                       id="food-input"
                       name="food"
@@ -225,10 +241,28 @@ export function DailyTracker({
                       disabled={isPending}
                       value={foodInput}
                       onChange={(e) => setFoodInput(e.target.value)}
+                      onFocus={() => setShowSuggestions(true)}
+                      autoComplete="off"
                     />
                     <Button type="submit" size="icon" aria-label="Add food" disabled={isPending}>
                       <Plus />
                     </Button>
+
+                    {showSuggestions && suggestions.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-md shadow-lg z-10">
+                        <ul className="py-1">
+                          {suggestions.map((s) => (
+                            <li
+                              key={s.id}
+                              className="px-3 py-2 hover:bg-accent cursor-pointer"
+                              onClick={() => handleAddFood(s.name)}
+                            >
+                              {s.name}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </form>
               </div>
