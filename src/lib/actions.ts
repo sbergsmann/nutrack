@@ -33,3 +33,49 @@ export async function getUserIdFromSession(): Promise<string | null> {
         return null;
     }
 }
+
+const FoodSchema = z.object({
+  food: z.string().min(1, "Food item cannot be empty."),
+  date: z.string(),
+});
+
+export async function logFood(
+  prevState: any,
+  formData: FormData
+): Promise<{ message: string }> {
+  const validatedFields = FoodSchema.safeParse({
+    food: formData.get("food"),
+    date: formData.get("date"),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      message: "Invalid form data.",
+    };
+  }
+
+  const userId = await getUserIdFromSession();
+  if (!userId) {
+    return {
+      message: "You must be logged in to log food.",
+    };
+  }
+
+  try {
+    if (!getApps().length) {
+      initializeApp();
+    }
+    const firestore = getFirestore();
+    await addFood(
+      firestore,
+      userId,
+      validatedFields.data.date,
+      validatedFields.data.food
+    );
+    revalidatePath("/");
+    revalidatePath(`/day/${validatedFields.data.date}`);
+    return { message: "Food logged successfully." };
+  } catch (e) {
+    return { message: "Failed to log food." };
+  }
+}

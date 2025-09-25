@@ -1,0 +1,99 @@
+/**
+ * @file Firestore Security Rules
+ * @description This ruleset enforces a strict user-ownership model for daily logs and public read access for food items.
+ *
+ * Data Structure:
+ * - All daily log data is nested under /users/{userId}/dailyLogs/{dailyLogId}.
+ * - Food data is stored in a top-level /foods/{foodId} collection.
+ *
+ * Key Security Decisions:
+ * - Users can only access their own daily logs.
+ * - Food items are publicly readable but only can be created by authenticated users.
+ * - Listing all users is disallowed.
+ * - Data validation is relaxed during the prototyping phase but critical ownership links are enforced for DailyLogs.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Enforces access control for daily logs, allowing users to manage only their own logs.
+     * @path /users/{userId}/dailyLogs/{dailyLogId}
+     * @allow (create) - User 'user123' creates a new daily log under their own user ID.
+     *   - request.auth.uid: 'user123'
+     *   - request.resource.data: { 'id': 'user123', 'date': ..., 'foodEntries': [...], 'mood': 'happy' }
+     * @allow (get) - User 'user123' retrieves their own daily log with ID 'log456'.
+     *   - request.auth.uid: 'user123'
+     * @allow (update) - User 'user123' updates their own daily log with ID 'log456'.
+     *   - request.auth.uid: 'user123'
+     * @allow (delete) - User 'user123' deletes their own daily log with ID 'log456'.
+     *   - request.auth.uid: 'user123'
+     * @deny (create) - User 'user123' attempts to create a daily log under a different user ID 'user789'.
+     *   - request.auth.uid: 'user123'
+     *   - request.resource.data: { 'id': 'user789', 'date': ..., 'foodEntries': [...], 'mood': 'happy' }
+     * @deny (get) - User 'user123' attempts to retrieve a daily log belonging to user 'user789'.
+     *   - request.auth.uid: 'user123'
+     * @principle Enforces document ownership for all operations within a user's data tree.
+     */
+    match /users/{userId}/dailyLogs/{dailyLogId} {
+      // Allow a user to read their own daily log.
+      allow get: if isSignedIn() && isOwner(userId);
+      // Allow a user to list their own daily logs.
+      allow list: if isSignedIn() && isOwner(userId);
+
+      // Allow a user to create a new daily log under their own user ID, enforcing the userId on create.
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
+
+      // Allow a user to update their own existing daily log, enforcing the userId is immutable.
+      allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+
+      // Allow a user to delete their own existing daily log.
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Allows public read access to food items, but requires authentication for creation. Updates and deletes are disallowed.
+     * @path /foods/{foodId}
+     * @allow (get) - Any user can retrieve a food item.
+     *   - request.auth.uid: null (or any user ID)
+     * @allow (list) - Any user can list food items.
+     *   - request.auth.uid: null (or any user ID)
+     * @allow (create) - Any signed-in user can create a food item.
+     *   - request.auth.uid: 'user123'
+     * @deny (update) - No one can update a food item.
+     *   - request.auth.uid: 'user123' (or any user ID)
+     * @deny (delete) - No one can delete a food item.
+     *   - request.auth.uid: 'user123' (or any user ID)
+     * @principle Allows public read access with restricted write access to the collection.
+     */
+    match /foods/{foodId} {
+      // Allow anyone to read food items.
+      allow get: if true;
+      allow list: if true;
+
+      // Allow only authenticated users to create food items.
+      allow create: if isSignedIn();
+
+      // Disallow updates and deletes.
+      allow update: if false;
+      allow delete: if false;
+    }
+
+  }
+
+  // --- Helper functions ---
+  // Checks if the user is signed in.
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+  // Checks if the requesting user ID matches the document's owner ID.
+  function isOwner(userId) {
+    return request.auth.uid == userId;
+  }
+
+    // Checks if the requesting user ID matches the document's owner ID and the resource exists.
+  function isExistingOwner(userId) {
+    return isOwner(userId) && resource != null;
+  }
+}

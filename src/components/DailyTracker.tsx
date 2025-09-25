@@ -2,8 +2,10 @@
 "use client";
 
 import { useEffect, useRef, useTransition, useState } from "react";
+import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { removeFood, setMood } from "@/lib/data";
+import { logFood } from "@/lib/actions";
 import type { DailyEntry, FoodItem, Mood } from "@/lib/types";
 import { format, parseISO } from "date-fns";
 import { useUser } from "@/firebase/auth/use-user";
@@ -46,74 +48,62 @@ export function DailyTracker({
   const { toast } = useToast();
 
   const [currentMood, setCurrentMood] = useState<Mood | null>(entry.mood);
-  const [foodInput, setFoodInput] = useState("");
+  const [loggedFoods, setLoggedFoods] = useState<FoodItem[]>(entry.foods);
+
+  const [state, formAction, isPending] = useActionState(logFood, { message: ''});
+  const formRef = useRef<HTMLFormElement>(null);
+
 
   useEffect(() => {
     setCurrentMood(entry.mood);
-  }, [entry.mood]);
-
-  const [isPending, startTransition] = useTransition();
+    setLoggedFoods(entry.foods);
+  }, [entry]);
 
   const handleMoodChange = (mood: Mood) => {
     if (!user || !firestore) return;
     if (mood === currentMood) return;
 
+    // Optimistic update
     setCurrentMood(mood);
 
-    startTransition(async () => {
-      await setMood(firestore, user.uid, entry.date, mood);
+    // Backend request
+    setMood(firestore, user.uid, entry.date, mood).then(() => {
       toast({
         title: "Mood updated!",
         description: `Your mood has been set to ${mood}.`,
       });
+      // While we do an optimistic update, we also refresh to ensure consistency
       router.refresh();
     });
   };
 
   const handleDeleteFood = (foodId: string) => {
     if (!user || !firestore) return;
-    startTransition(async () => {
-      await removeFood(firestore, user.uid, entry.date, foodId);
+
+    // Optimistic update
+    setLoggedFoods(currentFoods => currentFoods.filter(f => f.id !== foodId));
+    
+    // Backend request
+    removeFood(firestore, user.uid, entry.date, foodId).then(() => {
+      toast({
+        title: "Food removed",
+      });
       router.refresh();
     });
   }
 
-  const handleAddFood = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !foodInput.trim()) return;
+  const handleOptimisticAddFood = (formData: FormData) => {
+    const foodName = formData.get('food') as string;
+    if (!foodName.trim()) return;
 
-    const token = await user.getIdToken();
+    const newFood: FoodItem = {
+      id: `temp-${Date.now()}`, // Temporary ID for rendering
+      name: foodName,
+      lastAddedAt: new Date(),
+    };
 
-    startTransition(async () => {
-      try {
-        const response = await fetch('/api/log-food', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ food: foodInput, date: entry.date }),
-        });
-
-        if (!response.ok) {
-          const { error } = await response.json();
-          throw new Error(error || "Failed to log food.");
-        }
-        
-        setFoodInput("");
-        router.refresh();
-        toast({
-          title: "Food logged!",
-          description: `${foodInput} has been added to your log.`,
-        });
-      } catch (error: any) {
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: error.message || "Could not log food.",
-        });
-      }
-    });
+    setLoggedFoods(currentFoods => [...currentFoods, newFood]);
+    formRef.current?.reset();
   };
 
   const displayDate = format(parseISO(entry.date), "MMMM d, yyyy");
@@ -191,21 +181,28 @@ export function DailyTracker({
                     ))}
                   </div>
                 </div>
-                <form onSubmit={handleAddFood} className="space-y-2">
+                 <form
+                  ref={formRef}
+                  action={formAction}
+                  onSubmit={(e) => {
+                    handleOptimisticAddFood(new FormData(e.currentTarget));
+                    formAction(new FormData(e.currentTarget));
+                  }}
+                  className="space-y-2"
+                >
                   <label htmlFor="food-input" className="font-medium text-sm">
                     Add a food item
                   </label>
                   <div className="flex gap-2">
-                    <Input
+                     <Input
                       id="food-input"
                       name="food"
                       placeholder="e.g., Avocado toast"
                       className="flex-grow"
                       required
                       disabled={isPending}
-                      value={foodInput}
-                      onChange={(e) => setFoodInput(e.target.value)}
                     />
+                    <input type="hidden" name="date" value={entry.date} />
                     <Button type="submit" size="icon" aria-label="Add food" disabled={isPending}>
                       <Plus />
                     </Button>
@@ -215,9 +212,9 @@ export function DailyTracker({
 
               <div className="space-y-4">
                 <h3 className="font-semibold text-sm">Logged Foods</h3>
-                {entry.foods && entry.foods.length > 0 ? (
+                {loggedFoods && loggedFoods.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {entry.foods.map((food) => (
+                    {loggedFoods.map((food) => (
                       <Card key={food.id} className="shadow-sm relative group">
                         <CardContent className="p-4 flex items-center gap-4">
                           <div className="bg-primary/20 text-primary p-2 rounded-full">
@@ -251,3 +248,4 @@ export function DailyTracker({
     </div>
   );
 }
+
