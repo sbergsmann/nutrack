@@ -48,11 +48,6 @@ export function DailyTracker({
   const formRef = useRef<HTMLFormElement>(null);
   
   useEffect(() => {
-    // This effect ensures the component re-renders when the entry prop changes,
-    // which is necessary because useActionState can hold onto stale state otherwise.
-  }, [entry]);
-
-  useEffect(() => {
     if (Object.keys(state).length === 0 && formRef.current) {
       formRef.current?.reset();
       router.refresh();
