@@ -279,7 +279,7 @@ export function DailyTracker({
     <div className="space-y-6 animate-fade-in">
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
         {/* This is a dummy trigger, as the dialog is controlled programmatically */}
-        <></>
+        <span />
       </FeedbackDialog>
       <Card className="shadow-sm">
         <CardHeader>
@@ -455,4 +455,5 @@ export function DailyTracker({
   );
 }
 
+    
     
