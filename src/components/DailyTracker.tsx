@@ -15,6 +15,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase/auth/use-user";
@@ -52,9 +53,11 @@ async function clientSideAction(action: (formData: FormData) => Promise<any>, fo
 export function DailyTracker({
   entry,
   isToday,
+  isLoading,
 }: {
   entry: DailyEntry;
   isToday: boolean;
+  isLoading: boolean;
 }) {
   const { data: user } = useUser();
   const [state, formAction] = useActionState(logFood, {});
@@ -96,6 +99,43 @@ export function DailyTracker({
   }
 
   const displayDate = format(parseISO(entry.date), "MMMM d, yyyy");
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Card className="shadow-sm">
+          <CardHeader>
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32" />
+              <div className="flex flex-wrap gap-2">
+                {[...Array(5)].map((_, i) => (
+                  <Skeleton key={i} className="h-10 w-24 flex-1 md:flex-none" />
+                ))}
+              </div>
+            </div>
+             <div className="space-y-2">
+              <Skeleton className="h-4 w-24" />
+              <div className="flex gap-2">
+                <Skeleton className="h-10 flex-grow" />
+                <Skeleton className="h-10 w-10" />
+              </div>
+            </div>
+            <div className="space-y-4">
+              <Skeleton className="h-5 w-24" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <Skeleton className="h-16 w-full" />
+                <Skeleton className="h-16 w-full" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">

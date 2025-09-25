@@ -43,7 +43,7 @@ export function CalendarView({
   const nextDay = addDays(selectedDate, 1);
 
   return (
-    <div className="flex items-center justify-between gap-2 p-4 rounded-lg bg-card border shadow-sm">
+    <div className="flex items-center justify-between gap-2 p-4 rounded-lg bg-card border shadow-sm animate-fade-in">
        <Button variant="ghost" size="icon" onClick={() => handleDayClick(prevDay)}>
           <ChevronLeft className="h-5 w-5" />
       </Button>

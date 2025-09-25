@@ -8,7 +8,6 @@ import { DailyTracker } from "@/components/DailyTracker";
 import { useUser } from "@/firebase/auth/use-user";
 import { useEffect, useState } from "react";
 import type { DailyEntry } from "@/lib/types";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useFirestore } from "@/firebase/provider";
 
 
@@ -48,16 +47,11 @@ export default function HomePage() {
   return (
     <div className="container mx-auto space-y-8 p-4 md:p-8">
       <CalendarView selectedDate={today} trackedDates={trackedDates} />
-      {isLoading ? (
-        <div className="space-y-6">
-          <Skeleton className="h-48 w-full" />
-        </div>
-      ) : (
-        <DailyTracker 
-          entry={todayEntry ?? {date: todayDateString, foods: [], mood: null}} 
-          isToday={true} 
-        />
-      )}
+      <DailyTracker 
+        entry={todayEntry ?? {date: todayDateString, foods: [], mood: null}} 
+        isToday={true} 
+        isLoading={isLoading}
+      />
     </div>
   );
 }

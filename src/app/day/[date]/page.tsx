@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { useUser } from "@/firebase/auth/use-user";
 import { useEffect, useState, use } from "react";
 import type { DailyEntry } from "@/lib/types";
-import { Skeleton } from "@/components/ui/skeleton";
 import { notFound } from "next/navigation";
 import { useFirestore } from "@/firebase/provider";
 
@@ -69,14 +68,11 @@ export default function DayPage({ params }: { params: Promise<{ date: string }> 
             <Link href="/">Back to Today's Log</Link>
           </Button>
         )}
-        {isLoading ? (
-          <Skeleton className="h-48 w-full" />
-        ) : (
-          <DailyTracker 
-            entry={dayEntry ?? {date: dateString, foods: [], mood: null}} 
-            isToday={isToday} 
-          />
-        )}
+        <DailyTracker 
+          entry={dayEntry ?? {date: dateString, foods: [], mood: null}} 
+          isToday={isToday} 
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );
