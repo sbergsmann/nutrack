@@ -18,9 +18,20 @@
         "displayName": {
           "type": "string",
           "description": "The user's display name."
+        },
+        "photoURL": {
+            "type": "string",
+            "format": "uri",
+            "description": "The URL of the user's profile picture."
+        },
+        "plan": {
+            "type": "string",
+            "description": "The user's subscription plan.",
+            "enum": ["Basic", "Monthly", "Yearly"],
+            "default": "Basic"
         }
       },
-      "required": ["uid", "email"]
+      "required": ["uid", "email", "plan"]
     },
     "dailyLog": {
       "title": "Daily Log",
