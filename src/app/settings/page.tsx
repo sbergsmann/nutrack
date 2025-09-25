@@ -1,8 +1,6 @@
 
 "use client";
 
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -150,187 +148,175 @@ export default function SettingsPage() {
   );
 
   return (
-    <div className="container mx-auto max-w-5xl p-4 md:p-8 animate-fade-in">
-      <div className="mb-8">
-        <Link
-          href="/"
-          className="flex items-center text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dashboard
-        </Link>
+    <div className="container mx-auto max-w-5xl space-y-8 p-4 md:p-8 animate-fade-in">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl font-headline">
+          Settings
+        </h1>
+        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground md:text-xl">
+          Manage your account and application settings.
+        </p>
       </div>
 
-      <div className="space-y-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl font-headline">
-            Settings
-          </h1>
-          <p className="mt-4 max-w-2xl mx-auto text-muted-foreground md:text-xl">
-            Manage your account and application settings.
-          </p>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
-            <CardDescription>
-              Provide this information to get personalized daily nutritional recommendations.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {userLoading ? (
-              <div className="space-y-4">
-                <Skeleton className="h-8 w-1/4" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-8 w-1/4" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-            ) : (
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-8"
-                >
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <FormField
-                      control={form.control}
-                      name="height"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Height (cm)</FormLabel>
+      <Card>
+        <CardHeader>
+          <CardTitle>Personal Information</CardTitle>
+          <CardDescription>
+            Provide this information to get personalized daily nutritional recommendations.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {userLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-1/4" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-8 w-1/4" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : (
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-8"
+              >
+                <div className="grid md:grid-cols-2 gap-8">
+                  <FormField
+                    control={form.control}
+                    name="height"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Height (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="e.g., 175"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="weight"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Weight (kg)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="e.g., 70"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={form.control}
+                    name="age"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Age</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="e.g., 30"
+                            {...field}
+                            onChange={(e) => field.onChange(e.target.value)}
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Gender</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value ?? undefined}
+                          value={field.value ?? undefined}
+                         >
                           <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="e.g., 175"
-                              {...field}
-                              onChange={(e) => field.onChange(e.target.value)}
-                              value={field.value ?? ""}
-                            />
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select your gender" />
+                            </SelectTrigger>
                           </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
+                          <SelectContent>
+                            <SelectItem value="Male">Male</SelectItem>
+                            <SelectItem value="Female">Female</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <div className="md:col-span-2">
+                      <FormField
                       control={form.control}
-                      name="weight"
+                      name="activityLevel"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Weight (kg)</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="e.g., 70"
-                              {...field}
-                              onChange={(e) => field.onChange(e.target.value)}
-                              value={field.value ?? ""}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                     <FormField
-                      control={form.control}
-                      name="age"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Age</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="e.g., 30"
-                              {...field}
-                              onChange={(e) => field.onChange(e.target.value)}
-                              value={field.value ?? ""}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                     <FormField
-                      control={form.control}
-                      name="gender"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Gender</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value ?? undefined}
-                            value={field.value ?? undefined}
-                           >
-                            <FormControl>
+                          <FormItem>
+                          <FormLabel>Activity Level</FormLabel>
+                          <Select 
+                              onValueChange={field.onChange}
+                              defaultValue={field.value ?? undefined}
+                              value={field.value ?? undefined}
+                          >
+                              <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Select your gender" />
+                                  <SelectValue placeholder="Select your activity level" />
                               </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="Male">Male</SelectItem>
-                              <SelectItem value="Female">Female</SelectItem>
-                              <SelectItem value="Other">Other</SelectItem>
-                            </SelectContent>
+                              </FormControl>
+                              <SelectContent>
+                              {activityLevels.map(level => (
+                                  <SelectItem key={level} value={level}>{level}</SelectItem>
+                              ))}
+                              </SelectContent>
                           </Select>
                           <FormMessage />
-                        </FormItem>
+                          </FormItem>
                       )}
-                    />
-                     <div className="md:col-span-2">
-                        <FormField
-                        control={form.control}
-                        name="activityLevel"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Activity Level</FormLabel>
-                            <Select 
-                                onValueChange={field.onChange}
-                                defaultValue={field.value ?? undefined}
-                                value={field.value ?? undefined}
-                            >
-                                <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select your activity level" />
-                                </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                {activityLevels.map(level => (
-                                    <SelectItem key={level} value={level}>{level}</SelectItem>
-                                ))}
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                        />
-                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button type="submit" disabled={isSaving || !form.formState.isDirty}>
-                      {isSaving ? "Saving..." : "Save Changes"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleClear}
-                      disabled={isSaving || (!hasMeasurements && !form.formState.isDirty)}
-                    >
-                      {isSaving ? "Clearing..." : "Clear All"}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            )}
-          </CardContent>
-        </Card>
+                      />
+                   </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button type="submit" disabled={isSaving || !form.formState.isDirty}>
+                    {isSaving ? "Saving..." : "Save Changes"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleClear}
+                    disabled={isSaving || (!hasMeasurements && !form.formState.isDirty)}
+                  >
+                    {isSaving ? "Clearing..." : "Clear All"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          )}
+        </CardContent>
+      </Card>
 
-        {profileIsComplete && (
-           <RecommendedIntake userProfile={form.getValues() as UserProfile} />
-        )}
+      {profileIsComplete && (
+         <RecommendedIntake userProfile={form.getValues() as UserProfile} />
+      )}
 
-        <div className="text-center text-sm text-muted-foreground">
-          <p>Version {appVersion}</p>
-        </div>
+      <div className="text-center text-sm text-muted-foreground">
+        <p>Version {appVersion}</p>
       </div>
     </div>
   );
