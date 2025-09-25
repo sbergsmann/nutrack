@@ -1,25 +1,24 @@
 
 "use client";
 
-import { format, isSameDay, parseISO, isValid } from "date-fns";
+import { use, useEffect, useState } from "react";
+import { format, isSameDay, isValid, parseISO } from "date-fns";
+import type { DailyEntry } from "@/lib/types";
+
+import { useUser } from "@/firebase/auth/use-user";
+import { useFirestore } from "@/firebase/provider";
 import { getAllEntries, getEntry } from "@/lib/data";
-import { CalendarView } from "@/components/CalendarView";
-import { DailyTracker } from "@/components/DailyTracker";
+
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useUser } from "@/firebase/auth/use-user";
-import { useEffect, useState, use } from "react";
-import type { DailyEntry } from "@/lib/types";
-import { notFound } from "next/navigation";
-import { useFirestore } from "@/firebase/provider";
+import { CalendarView } from "@/components/CalendarView";
+import { DailyTracker } from "@/components/DailyTracker";
 
-
-export default function DayPage({ params }: { params: Promise<{ date: string }> }) {
-  const { date: dateString } = use(params);
+function DayPageClient({ dateString }: { dateString: string }) {
   const firestore = useFirestore();
-
   const { data: user, loading: userLoading } = useUser();
-  
+
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
     notFound();
   }
@@ -76,4 +75,10 @@ export default function DayPage({ params }: { params: Promise<{ date: string }> 
       </div>
     </div>
   );
+}
+
+
+export default function DayPage({ params }: { params: Promise<{ date: string }> }) {
+  const { date } = use(params);
+  return <DayPageClient dateString={date} />;
 }
