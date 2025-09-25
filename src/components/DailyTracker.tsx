@@ -36,7 +36,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Smile, Meh, Frown, Zap, Battery, Trash, Minus, Calendar as CalendarIcon, Flame, Beef, Droplet, Sparkles, ArrowDownUp, SortAsc, SortDesc, Utensils } from "lucide-react";
+import { Plus, Smile, Meh, Frown, Zap, Battery, Trash, Minus, Calendar as CalendarIcon, Flame, Beef, Droplet, Sparkles, ArrowDownUp, SortDesc } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FeedbackDialog } from "./FeedbackDialog";
 import FoodIcon from "./FoodIcon";
@@ -49,8 +49,7 @@ const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
   { value: "Tired", label: "Tired", icon: <Battery className="h-4 w-4" /> },
 ];
 
-type SortKey = "name" | "calories" | "carbs" | "proteins" | "fats";
-type SortDirection = "asc" | "desc";
+type SortKey = "calories" | "carbs" | "proteins" | "fats";
 
 export function DailyTracker({
   entry,
@@ -76,8 +75,7 @@ export function DailyTracker({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
-  const [sortKey, setSortKey] = useState<SortKey>("name");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
 
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -259,33 +257,36 @@ export function DailyTracker({
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
-      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+      setSortKey(null); // Revert to default sort (by name)
     } else {
       setSortKey(key);
-      setSortDirection('asc');
     }
   };
 
   const sortedLoggedFoods = useMemo(() => {
-    return [...loggedFoods].sort((a, b) => {
-      const aVal = sortKey === 'name' ? a.food.name : (a.food[sortKey] ?? 0) * a.quantity;
-      const bVal = sortKey === 'name' ? b.food.name : (b.food[sortKey] ?? 0) * b.quantity;
-
-      if (typeof aVal === 'string' && typeof bVal === 'string') {
-        return sortDirection === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
-      }
-      if (typeof aVal === 'number' && typeof bVal === 'number') {
-        return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
-      }
-      return 0;
-    });
-  }, [loggedFoods, sortKey, sortDirection]);
+    const sorted = [...loggedFoods];
+    if (sortKey) {
+      sorted.sort((a, b) => {
+        const aVal = (a.food[sortKey] ?? 0) * a.quantity;
+        const bVal = (b.food[sortKey] ?? 0) * b.quantity;
+        return bVal - aVal; // Always descending for nutrients
+      });
+    } else {
+      sorted.sort((a, b) => a.food.name.localeCompare(b.food.name)); // Default sort by name
+    }
+    return sorted;
+  }, [loggedFoods, sortKey]);
 
   const renderSortIcon = (key: SortKey) => {
-    if (sortKey !== key) {
-      return <ArrowDownUp className="h-3 w-3 text-muted-foreground" />;
-    }
-    return sortDirection === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />;
+    return (
+      <div className="w-4 h-4 flex items-center justify-center">
+        {sortKey === key ? (
+          <SortDesc className="h-4 w-4" />
+        ) : (
+          <ArrowDownUp className="h-3 w-3 text-muted-foreground" />
+        )}
+      </div>
+    );
   };
 
   if (isLoading) {
@@ -445,14 +446,7 @@ export function DailyTracker({
 
                 {loggedFoods && loggedFoods.length > 0 ? (
                   <>
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                       <Button variant={sortKey === 'name' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3" onClick={() => handleSort('name')}>
-                        {renderSortIcon('name')}
-                        <div>
-                          <p className="text-xs text-muted-foreground">Sort by</p>
-                          <p className="font-bold">Name</p>
-                        </div>
-                      </Button>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       <Button variant={sortKey === 'calories' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-purple-500/10 border-purple-500/20 hover:bg-purple-500/20" onClick={() => handleSort('calories')}>
                         {renderSortIcon('calories')}
                         <Sparkles className="h-5 w-5 text-purple-400" />
@@ -584,7 +578,5 @@ export function DailyTracker({
     </div>
   );
 }
-
-    
 
     
