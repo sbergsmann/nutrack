@@ -83,7 +83,6 @@ export default function PremiumPage() {
         description: `You are now on the ${planName} plan.`,
       });
       router.push("/");
-      router.refresh(); // Force refresh to update user plan in header
     } catch (error) {
       console.error("Failed to update plan:", error);
       toast({
@@ -96,7 +95,7 @@ export default function PremiumPage() {
     }
   };
 
-  const isLoading = userLoading || isPending;
+  const isLoading = userLoading || !!isPending;
 
   return (
     <div className="container mx-auto max-w-4xl p-4 md:p-8 animate-fade-in">
@@ -159,7 +158,11 @@ export default function PremiumPage() {
                 onClick={() => handleChoosePlan(plan.name)}
                 disabled={isLoading}
               >
-                {user?.plan === plan.name ? "Current Plan" : isPending === plan.name ? "Updating..." : `Choose ${plan.name}`}
+                {user?.plan === plan.name
+                  ? "Current Plan"
+                  : isPending === plan.name
+                  ? "Choosing..."
+                  : "Choose Plan"}
               </Button>
             </CardFooter>
           </Card>
