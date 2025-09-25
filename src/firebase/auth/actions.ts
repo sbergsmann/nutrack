@@ -7,6 +7,7 @@ import {
   signOut as firebaseSignOut,
 } from "firebase/auth";
 import { auth } from "@/firebase/client";
+import { toast } from "@/hooks/use-toast";
 
 const provider = new GoogleAuthProvider();
 
@@ -19,13 +20,23 @@ export const signInWithGoogle = async () => {
       return;
     }
     console.error("Error signing in with Google: ", error);
+    toast({
+      variant: "destructive",
+      title: "Error signing in",
+      description: error.message,
+    });
   }
 };
 
 export const signOut = async () => {
   try {
     await firebaseSignOut(auth);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error signing out: ", error);
+    toast({
+      variant: "destructive",
+      title: "Error signing out",
+      description: error.message,
+    });
   }
 };
