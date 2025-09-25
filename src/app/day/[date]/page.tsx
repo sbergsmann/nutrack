@@ -14,9 +14,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { notFound } from "next/navigation";
 
 
-export default function DayPage({ params }: { params: { date: string } }) {
+export default function DayPage({ params }: { params: Promise<{ date: string }> }) {
+  const { date: dateString } = use(params);
+
   const { data: user, loading: userLoading } = useUser();
-  const dateString = params.date;
   
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
     notFound();
