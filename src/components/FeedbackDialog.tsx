@@ -83,7 +83,7 @@ export function FeedbackDialog({ children, open, onOpenChange }: FeedbackDialogP
         <DialogHeader>
           <DialogTitle>Send us your feedback</DialogTitle>
           <DialogDescription>
-            We'd love to hear what you think about Nutrack.
+            We'd love to hear what you think about Nutrack9.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">

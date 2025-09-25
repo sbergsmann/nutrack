@@ -7,7 +7,7 @@ import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
-  title: "Nutrack",
+  title: "Nutrack9",
   description: "Track your daily food intake and mood.",
 };
 

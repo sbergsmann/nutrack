@@ -15,7 +15,7 @@ export function WelcomePage() {
             Unlock the Connection Between Food and Mood
           </h1>
           <p className="max-w-[700px] text-muted-foreground md:text-xl">
-            Nutrack is a simple, mindful tool to help you discover how your diet
+            Nutrack9 is a simple, mindful tool to help you discover how your diet
             affects your well-being. Track your meals and moods to find
             patterns and feel your best.
           </p>
