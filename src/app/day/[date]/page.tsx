@@ -10,8 +10,6 @@ import { useFirestore } from "@/firebase/provider";
 import { getAllEntries, getEntry } from "@/lib/data";
 
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { DailyTracker } from "@/components/DailyTracker";
 
 function DayPageClient({ dateString }: { dateString: string }) {
@@ -67,11 +65,6 @@ function DayPageClient({ dateString }: { dateString: string }) {
   return (
     <div className="container mx-auto space-y-8 p-4 md:p-8">
        <div className="space-y-6">
-        {!isToday && (
-          <Button asChild variant="outline">
-            <Link href="/">Back to Today's Log</Link>
-          </Button>
-        )}
         <DailyTracker 
           entry={dayEntry ?? {date: dateString, foods: [], mood: null}} 
           isToday={isToday} 

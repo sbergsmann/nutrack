@@ -3,6 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { addFood, removeFood, searchFoods, setMood, updateFoodQuantity } from "@/lib/data";
 import type { DailyEntry, FoodItem, LoggedFood, Mood } from "@/lib/types";
 import { format, isSameDay, parseISO } from "date-fns";
@@ -26,6 +27,7 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardFooter,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils, Trash, Minus, Calendar as CalendarIcon } from "lucide-react";
@@ -249,7 +251,7 @@ export function DailyTracker({
             </div>
             <div className="space-y-4">
               <Skeleton className="h-5 w-24" />
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex flex-col gap-2">
                 <Skeleton className="h-16 w-full" />
                 <Skeleton className="h-16 w-full" />
               </div>
@@ -284,6 +286,13 @@ export function DailyTracker({
                     tracked: "bg-primary/30 text-primary-foreground font-bold",
                   }}
                 />
+                {!isToday && (
+                  <div className="p-2 border-t">
+                    <Button variant="ghost" className="w-full" asChild>
+                      <Link href="/">Go to Today</Link>
+                    </Button>
+                  </div>
+                )}
               </PopoverContent>
             </Popover>
             <CardTitle className="font-headline">{displayDate}</CardTitle>
