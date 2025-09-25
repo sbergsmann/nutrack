@@ -4,7 +4,7 @@
 import { useEffect, useRef, useTransition, useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import { removeFood, setMood } from "@/lib/data";
-import type { DailyEntry, Mood } from "@/lib/types";
+import type { DailyEntry, FoodItem, Mood } from "@/lib/types";
 import { format, parseISO } from "date-fns";
 import { useUser } from "@/firebase/auth/use-user";
 import { useFirestore } from "@/firebase/provider";
@@ -79,14 +79,14 @@ export function DailyTracker({
         title: "Mood updated!",
         description: `Your mood has been set to ${mood}.`,
       });
-      // No need to call router.refresh() here since we updated locally
+      router.refresh();
     });
   };
 
-  const handleDeleteFood = (food: string) => {
+  const handleDeleteFood = (foodId: string) => {
     if (!user || !firestore) return;
     startTransition(async () => {
-      await removeFood(firestore, user.uid, entry.date, food);
+      await removeFood(firestore, user.uid, entry.date, foodId);
       router.refresh();
     });
   }
@@ -195,22 +195,22 @@ export function DailyTracker({
 
               <div className="space-y-4">
                 <h3 className="font-semibold text-sm">Logged Foods</h3>
-                {entry.foods.length > 0 ? (
+                {entry.foods && entry.foods.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {entry.foods.map((food, index) => (
-                      <Card key={index} className="shadow-sm relative group">
+                    {entry.foods.map((food) => (
+                      <Card key={food.id} className="shadow-sm relative group">
                         <CardContent className="p-4 flex items-center gap-4">
                           <div className="bg-primary/20 text-primary p-2 rounded-full">
                             <Utensils className="h-5 w-5" />
                           </div>
-                          <p className="text-sm font-medium">{food}</p>
+                          <p className="text-sm font-medium">{food.name}</p>
                         </CardContent>
                         <Button
                           variant="ghost"
                           size="icon"
                           className="absolute top-1/2 right-2 -translate-y-1/2"
-                          onClick={() => handleDeleteFood(food)}
-                          aria-label={`Delete ${food}`}
+                          onClick={() => handleDeleteFood(food.id)}
+                          aria-label={`Delete ${food.name}`}
                           disabled={isMutationPending}
                         >
                           <Trash className="h-5 w-5 text-muted-foreground group-hover:text-destructive transition-colors" />

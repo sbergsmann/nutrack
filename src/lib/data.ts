@@ -1,4 +1,3 @@
-
 import {
   doc,
   getDoc,
@@ -9,15 +8,41 @@ import {
   updateDoc,
   arrayRemove,
   type Firestore,
+  serverTimestamp,
+  Timestamp,
 } from "firebase/firestore";
 import type { Firestore as AdminFirestore } from "firebase-admin/firestore";
-import type { DailyEntry, Mood } from "@/lib/types";
+import type { DailyEntry, FoodItem, Mood } from "@/lib/types";
 import { errorEmitter } from "@/firebase/error-emitter";
-import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors";
+import {
+  FirestorePermissionError,
+  type SecurityRuleContext,
+} from "@/firebase/errors";
 
+const getEntriesCollection = (
+  firestore: Firestore | AdminFirestore,
+  userId: string
+) => collection(firestore as Firestore, "users", userId, "dailyLogs");
 
-const getEntriesCollection = (firestore: Firestore | AdminFirestore, userId: string) =>
-  collection(firestore as Firestore, "users", userId, "dailyLogs");
+const getFoodsCollection = (firestore: Firestore | AdminFirestore) =>
+  collection(firestore as Firestore, "foods");
+
+export async function getFoodItem(
+  firestore: Firestore | AdminFirestore,
+  foodId: string
+): Promise<FoodItem | null> {
+  const foodDocRef = doc(getFoodsCollection(firestore), foodId);
+  const foodDoc = await getDoc(foodDocRef);
+  if (!foodDoc.exists()) {
+    return null;
+  }
+  const data = foodDoc.data();
+  return {
+    id: foodDoc.id,
+    name: data.name,
+    lastAddedAt: (data.lastAddedAt as Timestamp).toDate(),
+  };
+}
 
 export async function getEntry(
   firestore: Firestore | AdminFirestore,
@@ -35,7 +60,19 @@ export async function getEntry(
     };
   }
 
-  return entryDoc.data() as DailyEntry;
+  const entryData = entryDoc.data();
+  const foodIds = (entryData.foods || []) as string[];
+
+  const foodItems = (
+    await Promise.all(
+      foodIds.map((id) => getFoodItem(firestore, id))
+    )
+  ).filter((food): food is FoodItem => food !== null);
+
+  return {
+    ...entryData,
+    foods: foodItems,
+  } as DailyEntry;
 }
 
 export async function getAllEntries(
@@ -43,45 +80,84 @@ export async function getAllEntries(
   userId: string
 ): Promise<DailyEntry[]> {
   const snapshot = await getDocs(getEntriesCollection(firestore, userId));
-  return snapshot.docs.map((doc) => doc.data() as DailyEntry);
+  const entries = await Promise.all(
+    snapshot.docs.map(async (doc) => {
+      const entryData = doc.data();
+      const foodIds = (entryData.foods || []) as string[];
+      
+      const foodItems = (
+        await Promise.all(
+          foodIds.map((id) => getFoodItem(firestore, id))
+        )
+      ).filter((food): food is FoodItem => food !== null);
+
+      return {
+        ...entryData,
+        foods: foodItems,
+      } as DailyEntry;
+    })
+  );
+  return entries;
+}
+
+export async function getOrCreateFood(
+  firestore: Firestore | AdminFirestore,
+  foodName: string
+): Promise<string> {
+  const normalizedFoodName = foodName.trim().toLowerCase();
+  const foodId = normalizedFoodName.replace(/\s+/g, "-");
+  const foodRef = doc(getFoodsCollection(firestore), foodId);
+
+  const foodDoc = await getDoc(foodRef);
+  const data = {
+    name: foodName.trim(),
+    lastAddedAt: serverTimestamp(),
+  };
+
+  if (foodDoc.exists()) {
+    await updateDoc(foodRef, data);
+  } else {
+    await setDoc(foodRef, data);
+  }
+  return foodId;
 }
 
 export async function addFood(
   firestore: Firestore | AdminFirestore,
   userId: string,
   date: string,
-  food: string
+  foodName: string
 ): Promise<void> {
+  const foodId = await getOrCreateFood(firestore, foodName);
   const entryRef = doc(getEntriesCollection(firestore, userId), date);
-  
+
   const docSnap = await getDoc(entryRef);
   if (docSnap.exists()) {
-      updateDoc(entryRef, {
-          foods: arrayUnion(food),
-      }).catch(async (serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: entryRef.path,
-          operation: 'update',
-          requestResourceData: { foods: arrayUnion(food) },
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
+    updateDoc(entryRef, {
+      foods: arrayUnion(foodId),
+    }).catch(async (serverError) => {
+      const permissionError = new FirestorePermissionError({
+        path: entryRef.path,
+        operation: "update",
+        requestResourceData: { foods: arrayUnion(foodId) },
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit("permission-error", permissionError);
+    });
   } else {
-      const newEntry: DailyEntry = {
-        date: date,
-        foods: [food],
-        mood: null,
-        id: userId,
-      };
-      setDoc(entryRef, newEntry, { merge: true })
-      .catch(async (serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: entryRef.path,
-          operation: 'create',
-          requestResourceData: newEntry,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
+    const newEntry = {
+      date: date,
+      foods: [foodId],
+      mood: null,
+      id: userId,
+    };
+    setDoc(entryRef, newEntry, { merge: true }).catch(async (serverError) => {
+      const permissionError = new FirestorePermissionError({
+        path: entryRef.path,
+        operation: "create",
+        requestResourceData: newEntry,
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit("permission-error", permissionError);
+    });
   }
 }
 
@@ -89,18 +165,18 @@ export async function removeFood(
   firestore: Firestore | AdminFirestore,
   userId: string,
   date: string,
-  food: string
+  foodId: string
 ): Promise<void> {
   const entryRef = doc(getEntriesCollection(firestore, userId), date);
   updateDoc(entryRef, {
-    foods: arrayRemove(food),
+    foods: arrayRemove(foodId),
   }).catch(async (serverError) => {
     const permissionError = new FirestorePermissionError({
       path: entryRef.path,
-      operation: 'update',
-      requestResourceData: { foods: arrayRemove(food) },
+      operation: "update",
+      requestResourceData: { foods: arrayRemove(foodId) },
     } satisfies SecurityRuleContext);
-    errorEmitter.emit('permission-error', permissionError);
+    errorEmitter.emit("permission-error", permissionError);
   });
 }
 
@@ -116,16 +192,12 @@ export async function setMood(
     mood,
     id: userId,
   };
-  setDoc(
-    entryRef,
-    data,
-    { merge: true }
-  ).catch(async (serverError) => {
+  setDoc(entryRef, data, { merge: true }).catch(async (serverError) => {
     const permissionError = new FirestorePermissionError({
       path: entryRef.path,
-      operation: 'update',
+      operation: "update",
       requestResourceData: data,
     } satisfies SecurityRuleContext);
-    errorEmitter.emit('permission-error', permissionError);
+    errorEmitter.emit("permission-error", permissionError);
   });
 }

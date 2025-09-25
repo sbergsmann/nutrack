@@ -1,0 +1,88 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "Represents a user of the application.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique ID of the user."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name."
+        }
+      },
+      "required": ["uid", "email"]
+    },
+    "dailyLog": {
+      "title": "Daily Log",
+      "description": "A user's daily log of food and mood.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The user ID this log belongs to."
+        },
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "The date of the log in YYYY-MM-DD format."
+        },
+        "foods": {
+          "type": "array",
+          "description": "An array of food item reference IDs.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "mood": {
+          "type": "string",
+          "description": "The user's mood for the day.",
+          "enum": ["Happy", "Neutral", "Sad", "Energetic", "Tired"]
+        }
+      },
+      "required": ["id", "date"]
+    },
+    "food": {
+      "title": "Food",
+      "description": "Represents a food item in the global collection.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the food item."
+        },
+        "lastAddedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the food was last added."
+        }
+      },
+      "required": ["name", "lastAddedAt"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/user" },
+      "description": "Stores user profile information."
+    },
+    "/users/{userId}/dailyLogs/{logId}": {
+      "schema": { "$ref": "#/entities/dailyLog" },
+      "description": "Stores daily logs for each user. The logId is the date in YYYY-MM-DD format."
+    },
+    "/foods/{foodId}": {
+      "schema": { "$ref": "#/entities/food" },
+      "description": "Global collection of all unique food items."
+    }
+  }
+}
