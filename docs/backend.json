@@ -38,7 +38,7 @@
       "description": "A user's daily log of food and mood.",
       "type": "object",
       "properties": {
-        "id": {
+        "userId": {
           "type": "string",
           "description": "The user ID this log belongs to."
         },
@@ -71,7 +71,7 @@
           "enum": ["Happy", "Neutral", "Sad", "Energetic", "Tired"]
         }
       },
-      "required": ["id", "date"]
+      "required": ["userId", "date"]
     },
     "food": {
       "title": "Food",

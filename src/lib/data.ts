@@ -23,7 +23,6 @@ import {
   FirestorePermissionError,
   type SecurityRuleContext,
 } from "@/firebase/errors";
-import { stripe } from "./stripe";
 
 const getEntriesCollection = (
   firestore: Firestore | AdminFirestore,
@@ -194,7 +193,7 @@ export async function addFood(
           date: date,
           foods: [{ foodId, quantity: 1 }],
           mood: null,
-          id: userId,
+          userId: userId,
         };
         transaction.set(entryRef, newEntry);
       } else {
@@ -306,7 +305,7 @@ export async function setMood(
   const data = {
     date,
     mood,
-    id: userId,
+    userId: userId,
   };
   setDoc(entryRef, data, { merge: true }).catch(async (serverError) => {
     const permissionError = new FirestorePermissionError({
