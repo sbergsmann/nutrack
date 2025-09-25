@@ -14,7 +14,7 @@ import type { Firestore as AdminFirestore } from "firebase-admin/firestore";
 import type { DailyEntry, Mood } from "@/lib/types";
 
 const getEntriesCollection = (firestore: Firestore | AdminFirestore, userId: string) =>
-  collection(firestore as Firestore, "users", userId, "entries");
+  collection(firestore as Firestore, "users", userId, "dailyLogs");
 
 export async function getEntry(
   firestore: Firestore,
@@ -44,21 +44,21 @@ export async function getAllEntries(
 }
 
 export async function addFood(
-  firestore: AdminFirestore,
+  firestore: Firestore,
   userId: string,
   date: string,
   food: string
 ): Promise<void> {
-  const entryRef = firestore.collection("users").doc(userId).collection("entries").doc(date);
+  const entryRef = doc(getEntriesCollection(firestore, userId), date);
   
   try {
-    const doc = await entryRef.get();
-    if (doc.exists) {
-        await entryRef.update({
+    const docSnap = await getDoc(entryRef);
+    if (docSnap.exists()) {
+        await updateDoc(entryRef, {
             foods: arrayUnion(food),
         });
     } else {
-        await entryRef.set({
+        await setDoc(entryRef, {
             date: date,
             foods: [food],
             mood: null
@@ -71,25 +71,26 @@ export async function addFood(
 }
 
 export async function removeFood(
-  firestore: AdminFirestore,
+  firestore: Firestore,
   userId: string,
   date: string,
   food: string
 ): Promise<void> {
-  const entryRef = firestore.collection("users").doc(userId).collection("entries").doc(date);
-  await entryRef.update({
+  const entryRef = doc(getEntriesCollection(firestore, userId), date);
+  await updateDoc(entryRef, {
     foods: arrayRemove(food),
   });
 }
 
 export async function setMood(
-  firestore: AdminFirestore,
+  firestore: Firestore,
   userId: string,
   date: string,
   mood: Mood
 ): Promise<void> {
-  const entryRef = firestore.collection("users").doc(userId).collection("entries").doc(date);
-  await entryRef.set(
+  const entryRef = doc(getEntriesCollection(firestore, userId), date);
+  await setDoc(
+    entryRef,
     {
       date,
       mood,
