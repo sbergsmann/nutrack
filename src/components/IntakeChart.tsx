@@ -82,14 +82,16 @@ export function IntakeChart({ userProfile, entries }: IntakeChartProps) {
     };
 
     const nutrientTotalsByDate = entries.reduce((acc, entry) => {
-      const totals = entry.foods.reduce((totals, { food, quantity }) => {
-        totals.calories += (food.calories ?? 0) * quantity;
-        totals.carbs += (food.carbs ?? 0) * quantity;
-        totals.proteins += (food.proteins ?? 0) * quantity;
-        totals.fats += (food.fats ?? 0) * quantity;
-        return totals;
-      }, { calories: 0, carbs: 0, proteins: 0, fats: 0 });
-      acc[entry.date] = totals;
+      if (entry.foods.length > 0) {
+        const totals = entry.foods.reduce((totals, { food, quantity }) => {
+          totals.calories += (food.calories ?? 0) * quantity;
+          totals.carbs += (food.carbs ?? 0) * quantity;
+          totals.proteins += (food.proteins ?? 0) * quantity;
+          totals.fats += (food.fats ?? 0) * quantity;
+          return totals;
+        }, { calories: 0, carbs: 0, proteins: 0, fats: 0 });
+        acc[entry.date] = totals;
+      }
       return acc;
     }, {} as Record<string, Record<NutrientKey, number>>);
 
@@ -112,7 +114,7 @@ export function IntakeChart({ userProfile, entries }: IntakeChartProps) {
     return { nutritionGoals: goals, chartData: data };
   }, [userProfile, entries]);
 
-  if (!nutritionGoals || !chartData[activeNutrient] || chartData[activeNutrient].length === 0) {
+  if (!nutritionGoals || !chartData[activeNutrient] || chartData[activeNutrient].length < 2) {
     return null;
   }
   

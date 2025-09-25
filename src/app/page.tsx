@@ -70,7 +70,7 @@ export default function HomePage() {
       {profileComplete ? (
         <>
           <RecommendedIntake userProfile={user} />
-          {allEntries.length > 0 ? (
+          {allEntries.length > 1 ? (
             <IntakeChart userProfile={user} entries={allEntries} />
           ) : (
              <Card>
@@ -79,7 +79,7 @@ export default function HomePage() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  You haven't logged any food yet. Go to the Tracking page to start your first log and see your progress here!
+                  {allEntries.length > 0 ? "Log at least one more day to see your progress chart." : "You haven't logged any food yet. Go to the Tracking page to start your first log and see your progress here!"}
                 </p>
               </CardContent>
               <CardFooter>
