@@ -162,7 +162,7 @@ export async function addFood(
 }
 
 export async function removeFood(
-  firestore: Firestore | AdminFirestore,
+  firestore: Firestore,
   userId: string,
   date: string,
   foodId: string
@@ -181,7 +181,7 @@ export async function removeFood(
 }
 
 export async function setMood(
-  firestore: Firestore | AdminFirestore,
+  firestore: Firestore,
   userId: string,
   date: string,
   mood: Mood
