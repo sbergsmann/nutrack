@@ -1,7 +1,7 @@
 
 "use client";
 
-import { ArrowLeft, Beef, Droplet, Flame, Info, Sparkles } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import {
   Card,
@@ -32,18 +32,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useFirestore } from "@/firebase/provider";
 import { updateUserProfile } from "@/lib/data";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { UserProfile } from "@/lib/types";
+import { RecommendedIntake } from "@/components/RecommendedIntake";
 
 const activityLevels: UserProfile['activityLevel'][] = ["Sedentary", "Lightly active", "Moderately active", "Very active", "Extra active"];
 
@@ -146,40 +141,13 @@ export default function SettingsPage() {
   const appVersion = "0.1.0";
   const hasMeasurements = !!(user?.height || user?.weight || user?.age || user?.gender || user?.activityLevel);
 
-  const nutritionGoals = useMemo(() => {
-    const { height, weight, age, gender, activityLevel } = form.getValues();
-    if (!height || !weight || !age || !gender || !activityLevel) {
-      return null;
-    }
-
-    let bmr: number;
-    if (gender === 'Male') {
-        bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
-    } else if (gender === 'Female') {
-        bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
-    } else { // 'Other'
-        // Averaging male and female formulas
-        const bmrMale = (10 * weight) + (6.25 * height) - (5 * age) + 5;
-        const bmrFemale = (10 * weight) + (6.25 * height) - (5 * age) - 161;
-        bmr = (bmrMale + bmrFemale) / 2;
-    }
-    
-    const activityFactors: Record<typeof activityLevel, number> = {
-        'Sedentary': 1.2,
-        'Lightly active': 1.375,
-        'Moderately active': 1.55,
-        'Very active': 1.725,
-        'Extra active': 1.9,
-    };
-    const tdee = bmr * activityFactors[activityLevel];
-
-    return {
-        calories: { min: Math.round(tdee - 100), max: Math.round(tdee + 100) },
-        carbs: { min: Math.round((tdee * 0.45) / 4), max: Math.round((tdee * 0.65) / 4) },
-        proteins: { min: Math.round(weight * 0.8), max: Math.round(weight * 2.0) },
-        fats: { min: Math.round((tdee * 0.20) / 9), max: Math.round((tdee * 0.35) / 9) },
-    };
-}, [form.watch()]);
+  const profileIsComplete = !!(
+    form.watch('height') &&
+    form.watch('weight') &&
+    form.watch('age') &&
+    form.watch('gender') &&
+    form.watch('activityLevel')
+  );
 
   return (
     <div className="container mx-auto max-w-5xl p-4 md:p-8 animate-fade-in">
@@ -356,51 +324,8 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {nutritionGoals && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                Recommended Daily Intake
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <Info className="h-4 w-4 text-muted-foreground" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-xs text-center">
-                            <p>These are estimated ranges based on the Mifflin-St Jeor formula for BMR and standard activity multipliers. Your individual needs may vary.</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
-              </CardTitle>
-              <CardDescription>
-                Based on your information, here are your estimated daily nutritional goals.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      <div className="h-auto p-4 flex flex-col justify-start items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-                        <Sparkles className="h-6 w-6 text-purple-400" />
-                        <p className="text-sm text-muted-foreground">Calories</p>
-                        <p className="font-bold text-lg">{nutritionGoals.calories.min} - {nutritionGoals.calories.max}</p>
-                      </div>
-                      <div className="h-auto p-4 flex flex-col justify-start items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-lg">
-                        <Flame className="h-6 w-6 text-orange-400" />
-                        <p className="text-sm text-muted-foreground">Carbs</p>
-                        <p className="font-bold text-lg">{nutritionGoals.carbs.min} - {nutritionGoals.carbs.max}g</p>
-                      </div>
-                      <div className="h-auto p-4 flex flex-col justify-start items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg">
-                        <Beef className="h-6 w-6 text-red-400" />
-                        <p className="text-sm text-muted-foreground">Protein</p>
-                        <p className="font-bold text-lg">{nutritionGoals.proteins.min} - {nutritionGoals.proteins.max}g</p>
-                      </div>
-                      <div className="h-auto p-4 flex flex-col justify-start items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                        <Droplet className="h-6 w-6 text-yellow-400" />
-                        <p className="text-sm text-muted-foreground">Fat</p>
-                        <p className="font-bold text-lg">{nutritionGoals.fats.min} - {nutritionGoals.fats.max}g</p>
-                      </div>
-                </div>
-            </CardContent>
-          </Card>
+        {profileIsComplete && (
+           <RecommendedIntake userProfile={form.getValues() as UserProfile} />
         )}
 
         <div className="text-center text-sm text-muted-foreground">
