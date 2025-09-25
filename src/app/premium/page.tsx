@@ -1,4 +1,6 @@
 
+"use client";
+
 import { ArrowLeft, Check } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -11,8 +13,24 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/firebase/auth/use-user";
+import { useFirestore } from "@/firebase/provider";
+import { updateUserPlan } from "@/lib/data";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import type { UserProfile } from "@/lib/types";
 
-const plans = [
+type PlanName = UserProfile["plan"];
+
+const plans: {
+  name: PlanName;
+  price: string;
+  pricePeriod: string;
+  description: string;
+  features: string[];
+  isPopular: boolean;
+}[] = [
   {
     name: "Monthly",
     price: "$10",
@@ -40,6 +58,46 @@ const plans = [
 ];
 
 export default function PremiumPage() {
+  const { data: user, loading: userLoading } = useUser();
+  const firestore = useFirestore();
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isPending, setIsPending] = useState<PlanName | null>(null);
+
+  const handleChoosePlan = async (planName: PlanName) => {
+    if (!user || !firestore) return;
+
+    if (user.plan === planName) {
+      toast({
+        title: "You are already on this plan.",
+      });
+      return;
+    }
+
+    setIsPending(planName);
+
+    try {
+      await updateUserPlan(firestore, user.uid, planName);
+      toast({
+        title: "Plan updated!",
+        description: `You are now on the ${planName} plan.`,
+      });
+      router.push("/");
+      router.refresh(); // Force refresh to update user plan in header
+    } catch (error) {
+      console.error("Failed to update plan:", error);
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "Could not update your plan.",
+      });
+    } finally {
+      setIsPending(null);
+    }
+  };
+
+  const isLoading = userLoading || isPending;
+
   return (
     <div className="container mx-auto max-w-4xl p-4 md:p-8 animate-fade-in">
       <div className="mb-8">
@@ -67,7 +125,8 @@ export default function PremiumPage() {
             key={plan.name}
             className={cn(
               "flex flex-col",
-              plan.isPopular && "border-primary ring-2 ring-primary"
+              plan.isPopular && "border-primary ring-2 ring-primary",
+              user?.plan === plan.name && "bg-muted"
             )}
           >
             {plan.isPopular && (
@@ -97,8 +156,10 @@ export default function PremiumPage() {
               <Button
                 className="w-full"
                 variant={plan.isPopular ? "default" : "outline"}
+                onClick={() => handleChoosePlan(plan.name)}
+                disabled={isLoading}
               >
-                Choose {plan.name}
+                {user?.plan === plan.name ? "Current Plan" : isPending === plan.name ? "Updating..." : `Choose ${plan.name}`}
               </Button>
             </CardFooter>
           </Card>

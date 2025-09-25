@@ -14,9 +14,10 @@ import {
   addDoc,
   orderBy,
   runTransaction,
+  updateDoc,
 } from "firebase/firestore";
 import type { Firestore as AdminFirestore } from "firebase-admin/firestore";
-import type { DailyEntry, FoodItem, LoggedFood, Mood } from "@/lib/types";
+import type { DailyEntry, FoodItem, LoggedFood, Mood, UserProfile } from "@/lib/types";
 import { errorEmitter } from "@/firebase/error-emitter";
 import {
   FirestorePermissionError,
@@ -337,6 +338,23 @@ export async function addFeedback(
       path: feedbackRef.path,
       operation: 'create',
       requestResourceData: feedbackData,
+    } satisfies SecurityRuleContext);
+    errorEmitter.emit('permission-error', permissionError);
+  });
+}
+
+export async function updateUserPlan(
+  firestore: Firestore,
+  userId: string,
+  plan: UserProfile['plan']
+): Promise<void> {
+  const userRef = doc(firestore, 'users', userId);
+  const data = { plan };
+  updateDoc(userRef, data).catch(async (serverError) => {
+    const permissionError = new FirestorePermissionError({
+      path: userRef.path,
+      operation: 'update',
+      requestResourceData: data,
     } satisfies SecurityRuleContext);
     errorEmitter.emit('permission-error', permissionError);
   });
