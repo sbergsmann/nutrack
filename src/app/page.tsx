@@ -10,7 +10,8 @@ import type { DailyEntry } from "@/lib/types";
 import { useFirestore } from "@/firebase/provider";
 import { WelcomePage } from "@/components/WelcomePage";
 import { Skeleton } from "@/components/ui/skeleton";
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function HomePage() {
   const { data: user, loading: userLoading } = useUser();
@@ -66,12 +67,33 @@ export default function HomePage() {
 
   return (
     <div className="container mx-auto space-y-8 p-4 md:p-8">
-      <DailyTracker 
-        entry={todayEntry ?? {date: todayDateString, foods: [], mood: null}} 
-        isToday={true} 
-        isLoading={isLoading}
-        trackedDates={trackedDates}
-      />
+      <Tabs defaultValue="dashboard" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="tracking">Tracking</TabsTrigger>
+        </TabsList>
+        <TabsContent value="dashboard">
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Welcome to your Dashboard</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                This is your new dashboard. More features and insights will be
+                available here soon!
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="tracking">
+            <DailyTracker 
+                entry={todayEntry ?? {date: todayDateString, foods: [], mood: null}} 
+                isToday={true} 
+                isLoading={isLoading}
+                trackedDates={trackedDates}
+            />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
