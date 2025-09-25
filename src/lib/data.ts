@@ -10,6 +10,10 @@ import {
   type Firestore,
   serverTimestamp,
   Timestamp,
+  query,
+  where,
+  limit,
+  addDoc,
 } from "firebase/firestore";
 import type { Firestore as AdminFirestore } from "firebase-admin/firestore";
 import type { DailyEntry, FoodItem, Mood } from "@/lib/types";
@@ -40,7 +44,7 @@ export async function getFoodItem(
   return {
     id: foodDoc.id,
     name: data.name,
-    lastAddedAt: (data.lastAddedAt as Timestamp).toDate(),
+    lastAddedAt: (data.lastAddedAt as Timestamp)?.toDate() ?? new Date(),
   };
 }
 
@@ -104,26 +108,35 @@ export async function getOrCreateFood(
   firestore: Firestore | AdminFirestore,
   foodName: string
 ): Promise<string> {
-  const normalizedFoodName = foodName.trim().toLowerCase();
-  const foodId = normalizedFoodName.replace(/\s+/g, "-");
-  const foodRef = doc(getFoodsCollection(firestore), foodId);
+  const trimmedFoodName = foodName.trim();
+  const foodsRef = getFoodsCollection(firestore);
 
-  const foodDoc = await getDoc(foodRef);
-  const data = {
-    name: foodName.trim(),
-    lastAddedAt: serverTimestamp(),
-  };
+  // Query to see if the food item already exists
+  const q = query(
+    foodsRef,
+    where("name", "==", trimmedFoodName),
+    limit(1)
+  );
+  const querySnapshot = await getDocs(q);
 
-  if (foodDoc.exists()) {
-    await updateDoc(foodRef, data);
+  if (!querySnapshot.empty) {
+    // Food exists, update timestamp and return its ID
+    const foodDoc = querySnapshot.docs[0];
+    const foodRef = doc(foodsRef, foodDoc.id);
+    await updateDoc(foodRef, { lastAddedAt: serverTimestamp() });
+    return foodDoc.id;
   } else {
-    await setDoc(foodRef, data);
+    // Food doesn't exist, create it with an auto-generated ID
+    const newFoodDocRef = await addDoc(foodsRef, {
+      name: trimmedFoodName,
+      lastAddedAt: serverTimestamp(),
+    });
+    return newFoodDocRef.id;
   }
-  return foodId;
 }
 
 export async function addFood(
-  firestore: Firestore | AdminFirestore,
+  firestore: Firestore,
   userId: string,
   date: string,
   foodName: string
