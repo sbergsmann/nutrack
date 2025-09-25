@@ -9,9 +9,17 @@ import { RecommendedIntake } from "@/components/RecommendedIntake";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import type { DailyEntry } from "@/lib/types";
+import { useFirestore } from "@/firebase/provider";
+import { getAllEntries } from "@/lib/data";
+import { IntakeChart } from "@/components/IntakeChart";
 
 export default function HomePage() {
   const { data: user, loading: userLoading } = useUser();
+  const firestore = useFirestore();
+  const [allEntries, setAllEntries] = useState<DailyEntry[]>([]);
+  const [entriesLoading, setEntriesLoading] = useState(true);
 
   const profileComplete = !!(
     user?.height &&
@@ -21,9 +29,23 @@ export default function HomePage() {
     user?.activityLevel
   );
 
-  if (userLoading) {
+  useEffect(() => {
+    if (user && firestore) {
+      setEntriesLoading(true);
+      getAllEntries(firestore, user.uid)
+        .then(setAllEntries)
+        .finally(() => setEntriesLoading(false));
+    } else if (!userLoading) {
+      setEntriesLoading(false);
+    }
+  }, [user, firestore, userLoading]);
+
+  const isLoading = userLoading || entriesLoading;
+
+  if (isLoading) {
     return (
       <div className="container mx-auto space-y-8 p-4 md:p-8">
+        <Skeleton className="h-32 w-full" />
         <Skeleton className="h-48 w-full" />
         <Skeleton className="h-96 w-full" />
       </div>
@@ -46,7 +68,31 @@ export default function HomePage() {
       </Card>
       
       {profileComplete ? (
-        <RecommendedIntake userProfile={user} />
+        <>
+          <RecommendedIntake userProfile={user} />
+          {allEntries.length > 0 ? (
+            <IntakeChart userProfile={user} entries={allEntries} />
+          ) : (
+             <Card>
+              <CardHeader>
+                <CardTitle>Start Your Journey</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  You haven't logged any food yet. Go to the Tracking page to start your first log and see your progress here!
+                </p>
+              </CardContent>
+              <CardFooter>
+                 <Button asChild>
+                    <Link href="/tracking">
+                      Go to Tracking
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+              </CardFooter>
+            </Card>
+          )}
+        </>
       ) : (
         <Card>
           <CardHeader>
