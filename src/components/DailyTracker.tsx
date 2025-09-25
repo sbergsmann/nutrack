@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useRef, useTransition } from "react";
+import { useEffect, useRef, useTransition, useActionState } from "react";
 import { logFood, selectMood, deleteFood } from "@/lib/actions";
 import type { DailyEntry, Mood } from "@/lib/types";
 import { format, parseISO } from "date-fns";
@@ -18,7 +18,6 @@ import {
 import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase/auth/use-user";
-import { useFormState } from "react-dom";
 
 const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
   { value: "Happy", label: "Happy", icon: <Smile /> },
@@ -58,7 +57,7 @@ export function DailyTracker({
   isToday: boolean;
 }) {
   const { data: user } = useUser();
-  const [state, formAction] = useFormState(logFood, {});
+  const [state, formAction] = useActionState(logFood, {});
   const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
