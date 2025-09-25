@@ -32,6 +32,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils, Trash, Minus, Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FeedbackDialog } from "./FeedbackDialog";
 
 const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
   { value: "Happy", label: "Happy", icon: <Smile /> },
@@ -64,6 +65,7 @@ export function DailyTracker({
   const [suggestions, setSuggestions] = useState<FoodItem[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -127,10 +129,8 @@ export function DailyTracker({
   
     setIsPending(true);
   
-    // Find the original quantity before optimistic update
     const originalQuantity = loggedFoods.find(f => f.food.id === food.id)?.quantity ?? 0;
   
-    // Optimistic update
     setLoggedFoods(currentFoods => {
       const existingFood = currentFoods.find(f => f.food.id === food.id);
       if (existingFood) {
@@ -160,7 +160,7 @@ export function DailyTracker({
     }).catch(error => {
       console.error("Failed to update quantity:", error);
       toast({ variant: "destructive", title: "Failed to update quantity" });
-      setLoggedFoods(entry.foods); // Revert on error
+      setLoggedFoods(entry.foods); 
     }).finally(() => {
       setIsPending(false);
     });
@@ -176,12 +176,15 @@ export function DailyTracker({
     setShowSuggestions(false);
     setFoodInput("");
 
-    // Optimistic Update
+    let newFoodAdded = false;
+    let newFoods: LoggedFood[] = [];
+
     setLoggedFoods(currentFoods => {
-      const existingFood = currentFoods.find(f => f.food.name === trimmedFoodName);
+      const existingFood = currentFoods.find(f => f.food.name.toLowerCase() === trimmedFoodName.toLowerCase());
       if (existingFood) {
-        return currentFoods.map(f => f.food.name === trimmedFoodName ? { ...f, quantity: f.quantity + 1 } : f);
+        newFoods = currentFoods.map(f => f.food.name.toLowerCase() === trimmedFoodName.toLowerCase() ? { ...f, quantity: f.quantity + 1 } : f);
       } else {
+        newFoodAdded = true;
         const newFood: LoggedFood = {
           food: {
             id: `temp-${Date.now()}`,
@@ -190,8 +193,19 @@ export function DailyTracker({
           },
           quantity: 1,
         };
-        return [...currentFoods, newFood];
+        newFoods = [...currentFoods, newFood];
       }
+      
+      // Check for feedback condition
+      if (newFoodAdded && newFoods.length === 5) {
+        const hasShownFeedback = localStorage.getItem("hasShownFifthFoodFeedback");
+        if (!hasShownFeedback) {
+          setFeedbackOpen(true);
+          localStorage.setItem("hasShownFifthFoodFeedback", "true");
+        }
+      }
+      
+      return newFoods;
     });
 
     addFood(firestore, user.uid, entry.date, trimmedFoodName).then(() => {
@@ -207,7 +221,6 @@ export function DailyTracker({
         title: "Failed to log food",
         description: "Please try again.",
       });
-      // Revert optimistic update on failure
       setLoggedFoods(entry.foods);
     }).finally(() => {
       setIsPending(false);
@@ -264,6 +277,10 @@ export function DailyTracker({
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
+        {/* This is a dummy trigger, as the dialog is controlled programmatically */}
+        <></>
+      </FeedbackDialog>
       <Card className="shadow-sm">
         <CardHeader>
           <div className="flex items-center gap-2">
@@ -437,3 +454,5 @@ export function DailyTracker({
     </div>
   );
 }
+
+    

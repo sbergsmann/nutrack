@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,15 +21,34 @@ import { useFirestore } from "@/firebase/provider";
 import { addFeedback } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
 
-export function FeedbackDialog({ children }: { children: React.ReactNode }) {
+type FeedbackDialogProps = {
+  children: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+};
+
+export function FeedbackDialog({ children, open, onOpenChange }: FeedbackDialogProps) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [feedbackText, setFeedbackText] = useState("");
-  const [open, setOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { data: user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
+
+  const isControlled = open !== undefined && onOpenChange !== undefined;
+  const dialogOpen = isControlled ? open : isDialogOpen;
+  const setDialogOpen = isControlled ? onOpenChange : setIsDialogOpen;
+
+  // Reset state when dialog opens or closes
+  useEffect(() => {
+    if (!dialogOpen) {
+      setRating(0);
+      setHoverRating(0);
+      setFeedbackText("");
+    }
+  }, [dialogOpen]);
 
   const handleFeedbackSubmit = async () => {
     if (!user || !firestore) return;
@@ -47,9 +66,7 @@ export function FeedbackDialog({ children }: { children: React.ReactNode }) {
         title: "Feedback sent!",
         description: "Thank you for helping us improve.",
       });
-      setOpen(false);
-      setRating(0);
-      setFeedbackText("");
+      setDialogOpen(false);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -60,7 +77,7 @@ export function FeedbackDialog({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -106,3 +123,5 @@ export function FeedbackDialog({ children }: { children: React.ReactNode }) {
     </Dialog>
   );
 }
+
+    
