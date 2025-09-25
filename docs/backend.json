@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "user": {
@@ -37,9 +38,20 @@
         },
         "foods": {
           "type": "array",
-          "description": "An array of food item reference IDs.",
+          "description": "An array of logged food items with quantities.",
           "items": {
-            "type": "string"
+            "type": "object",
+            "properties": {
+              "foodId": {
+                "type": "string",
+                "description": "A reference to the food item in the global foods collection."
+              },
+              "quantity": {
+                "type": "number",
+                "description": "The quantity of the food item consumed."
+              }
+            },
+            "required": ["foodId", "quantity"]
           }
         },
         "mood": {
@@ -86,3 +98,5 @@
     }
   }
 }
+
+    

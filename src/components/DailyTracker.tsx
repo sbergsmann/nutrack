@@ -1,10 +1,10 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState }from "react";
 import { useRouter } from "next/navigation";
-import { addFood, removeFood, searchFoods, setMood } from "@/lib/data";
-import type { DailyEntry, FoodItem, Mood } from "@/lib/types";
+import { addFood, removeFood, searchFoods, setMood, updateFoodQuantity } from "@/lib/data";
+import type { DailyEntry, FoodItem, LoggedFood, Mood } from "@/lib/types";
 import { format, parseISO } from "date-fns";
 import { useUser } from "@/firebase/auth/use-user";
 import { useFirestore } from "@/firebase/provider";
@@ -21,7 +21,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils, Trash } from "lucide-react";
+import { Plus, Smile, Meh, Frown, Zap, Battery, Utensils, Trash, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
@@ -47,7 +47,7 @@ export function DailyTracker({
   const { toast } = useToast();
 
   const [currentMood, setCurrentMood] = useState<Mood | null>(entry.mood);
-  const [loggedFoods, setLoggedFoods] = useState<FoodItem[]>(entry.foods);
+  const [loggedFoods, setLoggedFoods] = useState<LoggedFood[]>(entry.foods);
   const [foodInput, setFoodInput] = useState("");
   const [isPending, setIsPending] = useState(false);
   const [suggestions, setSuggestions] = useState<FoodItem[]>([]);
@@ -99,7 +99,7 @@ export function DailyTracker({
 
   const handleDeleteFood = (foodId: string) => {
     if (!user || !firestore) return;
-    setLoggedFoods(currentFoods => currentFoods.filter(f => f.id !== foodId));
+    setLoggedFoods(currentFoods => currentFoods.filter(f => f.food.id !== foodId));
     removeFood(firestore, user.uid, entry.date, foodId).then(() => {
       toast({
         title: "Food removed",
@@ -107,6 +107,47 @@ export function DailyTracker({
       router.refresh();
     });
   }
+
+  const handleQuantityChange = async (food: FoodItem, change: 1 | -1) => {
+    if (!user || !firestore) return;
+
+    setIsPending(true);
+
+    // Optimistic update
+    setLoggedFoods(currentFoods => {
+      const existingFood = currentFoods.find(f => f.food.id === food.id);
+      if (existingFood) {
+        const newQuantity = existingFood.quantity + change;
+        if (newQuantity > 0) {
+          return currentFoods.map(f => f.food.id === food.id ? { ...f, quantity: newQuantity } : f);
+        } else {
+          return currentFoods.filter(f => f.food.id !== food.id);
+        }
+      }
+      return currentFoods;
+    });
+
+    try {
+      if (change === 1) {
+        await addFood(firestore, user.uid, entry.date, food.name);
+      } else {
+        const currentFood = loggedFoods.find(f => f.food.id === food.id);
+        if (currentFood && currentFood.quantity > 1) {
+          await updateFoodQuantity(firestore, user.uid, entry.date, food.id, currentFood.quantity - 1);
+        } else {
+          await removeFood(firestore, user.uid, entry.date, food.id);
+        }
+      }
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to update quantity:", error);
+      toast({ variant: "destructive", title: "Failed to update quantity" });
+      setLoggedFoods(entry.foods); // Revert on error
+    } finally {
+      setIsPending(false);
+    }
+  };
+
 
   const handleAddFood = async (foodName: string) => {
     if (!user || !firestore) return;
@@ -116,14 +157,25 @@ export function DailyTracker({
 
     setIsPending(true);
     setShowSuggestions(false);
-
-    const newFood: FoodItem = {
-      id: `temp-${Date.now()}`,
-      name: trimmedFoodName,
-      lastAddedAt: new Date(),
-    };
-    setLoggedFoods(currentFoods => [...currentFoods, newFood]);
     setFoodInput("");
+
+    // Optimistic Update
+    setLoggedFoods(currentFoods => {
+      const existingFood = currentFoods.find(f => f.food.name === trimmedFoodName);
+      if (existingFood) {
+        return currentFoods.map(f => f.food.name === trimmedFoodName ? { ...f, quantity: f.quantity + 1 } : f);
+      } else {
+        const newFood: LoggedFood = {
+          food: {
+            id: `temp-${Date.now()}`,
+            name: trimmedFoodName,
+            lastAddedAt: new Date(),
+          },
+          quantity: 1,
+        };
+        return [...currentFoods, newFood];
+      }
+    });
 
     try {
       await addFood(firestore, user.uid, entry.date, trimmedFoodName);
@@ -139,7 +191,8 @@ export function DailyTracker({
         title: "Failed to log food",
         description: "Please try again.",
       });
-      setLoggedFoods(currentFoods => currentFoods.filter(f => f.id !== newFood.id));
+      // Revert optimistic update on failure
+      setLoggedFoods(entry.foods);
     } finally {
       setIsPending(false);
     }
@@ -271,24 +324,39 @@ export function DailyTracker({
                 <h3 className="font-semibold text-sm">Logged Foods</h3>
                 {loggedFoods && loggedFoods.length > 0 ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {loggedFoods.map((food) => (
+                    {loggedFoods.map(({food, quantity}) => (
                       <Card key={food.id} className="shadow-sm relative group">
-                        <CardContent className="p-4 flex items-center gap-4">
-                          <div className="bg-primary/20 text-primary p-2 rounded-full">
-                            <Utensils className="h-5 w-5" />
+                        <CardContent className="p-4 flex items-center justify-between gap-4">
+                           <div className="flex items-center gap-4 overflow-hidden">
+                            <div className="bg-primary/20 text-primary p-2 rounded-full">
+                                <Utensils className="h-5 w-5" />
+                            </div>
+                            <p className="text-sm font-medium truncate">{food.name}</p>
                           </div>
-                          <p className="text-sm font-medium">{food.name}</p>
+                          <div className="flex items-center gap-2">
+                             <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => handleQuantityChange(food, -1)}
+                              disabled={isPending}
+                              aria-label={`Decrease quantity of ${food.name}`}
+                            >
+                              {quantity > 1 ? <Minus className="h-4 w-4" /> : <Trash className="h-4 w-4 text-destructive" />}
+                            </Button>
+                            <span className="font-bold text-sm w-4 text-center">{quantity}</span>
+                             <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => handleQuantityChange(food, 1)}
+                              disabled={isPending}
+                              aria-label={`Increase quantity of ${food.name}`}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </CardContent>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute top-1/2 right-2 -translate-y-1/2"
-                          onClick={() => handleDeleteFood(food.id)}
-                          aria-label={`Delete ${food.name}`}
-                          disabled={isPending}
-                        >
-                          <Trash className="h-5 w-5 text-muted-foreground group-hover:text-destructive transition-colors" />
-                        </Button>
                       </Card>
                     ))}
                   </div>
@@ -306,3 +374,5 @@ export function DailyTracker({
     </div>
   );
 }
+
+    
