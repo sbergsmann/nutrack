@@ -86,7 +86,8 @@ function DayPageClient({ dateString }: { dateString: string }) {
 
 // This component is necessary because `use` is not allowed in a client component.
 function DayPageLoader({ params }: { params: { date: string } }) {
-  return <DayPageClient dateString={params.date} />;
+  const resolvedParams = React.use(params);
+  return <DayPageClient dateString={resolvedParams.date} />;
 }
 
 export default DayPageLoader;
