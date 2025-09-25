@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LogIn, LogOut, MessageSquare, User as UserIcon, Star, BadgeCheck } from "lucide-react";
+import { LogIn, LogOut, MessageSquare, User as UserIcon, Star, BadgeCheck, Settings } from "lucide-react";
 import { useUser } from "@/firebase/auth/use-user";
 import { signInWithGoogle, signOut } from "@/firebase/auth/actions";
 import { FeedbackDialog } from "./FeedbackDialog";
@@ -70,10 +70,17 @@ export function UserProfile() {
             <Badge variant="secondary">{user.plan}</Badge>
           </div>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild disabled>
+        <DropdownMenuItem asChild>
           <Link href="/premium">
             <Star className="mr-2 h-4 w-4" />
             <span>Go Premium</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/settings">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
           </Link>
         </DropdownMenuItem>
         <FeedbackDialog>
@@ -82,6 +89,7 @@ export function UserProfile() {
             <span>Send Feedback</span>
           </DropdownMenuItem>
         </FeedbackDialog>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={signOut}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
