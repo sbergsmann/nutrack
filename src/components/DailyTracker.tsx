@@ -35,11 +35,11 @@ import { cn } from "@/lib/utils";
 import { FeedbackDialog } from "./FeedbackDialog";
 
 const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
-  { value: "Happy", label: "Happy", icon: <Smile /> },
-  { value: "Neutral", label: "Neutral", icon: <Meh /> },
-  { value: "Sad", label: "Sad", icon: <Frown /> },
-  { value: "Energetic", label: "Energetic", icon: <Zap /> },
-  { value: "Tired", label: "Tired", icon: <Battery /> },
+  { value: "Happy", label: "Happy", icon: <Smile className="h-4 w-4" /> },
+  { value: "Neutral", label: "Neutral", icon: <Meh className="h-4 w-4" /> },
+  { value: "Sad", label: "Sad", icon: <Frown className="h-4 w-4" /> },
+  { value: "Energetic", label: "Energetic", icon: <Zap className="h-4 w-4" /> },
+  { value: "Tired", label: "Tired", icon: <Battery className="h-4 w-4" /> },
 ];
 
 export function DailyTracker({
