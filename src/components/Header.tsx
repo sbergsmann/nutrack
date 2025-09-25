@@ -1,18 +1,22 @@
 import { Leaf } from "lucide-react";
 import Link from "next/link";
 import { UserProfile } from "./UserProfile";
+import { Navigation } from "./Navigation";
 
 export default function Header() {
   return (
     <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-10">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-8">
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-xl font-semibold"
-        >
-          <Leaf className="h-6 w-6 text-primary" />
-          <span className="font-headline">Nutrack9</span>
-        </Link>
+        <div className="flex items-center gap-6">
+            <Link
+            href="/"
+            className="flex items-center gap-2 text-xl font-semibold"
+            >
+            <Leaf className="h-6 w-6 text-primary" />
+            <span className="font-headline">Nutrack9</span>
+            </Link>
+            <Navigation />
+        </div>
         <UserProfile />
       </div>
     </header>
