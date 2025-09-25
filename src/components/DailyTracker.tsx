@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useRef, useTransition, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { removeFood, setMood } from "@/lib/data";
@@ -186,7 +186,6 @@ export function DailyTracker({
                   action={formAction}
                   onSubmit={(e) => {
                     handleOptimisticAddFood(new FormData(e.currentTarget));
-                    formAction(new FormData(e.currentTarget));
                   }}
                   className="space-y-2"
                 >
@@ -238,6 +237,7 @@ export function DailyTracker({
                 ) : (
                   <div className="text-center text-muted-foreground text-sm p-4 bg-background/50 border rounded-md">
                     <p>No food logged for this day yet.</p>
+
                   </div>
                 )}
               </div>
@@ -248,4 +248,3 @@ export function DailyTracker({
     </div>
   );
 }
-
