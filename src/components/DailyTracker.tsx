@@ -2,10 +2,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useActionState } from "react";
 import { useRouter } from "next/navigation";
-import { removeFood, setMood } from "@/lib/data";
-import { logFood } from "@/lib/actions";
+import { addFood, removeFood, setMood } from "@/lib/data";
 import type { DailyEntry, FoodItem, Mood } from "@/lib/types";
 import { format, parseISO } from "date-fns";
 import { useUser } from "@/firebase/auth/use-user";
@@ -49,8 +47,9 @@ export function DailyTracker({
 
   const [currentMood, setCurrentMood] = useState<Mood | null>(entry.mood);
   const [loggedFoods, setLoggedFoods] = useState<FoodItem[]>(entry.foods);
+  const [foodInput, setFoodInput] = useState("");
+  const [isPending, setIsPending] = useState(false);
 
-  const [state, formAction, isPending] = useActionState(logFood, { message: ''});
   const formRef = useRef<HTMLFormElement>(null);
 
 
@@ -92,19 +91,46 @@ export function DailyTracker({
     });
   }
 
-  const handleOptimisticAddFood = (formData: FormData) => {
-    const foodName = formData.get('food') as string;
-    if (!foodName.trim()) return;
+  const handleAddFood = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!user || !firestore) return;
+    
+    const foodName = foodInput.trim();
+    if (!foodName) return;
 
+    setIsPending(true);
+
+    // Optimistic update
     const newFood: FoodItem = {
-      id: `temp-${Date.now()}`, // Temporary ID for rendering
+      id: `temp-${Date.now()}`,
       name: foodName,
       lastAddedAt: new Date(),
     };
-
     setLoggedFoods(currentFoods => [...currentFoods, newFood]);
-    formRef.current?.reset();
+    setFoodInput("");
+
+    // Backend request
+    try {
+      await addFood(firestore, user.uid, entry.date, foodName);
+      toast({
+        title: "Food logged!",
+        description: `${foodName} has been added to your log.`,
+      });
+      router.refresh();
+    } catch (error) {
+      console.error("Failed to log food:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to log food",
+        description: "Please try again.",
+      });
+      // Revert optimistic update
+      setLoggedFoods(currentFoods => currentFoods.filter(f => f.id !== newFood.id));
+    } finally {
+      setIsPending(false);
+    }
   };
+  
 
   const displayDate = format(parseISO(entry.date), "MMMM d, yyyy");
 
@@ -183,10 +209,7 @@ export function DailyTracker({
                 </div>
                  <form
                   ref={formRef}
-                  action={formAction}
-                  onSubmit={(e) => {
-                    handleOptimisticAddFood(new FormData(e.currentTarget));
-                  }}
+                  onSubmit={handleAddFood}
                   className="space-y-2"
                 >
                   <label htmlFor="food-input" className="font-medium text-sm">
@@ -200,8 +223,9 @@ export function DailyTracker({
                       className="flex-grow"
                       required
                       disabled={isPending}
+                      value={foodInput}
+                      onChange={(e) => setFoodInput(e.target.value)}
                     />
-                    <input type="hidden" name="date" value={entry.date} />
                     <Button type="submit" size="icon" aria-label="Add food" disabled={isPending}>
                       <Plus />
                     </Button>
