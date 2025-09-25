@@ -8,14 +8,15 @@ import { DailyTracker } from "@/components/DailyTracker";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/firebase/auth/use-user";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import type { DailyEntry } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { notFound } from "next/navigation";
 
 
-export default function DayPage({ params: { date: dateString } }: { params: { date: string } }) {
+export default function DayPage({ params }: { params: { date: string } }) {
   const { data: user, loading: userLoading } = useUser();
+  const dateString = params.date;
   
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
     notFound();
