@@ -31,6 +31,9 @@ const getEntriesCollection = (
 const getFoodsCollection = (firestore: Firestore | AdminFirestore) =>
   collection(firestore as Firestore, "foods");
 
+const getFeedbackCollection = (firestore: Firestore | AdminFirestore) =>
+  collection(firestore as Firestore, "feedback");
+
 export async function searchFoods(
   firestore: Firestore,
   searchTerm: string
@@ -314,4 +317,27 @@ export async function setMood(
   });
 }
 
-    
+export async function addFeedback(
+  firestore: Firestore,
+  userId: string,
+  rating: number,
+  text: string
+): Promise<void> {
+  const feedbackCollection = getFeedbackCollection(firestore);
+  const feedbackData = {
+    userId,
+    rating,
+    text,
+    createdAt: serverTimestamp(),
+  };
+
+  const feedbackRef = doc(feedbackCollection);
+  addDoc(feedbackCollection, feedbackData).catch(async (serverError) => {
+    const permissionError = new FirestorePermissionError({
+      path: feedbackRef.path,
+      operation: 'create',
+      requestResourceData: feedbackData,
+    } satisfies SecurityRuleContext);
+    errorEmitter.emit('permission-error', permissionError);
+  });
+}

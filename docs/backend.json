@@ -78,6 +78,31 @@
         }
       },
       "required": ["name", "lastAddedAt"]
+    },
+    "feedback": {
+      "title": "Feedback",
+      "description": "User feedback and rating for the application.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user providing feedback."
+        },
+        "rating": {
+          "type": "number",
+          "description": "A star rating from 1 to 5."
+        },
+        "text": {
+          "type": "string",
+          "description": "The user's written feedback."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the feedback was submitted."
+        }
+      },
+      "required": ["userId", "rating", "createdAt"]
     }
   },
   "auth": {
@@ -95,8 +120,10 @@
     "/foods/{foodId}": {
       "schema": { "$ref": "#/entities/food" },
       "description": "Global collection of all unique food items."
+    },
+    "/feedback/{feedbackId}": {
+      "schema": { "$ref": "#/entities/feedback" },
+      "description": "Stores user feedback submissions."
     }
   }
 }
-
-    

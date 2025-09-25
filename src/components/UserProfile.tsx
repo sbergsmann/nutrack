@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -10,9 +11,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LogIn, LogOut, User as UserIcon } from "lucide-react";
+import { LogIn, LogOut, MessageSquare, User as UserIcon } from "lucide-react";
 import { useUser } from "@/firebase/auth/use-user";
 import { signInWithGoogle, signOut } from "@/firebase/auth/actions";
+import { FeedbackDialog } from "./FeedbackDialog";
 
 export function UserProfile() {
   const { data: user, loading } = useUser();
@@ -57,6 +59,12 @@ export function UserProfile() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <FeedbackDialog>
+          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+            <MessageSquare className="mr-2 h-4 w-4" />
+            <span>Send Feedback</span>
+          </DropdownMenuItem>
+        </FeedbackDialog>
         <DropdownMenuItem onClick={signOut}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
