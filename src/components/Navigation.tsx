@@ -9,6 +9,7 @@ import { useUser } from "@/firebase/auth/use-user";
 const navLinks = [
     { href: "/", label: "Dashboard" },
     { href: "/tracking", label: "Tracking" },
+    { href: "/settings", label: "Settings" },
 ];
 
 export function Navigation() {
