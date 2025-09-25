@@ -1,16 +1,31 @@
-import "server-only";
-import { getDb } from "@/lib/firebase-server";
+
+"use client";
+
+import {
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  getDocs,
+  arrayUnion,
+  updateDoc,
+  arrayRemove,
+  type Firestore,
+} from "firebase/firestore";
 import type { DailyEntry, Mood } from "@/lib/types";
-import { FieldValue } from "firebase-admin/firestore";
+import { firestore } from "@/firebase/client";
 
-const getEntriesCollection = (db: FirebaseFirestore.Firestore) =>
-  db.collection("entries");
+const getEntriesCollection = (userId: string) =>
+  collection(firestore, "users", userId, "entries");
 
-export async function getEntry(date: string): Promise<DailyEntry> {
-  const db = await getDb();
-  const entryDoc = await getEntriesCollection(db).doc(date).get();
+export async function getEntry(
+  userId: string,
+  date: string
+): Promise<DailyEntry> {
+  const entryDocRef = doc(getEntriesCollection(userId), date);
+  const entryDoc = await getDoc(entryDocRef);
 
-  if (!entryDoc.exists) {
+  if (!entryDoc.exists()) {
     return {
       date,
       foods: [],
@@ -21,53 +36,60 @@ export async function getEntry(date: string): Promise<DailyEntry> {
   return entryDoc.data() as DailyEntry;
 }
 
-export async function getAllEntries(): Promise<DailyEntry[]> {
-  const db = await getDb();
-  const snapshot = await getEntriesCollection(db).get();
+export async function getAllEntries(
+  userId: string
+): Promise<DailyEntry[]> {
+  const snapshot = await getDocs(getEntriesCollection(userId));
   return snapshot.docs.map((doc) => doc.data() as DailyEntry);
 }
 
 export async function addFood(
+  userId: string,
   date: string,
   food: string
-): Promise<DailyEntry> {
-  const db = await getDb();
-  const entryRef = getEntriesCollection(db).doc(date);
-  await entryRef.set(
-    {
-      date: date,
-      foods: FieldValue.arrayUnion(food),
-    },
-    { merge: true }
-  );
-
-  const doc = await entryRef.get();
-  return doc.data() as DailyEntry;
+): Promise<void> {
+  const entryRef = doc(getEntriesCollection(userId), date);
+  
+  try {
+    await updateDoc(entryRef, {
+      foods: arrayUnion(food),
+    });
+  } catch (error: any) {
+    if (error.code === 'not-found') {
+      await setDoc(entryRef, {
+        date: date,
+        foods: [food],
+        mood: null
+      }, { merge: true });
+    } else {
+      throw error;
+    }
+  }
 }
 
 export async function removeFood(
+  userId: string,
   date: string,
   food: string
-): Promise<DailyEntry> {
-  const db = await getDb();
-  const entryRef = getEntriesCollection(db).doc(date);
-  await entryRef.update({
-    foods: FieldValue.arrayRemove(food),
+): Promise<void> {
+  const entryRef = doc(getEntriesCollection(userId), date);
+  await updateDoc(entryRef, {
+    foods: arrayRemove(food),
   });
-  const doc = await entryRef.get();
-  return doc.data() as DailyEntry;
 }
 
-export async function setMood(date: string, mood: Mood): Promise<DailyEntry> {
-  const db = await getDb();
-  const entryRef = getEntriesCollection(db).doc(date);
-  await entryRef.set(
+export async function setMood(
+  userId: string,
+  date: string,
+  mood: Mood
+): Promise<void> {
+  const entryRef = doc(getEntriesCollection(userId), date);
+  await setDoc(
+    entryRef,
     {
       date,
       mood,
     },
     { merge: true }
   );
-  const doc = await entryRef.get();
-  return doc.data() as DailyEntry;
 }
