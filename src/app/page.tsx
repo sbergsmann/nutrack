@@ -6,7 +6,7 @@ import { getAllEntries, getEntry } from "@/lib/data";
 import { CalendarView } from "@/components/CalendarView";
 import { DailyTracker } from "@/components/DailyTracker";
 import { useUser } from "@/firebase/auth/use-user";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import type { DailyEntry } from "@/lib/types";
 import { useFirestore } from "@/firebase/provider";
 
@@ -46,7 +46,7 @@ export default function HomePage() {
   }, [user, todayDateString, firestore, userLoading]);
 
   const trackedDates = allEntries
-    .filter((entry) => entry.foods.length > 0 || entry.mood)
+    .filter((entry) => (entry.foods && entry.foods.length > 0) || entry.mood)
     .map((entry) => entry.date);
 
   const isLoading = userLoading || loading;

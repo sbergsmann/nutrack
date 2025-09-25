@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { format, isSameDay, isValid, parseISO } from "date-fns";
 import type { DailyEntry } from "@/lib/types";
 
@@ -60,7 +60,7 @@ function DayPageClient({ dateString }: { dateString: string }) {
   }, [user, dateString, firestore, userLoading]);
 
   const trackedDates = allEntries
-    .filter((entry) => entry.foods.length > 0 || entry.mood)
+    .filter((entry) => (entry.foods && entry.foods.length > 0) || entry.mood)
     .map((entry) => entry.date);
 
   const isLoading = userLoading || loading;
@@ -85,9 +85,8 @@ function DayPageClient({ dateString }: { dateString: string }) {
 }
 
 // This component is necessary because `use` is not allowed in a client component.
-function DayPageLoader({ params }: { params: Promise<{ date: string }> }) {
-  const { date } = React.use(params);
-  return <DayPageClient dateString={date} />;
+function DayPageLoader({ params }: { params: { date: string } }) {
+  return <DayPageClient dateString={params.date} />;
 }
 
-export default DayPageClient;
+export default DayPageLoader;
