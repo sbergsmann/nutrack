@@ -186,7 +186,7 @@ export async function getOrCreateFood(
     const foodRef = doc(foodsRef as Firestore, foodDoc.id);
     updateDoc(foodRef, { lastAddedAt: serverTimestamp() });
     
-    const needsEnrichment = !foodData.portion || foodData.calories === undefined || foodData.carbs === undefined || foodData.proteins === undefined || foodData.fats === undefined;
+    const needsEnrichment = foodData.portion == null || foodData.calories == null || foodData.carbs == null || foodData.proteins == null || foodData.fats == null;
     if (needsEnrichment) {
       triggerFoodEnrichment(firestore, foodDoc.id, trimmedFoodName);
     }
@@ -408,22 +408,19 @@ export async function updateUserPlan(
 export async function updateUserProfile(
     firestore: Firestore,
     userId: string,
-    data: Partial<Pick<UserProfile, 'height' | 'weight'>>
+    data: Partial<Pick<UserProfile, 'height' | 'weight' | 'age' | 'gender' | 'activityLevel'>>
 ): Promise<void> {
     const userRef = doc(firestore, 'users', userId);
 
     const updateData: { [key: string]: any } = {};
-    if (data.height === null) {
-      updateData.height = deleteField();
-    } else if (data.height !== undefined) {
-      updateData.height = data.height;
-    }
-
-    if (data.weight === null) {
-      updateData.weight = deleteField();
-    } else if (data.weight !== undefined) {
-      updateData.weight = data.weight;
-    }
+    
+    (Object.keys(data) as Array<keyof typeof data>).forEach(key => {
+        if (data[key] === null) {
+            updateData[key] = deleteField();
+        } else if (data[key] !== undefined) {
+            updateData[key] = data[key];
+        }
+    });
     
     updateDoc(userRef, updateData).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({

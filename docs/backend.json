@@ -37,6 +37,20 @@
         "weight": {
           "type": "number",
           "description": "The user's body weight in kilograms."
+        },
+        "age": {
+          "type": "number",
+          "description": "The user's age in years."
+        },
+        "gender": {
+          "type": "string",
+          "description": "The user's gender.",
+          "enum": ["Male", "Female", "Other"]
+        },
+        "activityLevel": {
+          "type": "string",
+          "description": "The user's physical activity level.",
+          "enum": ["Sedentary", "Lightly active", "Moderately active", "Very active", "Extra active"]
         }
       },
       "required": ["uid", "email", "plan"]

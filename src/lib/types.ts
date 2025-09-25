@@ -34,4 +34,7 @@ export type UserProfile = {
   plan: 'Basic' | 'Monthly' | 'Yearly';
   height?: number | null; // in cm
   weight?: number | null; // in kg
+  age?: number | null;
+  gender?: 'Male' | 'Female' | 'Other' | null;
+  activityLevel?: 'Sedentary' | 'Lightly active' | 'Moderately active' | 'Very active' | 'Extra active' | null;
 };
