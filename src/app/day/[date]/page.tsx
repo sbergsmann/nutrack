@@ -16,12 +16,13 @@ import { notFound } from "next/navigation";
 
 export default function DayPage({ params }: { params: { date: string } }) {
   const { data: user, loading: userLoading } = useUser();
+  const { date: dateString } = params;
   
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(params.date)) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
     notFound();
   }
 
-  const selectedDate = parseISO(params.date);
+  const selectedDate = parseISO(dateString);
   if (!isValid(selectedDate)) {
     notFound();
   }
@@ -39,7 +40,7 @@ export default function DayPage({ params }: { params: { date: string } }) {
     const fetchData = async () => {
       setLoading(true);
       const [dayEntryData, allEntriesData] = await Promise.all([
-        getEntry(user.uid, params.date),
+        getEntry(user.uid, dateString),
         getAllEntries(user.uid),
       ]);
       setDayEntry(dayEntryData);
@@ -48,7 +49,7 @@ export default function DayPage({ params }: { params: { date: string } }) {
     };
 
     fetchData();
-  }, [user, params.date]);
+  }, [user, dateString]);
 
   const trackedDates = allEntries
     .filter((entry) => entry.foods.length > 0 || entry.mood)
@@ -69,7 +70,7 @@ export default function DayPage({ params }: { params: { date: string } }) {
           <Skeleton className="h-48 w-full" />
         ) : dayEntry ? (
           <DailyTracker entry={dayEntry} isToday={isToday} />
-        ) : <DailyTracker entry={{date: params.date, foods: [], mood: null}} isToday={isToday}/>}
+        ) : <DailyTracker entry={{date: dateString, foods: [], mood: null}} isToday={isToday}/>}
       </div>
     </div>
   );
