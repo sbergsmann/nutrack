@@ -15,6 +15,7 @@ import {
   orderBy,
   runTransaction,
   updateDoc,
+  deleteField,
 } from "firebase/firestore";
 import type { Firestore as AdminFirestore } from "firebase-admin/firestore";
 import type { DailyEntry, FoodItem, LoggedFood, Mood, UserProfile } from "@/lib/types";
@@ -410,7 +411,21 @@ export async function updateUserProfile(
     data: Partial<Pick<UserProfile, 'height' | 'weight'>>
 ): Promise<void> {
     const userRef = doc(firestore, 'users', userId);
-    updateDoc(userRef, data).catch(async (serverError) => {
+
+    const updateData: { [key: string]: any } = {};
+    if (data.height === null) {
+      updateData.height = deleteField();
+    } else if (data.height !== undefined) {
+      updateData.height = data.height;
+    }
+
+    if (data.weight === null) {
+      updateData.weight = deleteField();
+    } else if (data.weight !== undefined) {
+      updateData.weight = data.weight;
+    }
+    
+    updateDoc(userRef, updateData).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
             path: userRef.path,
             operation: 'update',

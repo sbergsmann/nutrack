@@ -33,12 +33,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const profileFormSchema = z.object({
   height: z.preprocess(
-    (a) => (a === "" ? undefined : parseFloat(String(a))),
-    z.number({ invalid_type_error: "Must be a number" }).positive().optional()
+    (a) => (a === "" || a === null ? undefined : parseFloat(String(a))),
+    z.number({ invalid_type_error: "Must be a number" }).positive().optional().nullable()
   ),
   weight: z.preprocess(
-    (a) => (a === "" ? undefined : parseFloat(String(a))),
-    z.number({ invalid_type_error: "Must be a number" }).positive().optional()
+    (a) => (a === "" || a === null ? undefined : parseFloat(String(a))),
+    z.number({ invalid_type_error: "Must be a number" }).positive().optional().nullable()
   ),
 });
 
@@ -61,8 +61,8 @@ export default function SettingsPage() {
   useEffect(() => {
     if (user) {
       form.reset({
-        height: user.height || undefined,
-        weight: user.weight || undefined,
+        height: user.height || null,
+        weight: user.weight || null,
       });
     }
   }, [user, form]);
@@ -71,7 +71,10 @@ export default function SettingsPage() {
     if (!user || !firestore) return;
     setIsSaving(true);
     try {
-      await updateUserProfile(firestore, user.uid, data);
+      await updateUserProfile(firestore, user.uid, {
+        height: data.height === undefined ? null : data.height,
+        weight: data.weight === undefined ? null : data.weight,
+      });
       toast({
         title: "Profile updated",
         description: "Your measurements have been saved successfully.",
@@ -87,7 +90,29 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleClear() {
+    if (!user || !firestore) return;
+    setIsSaving(true);
+    try {
+      await updateUserProfile(firestore, user.uid, { height: null, weight: null });
+      form.reset({ height: null, weight: null });
+      toast({
+        title: "Profile cleared",
+        description: "Your measurements have been removed.",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "Could not clear your profile.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   const appVersion = "0.1.0"; // From package.json
+  const hasMeasurements = !!user?.height || !!user?.weight;
 
   return (
     <div className="container mx-auto max-w-5xl p-4 md:p-8 animate-fade-in">
@@ -173,9 +198,19 @@ export default function SettingsPage() {
                       )}
                     />
                   </div>
-                  <Button type="submit" disabled={isSaving || !form.formState.isDirty}>
-                    {isSaving ? "Saving..." : "Save Changes"}
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button type="submit" disabled={isSaving || !form.formState.isDirty}>
+                      {isSaving ? "Saving..." : "Save Changes"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleClear}
+                      disabled={isSaving || !hasMeasurements && !form.formState.isDirty}
+                    >
+                      {isSaving ? "Clearing..." : "Clear"}
+                    </Button>
+                  </div>
                 </form>
               </Form>
             )}
