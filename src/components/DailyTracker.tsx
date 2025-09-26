@@ -437,33 +437,33 @@ export function DailyTracker({
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       <Button variant={sortKey === 'calories' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-chart-1/10 border-chart-1/20 hover:bg-chart-1/20" onClick={() => handleSort('calories')}>
                         {renderSortIcon('calories')}
-                        <Sparkles className="h-5 w-5 text-chart-1" />
-                        <div>
-                          <p className="text-xs text-muted-foreground">{dictionary.nutrients.calories}</p>
+                        <Sparkles className="h-5 w-5 text-chart-1 flex-shrink-0" />
+                        <div className="overflow-hidden">
+                          <p className="text-xs text-muted-foreground truncate">{dictionary.nutrients.calories}</p>
                           <p className="font-bold">{nutrientTotals.calories.toFixed(0)}</p>
                         </div>
                       </Button>
                       <Button variant={sortKey === 'carbs' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-chart-2/10 border-chart-2/20 hover:bg-chart-2/20" onClick={() => handleSort('carbs')}>
                         {renderSortIcon('carbs')}
-                        <Flame className="h-5 w-5 text-chart-2" />
-                        <div>
-                          <p className="text-xs text-muted-foreground">{dictionary.nutrients.carbs}</p>
+                        <Flame className="h-5 w-5 text-chart-2 flex-shrink-0" />
+                        <div className="overflow-hidden">
+                          <p className="text-xs text-muted-foreground truncate">{dictionary.nutrients.carbs}</p>
                           <p className="font-bold">{nutrientTotals.carbs.toFixed(0)}g</p>
                         </div>
                       </Button>
                       <Button variant={sortKey === 'proteins' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-chart-3/10 border-chart-3/20 hover:bg-chart-3/20" onClick={() => handleSort('proteins')}>
                         {renderSortIcon('proteins')}
-                        <Beef className="h-5 w-5 text-chart-3" />
-                        <div>
-                          <p className="text-xs text-muted-foreground">{dictionary.nutrients.protein}</p>
+                        <Beef className="h-5 w-5 text-chart-3 flex-shrink-0" />
+                        <div className="overflow-hidden">
+                          <p className="text-xs text-muted-foreground truncate">{dictionary.nutrients.protein}</p>
                           <p className="font-bold">{nutrientTotals.proteins.toFixed(0)}g</p>
                         </div>
                       </Button>
                       <Button variant={sortKey === 'fats' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-chart-4/10 border-chart-4/20 hover:bg-chart-4/20" onClick={() => handleSort('fats')}>
                          {renderSortIcon('fats')}
-                        <Droplet className="h-5 w-5 text-chart-4" />
-                        <div>
-                          <p className="text-xs text-muted-foreground">{dictionary.nutrients.fat}</p>
+                        <Droplet className="h-5 w-5 text-chart-4 flex-shrink-0" />
+                        <div className="overflow-hidden">
+                          <p className="text-xs text-muted-foreground truncate">{dictionary.nutrients.fat}</p>
                           <p className="font-bold">{nutrientTotals.fats.toFixed(0)}g</p>
                         </div>
                       </Button>
@@ -540,33 +540,35 @@ export function DailyTracker({
                                   </Button>
                               </CardContent>
                           </Card>
-                          <PopoverContent className="text-sm max-w-xs w-auto">
+                           <PopoverContent className="text-sm max-w-xs w-auto">
                             <div className="space-y-3">
                                 <div>
                                     <h4 className="font-bold">{food.name}</h4>
                                     {food.description && <p className="text-muted-foreground text-xs">{food.description}</p>}
                                 </div>
-                                <div className="space-y-2 text-xs">
-                                    <p className="font-medium">{dictionary.nutrients.perPortion} ({food.portion}g)</p>
-                                    <div className="flex items-center gap-4 text-muted-foreground">
-                                        <div className="flex items-center gap-1" title={dictionary.nutrients.calories}>
-                                            <Sparkles className="h-3 w-3 text-chart-1" />
-                                            <span>{food.calories?.toFixed(0) ?? 'N/A'}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1" title={dictionary.nutrients.carbs}>
-                                            <Flame className="h-3 w-3 text-chart-2" />
-                                            <span>{food.carbs?.toFixed(0) ?? 'N/A'}g</span>
-                                        </div>
-                                        <div className="flex items-center gap-1" title={dictionary.nutrients.protein}>
-                                            <Beef className="h-3 w-3 text-chart-3" />
-                                            <span>{food.proteins?.toFixed(0) ?? 'N/A'}g</span>
-                                        </div>
-                                        <div className="flex items-center gap-1" title={dictionary.nutrients.fat}>
-                                            <Droplet className="h-3 w-3 text-chart-4" />
-                                            <span>{food.fats?.toFixed(0) ?? 'N/A'}g</span>
-                                        </div>
-                                    </div>
-                                </div>
+                                {food.portion && (
+                                  <div className="space-y-2 text-xs">
+                                      <p className="font-medium">{dictionary.nutrients.perPortion} ({food.portion}g)</p>
+                                      <div className="flex items-center gap-4 text-muted-foreground">
+                                          <div className="flex items-center gap-1" title={dictionary.nutrients.calories}>
+                                              <Sparkles className="h-3 w-3 text-chart-1" />
+                                              <span>{food.calories?.toFixed(0) ?? 'N/A'}</span>
+                                          </div>
+                                          <div className="flex items-center gap-1" title={dictionary.nutrients.carbs}>
+                                              <Flame className="h-3 w-3 text-chart-2" />
+                                              <span>{food.carbs?.toFixed(0) ?? 'N/A'}g</span>
+                                          </div>
+                                          <div className="flex items-center gap-1" title={dictionary.nutrients.protein}>
+                                              <Beef className="h-3 w-3 text-chart-3" />
+                                              <span>{food.proteins?.toFixed(0) ?? 'N/A'}g</span>
+                                          </div>
+                                          <div className="flex items-center gap-1" title={dictionary.nutrients.fat}>
+                                              <Droplet className="h-3 w-3 text-chart-4" />
+                                              <span>{food.fats?.toFixed(0) ?? 'N/A'}g</span>
+                                          </div>
+                                      </div>
+                                  </div>
+                                )}
                                 {quantity > 1 && (
                                     <div className="space-y-2 text-xs border-t pt-2">
                                         <p className="font-medium">{dictionary.totalPortion} ({quantity}x)</p>
@@ -609,7 +611,3 @@ export function DailyTracker({
     </div>
   );
 }
-
-    
-
-    
