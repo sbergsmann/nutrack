@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RecommendedIntake } from "@/components/RecommendedIntake";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowRight, Flame, Wind } from "lucide-react";
+import { ArrowRight, Flame } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import type { DailyEntry } from "@/lib/types";
 import { useFirestore } from "@/firebase/provider";
@@ -16,6 +16,7 @@ import { getAllEntries } from "@/lib/data";
 import { IntakeChart } from "@/components/IntakeChart";
 import { cn } from "@/lib/utils";
 import { addDays, differenceInCalendarDays, endOfDay, format, startOfDay } from "date-fns";
+import { AddToHomeScreenPrompt } from "@/components/AddToHomeScreenPrompt";
 
 export default function HomePage() {
   const { data: user, loading: userLoading } = useUser();
@@ -148,6 +149,8 @@ export default function HomePage() {
         </CardContent>
       </Card>
       
+      <AddToHomeScreenPrompt />
+
       {profileComplete ? (
         <>
           <RecommendedIntake userProfile={user} />
