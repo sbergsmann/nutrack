@@ -37,4 +37,5 @@ export type UserProfile = {
   age?: number | null;
   gender?: 'Male' | 'Female' | 'Other' | null;
   activityLevel?: 'Sedentary' | 'Lightly active' | 'Moderately active' | 'Very active' | 'Extra active' | null;
+  createdAt: Date;
 };

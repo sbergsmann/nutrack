@@ -51,9 +51,14 @@
           "type": "string",
           "description": "The user's physical activity level.",
           "enum": ["Sedentary", "Lightly active", "Moderately active", "Very active", "Extra active"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the user was created."
         }
       },
-      "required": ["uid", "email", "plan"]
+      "required": ["uid", "email", "plan", "createdAt"]
     },
     "dailyLog": {
       "title": "Daily Log",
