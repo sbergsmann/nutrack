@@ -52,93 +52,37 @@ async function triggerFoodEnrichment(firestore: Firestore, foodId: string, foodN
     }
 }
 
-function generateNgrams(name: string): string[] {
-    const ngrams = new Set<string>();
-    if (!name) return [];
-    
-    // Sanitize and split into words by space or hyphen
-    const words = name.toLowerCase().split(/[\s-]+/);
-
-    for (const word of words) {
-        // Remove any non-alphanumeric characters from the word
-        const cleanWord = word.replace(/[^a-z0-9]/g, '');
-        if(cleanWord.length === 0) continue;
-        // Generate prefixes for the clean word
-        for (let i = 1; i <= cleanWord.length; i++) {
-            ngrams.add(cleanWord.substring(0, i));
-        }
-    }
-    
-    return Array.from(ngrams);
-}
-
 export async function searchFoods(
   firestore: Firestore,
   searchTerm: string
 ): Promise<FoodItem[]> {
   const foodsRef = getFoodsCollection(firestore);
-  const lowercasedSearchTerm = searchTerm.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const searchTermLower = searchTerm.toLowerCase();
 
-  if (lowercasedSearchTerm.length < 1) {
+  if (searchTermLower.length < 1) {
     return [];
   }
 
-  // Query for new documents with n-grams for substring matching
-  const ngramQuery = query(
-      foodsRef,
-      where("name_ngrams", "array-contains", lowercasedSearchTerm),
-      limit(5)
+  const q = query(
+    foodsRef,
+    orderBy("name"),
+    limit(20) // Fetch a slightly larger batch to filter client-side
   );
 
-  // Fallback query for old documents without n-grams (prefix search)
-  const prefixQuery = query(
-      foodsRef,
-      where("name_lowercase", ">=", lowercasedSearchTerm),
-      where("name_lowercase", "<=", lowercasedSearchTerm + "\uf8ff"),
-      orderBy("name_lowercase"),
-      limit(5)
-  );
+  const querySnapshot = await getDocs(q);
 
-  const [ngramSnapshot, prefixSnapshot] = await Promise.all([
-      getDocs(ngramQuery),
-      getDocs(prefixQuery),
-  ]);
-
-  const results = new Map<string, FoodItem>();
-
-  const processDoc = (doc: any) => {
-    const data = doc.data();
-    return {
+  const results = querySnapshot.docs
+    .map((doc) => {
+      const data = doc.data();
+      return {
         id: doc.id,
+        name: data.name,
         ...data,
-        lastAddedAt: (data.lastAddedAt as Timestamp)?.toDate() ?? new Date(),
-    } as FoodItem;
-  };
-
-  ngramSnapshot.docs.forEach(doc => {
-      results.set(doc.id, processDoc(doc));
-  });
-
-  prefixSnapshot.docs.forEach(doc => {
-      if (!results.has(doc.id)) {
-          results.set(doc.id, processDoc(doc));
-      }
-  });
-
-
-  // Since array-contains doesn't guarantee order, we sort client-side
-  // to prioritize results that start with the search term.
-  return Array.from(results.values())
-    .sort((a, b) => {
-        const aName = a.name.toLowerCase();
-        const bName = b.name.toLowerCase();
-        const aStarts = aName.startsWith(searchTerm.toLowerCase());
-        const bStarts = bName.startsWith(searchTerm.toLowerCase());
-        if (aStarts && !bStarts) return -1;
-        if (!aStarts && bStarts) return 1;
-        return aName.localeCompare(bName); // Alphabetical for others
+      } as FoodItem;
     })
-    .slice(0, 5); // Take top 5 after sorting
+    .filter((food) => food.name.toLowerCase().startsWith(searchTermLower));
+
+  return results.slice(0, 5);
 }
 
 export async function getFoodItem(
@@ -232,12 +176,16 @@ export async function getOrCreateFood(
   foodName: string
 ): Promise<FoodItem> {
   const trimmedFoodName = foodName.trim();
-  const lowercasedFoodName = trimmedFoodName.toLowerCase();
   const foodsRef = getFoodsCollection(firestore);
 
+  // Firestore queries are case-sensitive, so we can't reliably query for existing food
+  // without a lowercase field. Given the complexity this caused, we'll accept
+  // potential duplicates with different casing, which is a simpler tradeoff.
+  // A more robust solution would re-introduce the lowercase field, but for now, we prioritize simplicity.
+  
   const q = query(
     foodsRef,
-    where("name_lowercase", "==", lowercasedFoodName),
+    where("name", "==", trimmedFoodName),
     limit(1)
   );
   const querySnapshot = await getDocs(q);
@@ -246,28 +194,10 @@ export async function getOrCreateFood(
     const foodDoc = querySnapshot.docs[0];
     const foodData = foodDoc.data();
     const foodRef = doc(foodsRef as Firestore, foodDoc.id);
-
-    const updatePayload: { [key: string]: any } = { lastAddedAt: serverTimestamp() };
     
-    let needsUpdate = false;
-    // Backfill name_lowercase if it's missing
-    if (!foodData.name_lowercase) {
-      updatePayload.name_lowercase = foodData.name.toLowerCase();
-      needsUpdate = true;
-    }
-    // Backfill n-grams if they are missing
-    if (!foodData.name_ngrams) {
-        updatePayload.name_ngrams = generateNgrams(foodData.name);
-        needsUpdate = true;
-    }
-
-    if (needsUpdate) {
-        await updateDoc(foodRef, updatePayload);
-    } else {
-        await updateDoc(foodRef, { lastAddedAt: serverTimestamp() });
-    }
+    await updateDoc(foodRef, { lastAddedAt: serverTimestamp() });
     
-    const needsEnrichment = foodData.portion == null || foodData.calories == null || foodData.carbs == null || foodData.proteins == null || foodData.fats == null;
+    const needsEnrichment = foodData.portion == null || foodData.calories == null;
     if (needsEnrichment) {
       triggerFoodEnrichment(firestore, foodDoc.id, trimmedFoodName);
     }
@@ -275,15 +205,13 @@ export async function getOrCreateFood(
     return {
       id: foodDoc.id,
       name: foodData.name,
-      lastAddedAt: (foodData.lastAddedAt as Timestamp)?.toDate() ?? new Date(),
+      lastAddedAt: new Date(),
       ...foodData
     } as FoodItem;
 
   } else {
     const newFoodData = {
       name: trimmedFoodName,
-      name_lowercase: lowercasedFoodName,
-      name_ngrams: generateNgrams(trimmedFoodName),
       lastAddedAt: serverTimestamp(),
     };
     const newFoodDocRef = await addDoc(foodsRef, newFoodData);
@@ -532,3 +460,4 @@ export async function getUser(
     
 
     
+
