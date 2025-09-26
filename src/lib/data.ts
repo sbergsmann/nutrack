@@ -58,7 +58,9 @@ export async function searchFoods(
 ): Promise<FoodItem[]> {
   const foodsRef = getFoodsCollection(firestore);
   const lowercasedSearchTerm = searchTerm.toLowerCase();
-  const q = query(
+
+  // Query for new documents with name_lowercase
+  const queryNew = query(
     foodsRef,
     where("name_lowercase", ">=", lowercasedSearchTerm),
     where("name_lowercase", "<=", lowercasedSearchTerm + "\uf8ff"),
@@ -66,19 +68,42 @@ export async function searchFoods(
     limit(5)
   );
 
-  const snapshot = await getDocs(q);
-  if (snapshot.empty) {
-    return [];
-  }
-  return snapshot.docs.map((doc) => {
-    const data = doc.data();
-    return {
-      id: doc.id,
-      name: data.name,
-      lastAddedAt: (data.lastAddedAt as Timestamp)?.toDate() ?? new Date(),
-      ...data
-    };
-  });
+  // Fallback query for old documents without name_lowercase
+  const queryOld = query(
+    foodsRef,
+    where("name", ">=", searchTerm),
+    where("name", "<=", searchTerm + "\uf8ff"),
+    orderBy("name"),
+    limit(5)
+  );
+  
+  const [snapshotNew, snapshotOld] = await Promise.all([
+    getDocs(queryNew),
+    getDocs(queryOld),
+  ]);
+
+  const resultsMap = new Map<string, FoodItem>();
+
+  const processSnapshot = (snapshot: any) => {
+    snapshot.docs.forEach((doc: any) => {
+      if (!resultsMap.has(doc.id)) {
+        const data = doc.data();
+        // Filter in code for old documents that might not have name_lowercase
+        if (data.name_lowercase || data.name.toLowerCase().startsWith(lowercasedSearchTerm)) {
+          resultsMap.set(doc.id, {
+            id: doc.id,
+            ...data,
+            lastAddedAt: (data.lastAddedAt as Timestamp)?.toDate() ?? new Date(),
+          } as FoodItem);
+        }
+      }
+    });
+  };
+
+  processSnapshot(snapshotNew);
+  processSnapshot(snapshotOld);
+
+  return Array.from(resultsMap.values()).slice(0, 5);
 }
 
 export async function getFoodItem(
