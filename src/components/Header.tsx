@@ -1,8 +1,8 @@
-import { Leaf } from "lucide-react";
 import Link from "next/link";
 import { UserProfile } from "./UserProfile";
 import { Navigation } from "./Navigation";
 import { MobileNavigation } from "./MobileNavigation";
+import Image from "next/image";
 
 export default function Header() {
   return (
@@ -13,7 +13,7 @@ export default function Header() {
             href="/"
             className="flex items-center gap-2 text-xl font-semibold"
             >
-            <Leaf className="h-6 w-6 text-primary" />
+            <Image src="/icon.svg" alt="Nutrack9 Logo" width={24} height={24} />
             <span className="font-headline">Nutrack9</span>
             </Link>
             <Navigation />
