@@ -97,7 +97,7 @@ export async function searchFoods(
 
   const [ngramSnapshot, prefixSnapshot] = await Promise.all([
       getDocs(ngramQuery),
-      getDocs(prefixSnapshot),
+      getDocs(prefixQuery),
   ]);
 
   const results = new Map<string, FoodItem>();
@@ -524,5 +524,7 @@ export async function getUser(
         return null;
     }
 }
+
+    
 
     
