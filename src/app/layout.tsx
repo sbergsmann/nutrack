@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({
       <body className={cn("font-body antialiased h-full")}>
         {children}
         <SpeedInsights/>
+        <Analytics />
       </body>
     </html>
   );
