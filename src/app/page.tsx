@@ -9,7 +9,10 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace(`/${i18n.defaultLocale}`);
+    // Determine the best locale.
+    const browserLang = navigator.language.split('-')[0];
+    const defaultLocale = i18n.locales.includes(browserLang as any) ? browserLang : i18n.defaultLocale;
+    router.replace(`/${defaultLocale}`);
   }, [router]);
 
   return null;
