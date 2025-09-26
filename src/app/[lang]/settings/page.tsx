@@ -316,7 +316,8 @@ function SettingsPage({ dictionary }: { dictionary: any }) {
 
 
 async function SettingsPageLoader({ params }: { params: { lang: string } }) {
-  const dictionary = await getDictionary(params.lang);
+  const resolvedParams = await params;
+  const dictionary = await getDictionary(resolvedParams.lang);
   return <SettingsPage dictionary={dictionary.settings} />;
 }
 

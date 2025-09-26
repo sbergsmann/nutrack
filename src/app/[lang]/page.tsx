@@ -209,7 +209,8 @@ function HomePageClient({ dictionary }: { dictionary: any }) {
 }
 
 export default async function HomePage({ params }: { params: { lang: string } }) {
-  const dictionary = await getDictionary(params.lang as any);
+  const resolvedParams = await params;
+  const dictionary = await getDictionary(resolvedParams.lang as any);
   return <HomePageClient dictionary={dictionary} />;
 }
 

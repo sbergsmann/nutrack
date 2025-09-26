@@ -179,6 +179,7 @@ function PremiumPage({ dictionary }: { dictionary: any }) {
 }
 
 export default async function PremiumPageLoader({ params }: { params: { lang: string } }) {
-  const dictionary = await getDictionary(params.lang);
+  const resolvedParams = await params;
+  const dictionary = await getDictionary(resolvedParams.lang);
   return <PremiumPage dictionary={dictionary.premium} />;
 }
