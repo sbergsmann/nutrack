@@ -135,7 +135,7 @@ export default function SettingsPage() {
     }
   }
 
-  const appVersion = "1.2.0";
+  const appVersion = "1.2.1";
   const hasMeasurements = !!(user?.height || user?.weight || user?.age || user?.gender || user?.activityLevel);
 
   return (
