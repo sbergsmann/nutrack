@@ -54,16 +54,18 @@ async function triggerFoodEnrichment(firestore: Firestore, foodId: string, foodN
 
 function generateNgrams(name: string): string[] {
     const ngrams = new Set<string>();
-    const words = name.split(/\s+/); // Split by one or more spaces
+    const words = name.toLowerCase().split(/[\s-]+/); // Split by spaces or hyphens
     for (const word of words) {
-      if (word.length > 0) {
-        for (let i = 1; i <= word.length; i++) {
-          ngrams.add(word.substring(0, i));
+      const cleanWord = word.replace(/[^a-z0-9]/g, ''); // Remove non-alphanumeric chars
+      if (cleanWord.length > 0) {
+        for (let i = 1; i <= cleanWord.length; i++) {
+          ngrams.add(cleanWord.substring(0, i));
         }
       }
     }
     return Array.from(ngrams);
 }
+
 
 export async function searchFoods(
   firestore: Firestore,
@@ -76,23 +78,53 @@ export async function searchFoods(
     return [];
   }
 
+  // Query for new items with ngrams (case-insensitive)
   const ngramQuery = query(
     foodsRef,
     where("name_ngrams", "array-contains", searchTermLower),
     limit(10)
   );
 
-  const querySnapshot = await getDocs(ngramQuery);
+  // Fallback query for old items by name prefix (case-sensitive)
+  const prefixQuery = query(
+    foodsRef,
+    where("name", ">=", searchTerm),
+    where("name", "<", searchTerm + "\uf8ff"),
+    limit(10)
+  );
 
-  return querySnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        name: data.name,
-        ...data,
-      } as FoodItem;
-    });
+  const [ngramSnapshot, prefixSnapshot] = await Promise.all([
+      getDocs(ngramQuery),
+      getDocs(prefixQuery),
+  ]);
+
+  const results = new Map<string, FoodItem>();
+
+  // Process n-gram results
+  ngramSnapshot.docs.forEach((doc) => {
+    const data = doc.data();
+    results.set(doc.id, {
+      id: doc.id,
+      name: data.name,
+      ...data,
+    } as FoodItem);
+  });
+  
+  // Process prefix results
+  prefixSnapshot.docs.forEach((doc) => {
+      if (!results.has(doc.id)) {
+          const data = doc.data();
+          results.set(doc.id, {
+            id: doc.id,
+            name: data.name,
+            ...data,
+          } as FoodItem);
+      }
+  });
+
+  return Array.from(results.values());
 }
+
 
 export async function getFoodItem(
   firestore: Firestore | AdminFirestore,
@@ -200,16 +232,11 @@ export async function getOrCreateFood(
     const foodData = foodDoc.data();
     
     const updates: { [key: string]: any } = { lastAddedAt: serverTimestamp() };
-    let needsUpdate = false;
     
     // Backfill n-grams if they don't exist
     if (!foodData.name_ngrams) {
-      updates.name_ngrams = generateNgrams(trimmedFoodName.toLowerCase());
-      needsUpdate = true;
-    }
-
-    if (needsUpdate) {
-        await updateDoc(foodRef, updates);
+      updates.name_ngrams = generateNgrams(trimmedFoodName);
+      await updateDoc(foodRef, updates);
     } else {
         await updateDoc(foodRef, { lastAddedAt: serverTimestamp() });
     }
@@ -231,7 +258,7 @@ export async function getOrCreateFood(
     const newFoodData = {
       name: trimmedFoodName,
       lastAddedAt: serverTimestamp(),
-      name_ngrams: generateNgrams(trimmedFoodName.toLowerCase()),
+      name_ngrams: generateNgrams(trimmedFoodName),
     };
     const newFoodDocRef = await addDoc(foodsRef, newFoodData);
     triggerFoodEnrichment(firestore, newFoodDocRef.id, trimmedFoodName);
@@ -479,5 +506,6 @@ export async function getUser(
     
 
     
+
 
 
