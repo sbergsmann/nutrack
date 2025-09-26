@@ -52,6 +52,19 @@ async function triggerFoodEnrichment(firestore: Firestore, foodId: string, foodN
     }
 }
 
+function generateNgrams(name: string): string[] {
+    const ngrams = new Set<string>();
+    const words = name.split(/\s+/); // Split by one or more spaces
+    for (const word of words) {
+      if (word.length > 0) {
+        for (let i = 1; i <= word.length; i++) {
+          ngrams.add(word.substring(0, i));
+        }
+      }
+    }
+    return Array.from(ngrams);
+}
+
 export async function searchFoods(
   firestore: Firestore,
   searchTerm: string
@@ -63,26 +76,22 @@ export async function searchFoods(
     return [];
   }
 
-  const q = query(
+  const ngramQuery = query(
     foodsRef,
-    orderBy("name"),
-    limit(20) // Fetch a slightly larger batch to filter client-side
+    where("name_ngrams", "array-contains", searchTermLower),
+    limit(10)
   );
 
-  const querySnapshot = await getDocs(q);
+  const querySnapshot = await getDocs(ngramQuery);
 
-  const results = querySnapshot.docs
-    .map((doc) => {
+  return querySnapshot.docs.map((doc) => {
       const data = doc.data();
       return {
         id: doc.id,
         name: data.name,
         ...data,
       } as FoodItem;
-    })
-    .filter((food) => food.name.toLowerCase().startsWith(searchTermLower));
-
-  return results.slice(0, 5);
+    });
 }
 
 export async function getFoodItem(
@@ -177,11 +186,6 @@ export async function getOrCreateFood(
 ): Promise<FoodItem> {
   const trimmedFoodName = foodName.trim();
   const foodsRef = getFoodsCollection(firestore);
-
-  // Firestore queries are case-sensitive, so we can't reliably query for existing food
-  // without a lowercase field. Given the complexity this caused, we'll accept
-  // potential duplicates with different casing, which is a simpler tradeoff.
-  // A more robust solution would re-introduce the lowercase field, but for now, we prioritize simplicity.
   
   const q = query(
     foodsRef,
@@ -192,10 +196,23 @@ export async function getOrCreateFood(
 
   if (!querySnapshot.empty) {
     const foodDoc = querySnapshot.docs[0];
-    const foodData = foodDoc.data();
     const foodRef = doc(foodsRef as Firestore, foodDoc.id);
+    const foodData = foodDoc.data();
     
-    await updateDoc(foodRef, { lastAddedAt: serverTimestamp() });
+    const updates: { [key: string]: any } = { lastAddedAt: serverTimestamp() };
+    let needsUpdate = false;
+    
+    // Backfill n-grams if they don't exist
+    if (!foodData.name_ngrams) {
+      updates.name_ngrams = generateNgrams(trimmedFoodName.toLowerCase());
+      needsUpdate = true;
+    }
+
+    if (needsUpdate) {
+        await updateDoc(foodRef, updates);
+    } else {
+        await updateDoc(foodRef, { lastAddedAt: serverTimestamp() });
+    }
     
     const needsEnrichment = foodData.portion == null || foodData.calories == null;
     if (needsEnrichment) {
@@ -206,20 +223,22 @@ export async function getOrCreateFood(
       id: foodDoc.id,
       name: foodData.name,
       lastAddedAt: new Date(),
-      ...foodData
+      ...foodData,
+      ...updates
     } as FoodItem;
 
   } else {
     const newFoodData = {
       name: trimmedFoodName,
       lastAddedAt: serverTimestamp(),
+      name_ngrams: generateNgrams(trimmedFoodName.toLowerCase()),
     };
     const newFoodDocRef = await addDoc(foodsRef, newFoodData);
     triggerFoodEnrichment(firestore, newFoodDocRef.id, trimmedFoodName);
     return {
       id: newFoodDocRef.id,
-      name: trimmedFoodName,
       lastAddedAt: new Date(),
+      ...newFoodData,
     } as FoodItem;
   }
 }
@@ -460,4 +479,5 @@ export async function getUser(
     
 
     
+
 
