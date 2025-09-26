@@ -28,24 +28,32 @@ import { i18n, type Locale } from "@/i18n.config";
 import { cn } from "@/lib/utils";
 import { useFirestore } from "@/firebase/provider";
 import { updateUserLanguage } from "@/lib/data";
+import { useToast } from "@/hooks/use-toast";
 
 export function UserProfile({ dictionary }: { dictionary: any }) {
   const { data: user, loading } = useUser();
   const firestore = useFirestore();
   const pathname = usePathname();
   const params = useParams();
+  const { toast } = useToast();
   const lang = params.lang as Locale;
   const [isLanguageOpen, setLanguageOpen] = useState(false);
 
-  const handleLanguageChange = (newLocale: Locale) => {
+  const handleLanguageChange = async (newLocale: Locale) => {
     if (!pathname || !user || !firestore) return;
+    if (newLocale === lang) return;
 
-    // Update preference in DB
-    updateUserLanguage(firestore, user.uid, newLocale);
-    
-    // Redirect
-    const newPath = pathname.replace(`/${lang}`, `/${newLocale}`);
-    window.location.href = newPath;
+    try {
+      await updateUserLanguage(firestore, user.uid, newLocale);
+      const newPath = pathname.replace(`/${lang}`, `/${newLocale}`);
+      window.location.href = newPath;
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Failed to change language",
+        description: "Please try again.",
+      });
+    }
   };
 
   if (loading) {

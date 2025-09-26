@@ -469,14 +469,17 @@ export async function updateUserLanguage(
 ): Promise<void> {
   const userRef = doc(firestore, 'users', userId);
   const data = { language };
-  updateDoc(userRef, data).catch(async (serverError) => {
+  try {
+    await updateDoc(userRef, data)
+  } catch (serverError) {
     const permissionError = new FirestorePermissionError({
       path: userRef.path,
       operation: 'update',
       requestResourceData: data,
     } satisfies SecurityRuleContext);
     errorEmitter.emit('permission-error', permissionError);
-  });
+    throw permissionError;
+  };
 }
 
 export async function updateUserProfile(
