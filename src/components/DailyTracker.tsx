@@ -20,13 +20,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
 
 import {
   Card,
@@ -36,7 +29,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Smile, Meh, Frown, Zap, Battery, Trash, Minus, Calendar as CalendarIcon, Flame, Beef, Droplet, Sparkles, ArrowDownUp, SortDesc } from "lucide-react";
+import { Plus, Smile, Meh, Frown, Zap, Battery, Trash, Minus, Calendar as CalendarIcon, Flame, Beef, Droplet, Sparkles, ArrowDownUp, SortDesc, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FeedbackDialog } from "./FeedbackDialog";
 import FoodIcon from "./FoodIcon";
@@ -478,89 +471,94 @@ export function DailyTracker({
                       </Button>
                     </div>
 
-                    <TooltipProvider>
-                      <div className="flex flex-col gap-2">
-                        {sortedLoggedFoods.map(({food, quantity}) => (
-                          <Card key={food.id} className="shadow-sm">
-                            <CardContent className="p-4 flex items-center justify-between gap-4">
-                              <div className="flex items-center gap-4 overflow-hidden flex-1">
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <div className="bg-primary/20 text-primary p-2 rounded-full">
-                                        <FoodIcon iconName={food.icon} className="h-5 w-5" />
-                                    </div>
-                                  </TooltipTrigger>
-                                  {food.description && <TooltipContent className="max-w-xs text-center"><p>{food.description}</p></TooltipContent>}
-                                </Tooltip>
-
-                                <div className="flex-1 overflow-hidden">
+                    <div className="flex flex-col gap-2">
+                      {sortedLoggedFoods.map(({food, quantity}) => (
+                        <Card key={food.id} className="shadow-sm">
+                          <CardContent className="p-4 flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-4 overflow-hidden flex-1">
+                              <div className="bg-primary/20 text-primary p-2 rounded-full">
+                                  <FoodIcon iconName={food.icon} className="h-5 w-5" />
+                              </div>
+                              
+                              <div className="flex-1 overflow-hidden">
+                                <div className="flex items-center gap-1.5">
                                   <p className="text-sm font-medium truncate">{food.name}</p>
-                                  {(food.portion != null && (food.calories != null || food.carbs != null || food.proteins != null || food.fats != null)) ? (
-                                    <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                                      <div className="flex items-center gap-1" title="Calories">
-                                        <Sparkles className="h-3 w-3 text-chart-1" />
-                                        <span>{food.calories?.toFixed(0) ?? '–'}</span>
-                                      </div>
-                                      <div className="flex items-center gap-1" title="Carbs">
-                                        <Flame className="h-3 w-3 text-chart-2" />
-                                        <span>{food.carbs?.toFixed(0) ?? '–'}g</span>
-                                      </div>
-                                      <div className="flex items-center gap-1" title="Protein">
-                                        <Beef className="h-3 w-3 text-chart-3" />
-                                        <span>{food.proteins?.toFixed(0) ?? '–'}g</span>
-                                      </div>
-                                      <div className="flex items-center gap-1" title="Fat">
-                                        <Droplet className="h-3 w-3 text-chart-4" />
-                                        <span>{food.fats?.toFixed(0) ?? '–'}g</span>
-                                      </div>
-                                      <div className="flex items-center gap-1 font-bold text-primary/80" title="Total Portion">
-                                          <span>
-                                              {quantity > 1 ? `${quantity}x${food.portion}g` : `${food.portion}g`}
-                                          </span>
-                                      </div>
-                                    </div>
-                                  ) : <div className="h-4" /> /* Placeholder for height consistency */
-                                  }
+                                  {food.description && (
+                                    <Popover>
+                                      <PopoverTrigger>
+                                        <Info className="h-3.5 w-3.5 text-muted-foreground cursor-pointer" />
+                                      </PopoverTrigger>
+                                      <PopoverContent className="text-sm max-w-xs text-center">
+                                        {food.description}
+                                      </PopoverContent>
+                                    </Popover>
+                                  )}
                                 </div>
+                                {(food.portion != null && (food.calories != null || food.carbs != null || food.proteins != null || food.fats != null)) ? (
+                                  <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                                    <div className="flex items-center gap-1" title="Calories">
+                                      <Sparkles className="h-3 w-3 text-chart-1" />
+                                      <span>{food.calories?.toFixed(0) ?? '–'}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1" title="Carbs">
+                                      <Flame className="h-3 w-3 text-chart-2" />
+                                      <span>{food.carbs?.toFixed(0) ?? '–'}g</span>
+                                    </div>
+                                    <div className="flex items-center gap-1" title="Protein">
+                                      <Beef className="h-3 w-3 text-chart-3" />
+                                      <span>{food.proteins?.toFixed(0) ?? '–'}g</span>
+                                    </div>
+                                    <div className="flex items-center gap-1" title="Fat">
+                                      <Droplet className="h-3 w-3 text-chart-4" />
+                                      <span>{food.fats?.toFixed(0) ?? '–'}g</span>
+                                    </div>
+                                    <div className="flex items-center gap-1 font-bold text-primary/80" title="Total Portion">
+                                        <span>
+                                            {quantity > 1 ? `${quantity}x${food.portion}g` : `${food.portion}g`}
+                                        </span>
+                                    </div>
+                                  </div>
+                                ) : <div className="h-4" /> /* Placeholder for height consistency */
+                                }
                               </div>
-                              <div className="flex items-center gap-1">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-7 w-7"
-                                  onClick={() => handleQuantityChange(food, -1)}
-                                  disabled={isPending}
-                                  aria-label={`Decrease quantity of ${food.name}`}
-                                >
-                                  <Minus className="h-4 w-4" />
-                                </Button>
-                                <span className="font-bold text-sm w-4 text-center">{quantity}</span>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-7 w-7"
-                                  onClick={() => handleQuantityChange(food, 1)}
-                                  disabled={isPending}
-                                  aria-label={`Increase quantity of ${food.name}`}
-                                >
-                                  <Plus className="h-4 w-4" />
-                                </Button>
-                              </div>
+                            </div>
+                            <div className="flex items-center gap-1">
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 text-destructive/70 hover:text-destructive"
-                                onClick={() => handleDeleteFood(food.id)}
+                                className="h-7 w-7"
+                                onClick={() => handleQuantityChange(food, -1)}
                                 disabled={isPending}
-                                aria-label={`Delete ${food.name}`}
+                                aria-label={`Decrease quantity of ${food.name}`}
                               >
-                                <Trash className="h-4 w-4" />
+                                <Minus className="h-4 w-4" />
                               </Button>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </TooltipProvider>
+                              <span className="font-bold text-sm w-4 text-center">{quantity}</span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7"
+                                onClick={() => handleQuantityChange(food, 1)}
+                                disabled={isPending}
+                                aria-label={`Increase quantity of ${food.name}`}
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-destructive/70 hover:text-destructive"
+                              onClick={() => handleDeleteFood(food.id)}
+                              disabled={isPending}
+                              aria-label={`Delete ${food.name}`}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
                   </>
                 ) : (
                   <div className="text-center text-muted-foreground text-sm p-4 bg-background/50 border rounded-md">
@@ -575,5 +573,7 @@ export function DailyTracker({
     </div>
   );
 }
+
+    
 
     
