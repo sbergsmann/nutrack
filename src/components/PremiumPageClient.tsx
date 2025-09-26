@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Check, StarIcon, Rocket } from "lucide-react";
@@ -123,9 +124,9 @@ export function PremiumPageClient({ dictionary }: { dictionary: any }) {
 
       <div className="flex flex-col items-center justify-center text-center gap-6">
         <Rocket className="h-16 w-16 text-primary" />
-        <h2 className="text-3xl font-bold tracking-tighter">Coming Soon!</h2>
+        <h2 className="text-3xl font-bold tracking-tighter">{dictionary.comingSoon.title}</h2>
         <p className="max-w-md text-muted-foreground">
-          We're working hard to bring you exciting new features. Premium plans will be available shortly. Stay tuned!
+          {dictionary.comingSoon.description}
         </p>
       </div>
 

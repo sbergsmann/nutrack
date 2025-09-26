@@ -193,6 +193,10 @@
     "title": "Wählen Sie Ihren Plan",
     "subtitle": "Schalten Sie leistungsstarke Funktionen frei, um Ihre Gesundheitsreise zu beschleunigen.",
     "mostPopular": "Am beliebtesten",
+    "comingSoon": {
+      "title": "Kommt bald!",
+      "description": "Wir arbeiten hart daran, Ihnen aufregende neue Funktionen zu bieten. Premium-Pläne werden in Kürze verfügbar sein. Bleiben Sie dran!"
+    },
     "basic": {
       "price": "Kostenlos",
       "description": "Die Grundlagen für den Einstieg.",

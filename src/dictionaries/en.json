@@ -193,6 +193,10 @@
     "title": "Choose Your Plan",
     "subtitle": "Unlock powerful features to supercharge your health journey.",
     "mostPopular": "Most Popular",
+    "comingSoon": {
+      "title": "Coming Soon!",
+      "description": "We're working hard to bring you exciting new features. Premium plans will be available shortly. Stay tuned!"
+    },
     "basic": {
       "price": "Free",
       "description": "The essentials for getting started.",
