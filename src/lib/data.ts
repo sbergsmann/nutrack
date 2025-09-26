@@ -1,4 +1,5 @@
 
+
 import {
   doc,
   getDoc,
@@ -55,13 +56,16 @@ function generateNgrams(name: string): string[] {
     const ngrams = new Set<string>();
     if (!name) return [];
     
-    const lowerCaseName = name.toLowerCase();
-    const words = lowerCaseName.split(' ');
+    // Sanitize and split into words by space or hyphen
+    const words = name.toLowerCase().split(/[\s-]+/);
 
     for (const word of words) {
-        if(word.length === 0) continue;
-        for (let i = 1; i <= word.length; i++) {
-            ngrams.add(word.substring(0, i));
+        // Remove any non-alphanumeric characters from the word
+        const cleanWord = word.replace(/[^a-z0-9]/g, '');
+        if(cleanWord.length === 0) continue;
+        // Generate prefixes for the clean word
+        for (let i = 1; i <= cleanWord.length; i++) {
+            ngrams.add(cleanWord.substring(0, i));
         }
     }
     
@@ -73,7 +77,7 @@ export async function searchFoods(
   searchTerm: string
 ): Promise<FoodItem[]> {
   const foodsRef = getFoodsCollection(firestore);
-  const lowercasedSearchTerm = searchTerm.toLowerCase();
+  const lowercasedSearchTerm = searchTerm.toLowerCase().replace(/[^a-z0-9]/g, '');
 
   if (lowercasedSearchTerm.length < 1) {
     return [];
@@ -128,8 +132,8 @@ export async function searchFoods(
     .sort((a, b) => {
         const aName = a.name.toLowerCase();
         const bName = b.name.toLowerCase();
-        const aStarts = aName.startsWith(lowercasedSearchTerm);
-        const bStarts = bName.startsWith(lowercasedSearchTerm);
+        const aStarts = aName.startsWith(searchTerm.toLowerCase());
+        const bStarts = bName.startsWith(searchTerm.toLowerCase());
         if (aStarts && !bStarts) return -1;
         if (!aStarts && bStarts) return 1;
         return aName.localeCompare(bName); // Alphabetical for others
