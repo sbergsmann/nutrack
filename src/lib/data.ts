@@ -57,11 +57,12 @@ export async function searchFoods(
   searchTerm: string
 ): Promise<FoodItem[]> {
   const foodsRef = getFoodsCollection(firestore);
+  const lowercasedSearchTerm = searchTerm.toLowerCase();
   const q = query(
     foodsRef,
-    where("name", ">=", searchTerm),
-    where("name", "<=", searchTerm + "\uf8ff"),
-    orderBy("name"),
+    where("name_lowercase", ">=", lowercasedSearchTerm),
+    where("name_lowercase", "<=", lowercasedSearchTerm + "\uf8ff"),
+    orderBy("name_lowercase"),
     limit(5)
   );
 
@@ -171,11 +172,12 @@ export async function getOrCreateFood(
   foodName: string
 ): Promise<FoodItem> {
   const trimmedFoodName = foodName.trim();
+  const lowercasedFoodName = trimmedFoodName.toLowerCase();
   const foodsRef = getFoodsCollection(firestore);
 
   const q = query(
     foodsRef,
-    where("name", "==", trimmedFoodName),
+    where("name_lowercase", "==", lowercasedFoodName),
     limit(1)
   );
   const querySnapshot = await getDocs(q);
@@ -201,6 +203,7 @@ export async function getOrCreateFood(
   } else {
     const newFoodData = {
       name: trimmedFoodName,
+      name_lowercase: lowercasedFoodName,
       lastAddedAt: serverTimestamp(),
     };
     const newFoodDocRef = await addDoc(foodsRef, newFoodData);

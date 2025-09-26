@@ -109,6 +109,10 @@
           "type": "string",
           "description": "The name of the food item."
         },
+        "name_lowercase": {
+          "type": "string",
+          "description": "The lowercase version of the food name for case-insensitive search."
+        },
         "lastAddedAt": {
           "type": "string",
           "format": "date-time",
@@ -143,7 +147,7 @@
           "description": "The name of a lucide-react icon."
         }
       },
-      "required": ["name", "lastAddedAt"]
+      "required": ["name", "name_lowercase", "lastAddedAt"]
     },
     "feedback": {
       "title": "Feedback",
