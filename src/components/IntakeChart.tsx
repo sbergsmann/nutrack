@@ -159,7 +159,6 @@ export function IntakeChart({ userProfile, entries }: IntakeChartProps) {
                             domain={['dataMin - 20', 'dataMax + 20']}
                         />
                         <Tooltip content={<CustomTooltip unit={nutrientConfig[key].unit} />} />
-                        <Legend iconType="circle" />
                         <Area 
                             type="monotone" 
                             dataKey="recommended" 
