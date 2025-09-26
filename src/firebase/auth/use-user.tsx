@@ -6,7 +6,7 @@ import { type User as AuthUser, onAuthStateChanged } from "firebase/auth";
 import { useAuth, useFirestore } from "@/firebase/provider";
 import { doc, getDoc, setDoc, onSnapshot, serverTimestamp } from "firebase/firestore";
 import type { UserProfile } from "@/lib/types";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { type Locale } from "@/i18n.config";
 
 export const useUser = () => {
@@ -14,6 +14,7 @@ export const useUser = () => {
   const firestore = useFirestore();
   const params = useParams();
   const pathname = usePathname();
+  const router = useRouter();
   const lang = params.lang as Locale;
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -36,12 +37,12 @@ export const useUser = () => {
               createdAt: (userData.createdAt as any)?.toDate() ?? new Date(),
             };
             setUser(finalUser);
-
-            // Redirect if language preference doesn't match URL
-            if (finalUser.language && finalUser.language !== lang && pathname) {
+            
+            // Only redirect if data is loaded, a language is set, and it differs from the URL
+            if (!loading && finalUser.language && finalUser.language !== lang && pathname) {
                 const newPath = pathname.replace(`/${lang}`, `/${finalUser.language}`);
-                window.location.href = newPath;
-                return; // Prevent further processing while redirecting
+                router.replace(newPath); // Use replace to avoid history pollution
+                return;
             }
 
             setLoading(false);
@@ -73,7 +74,7 @@ export const useUser = () => {
     });
 
     return () => unsubscribeAuth();
-  }, [auth, firestore, lang, pathname]);
+  }, [auth, firestore, lang, pathname, loading, router]);
 
   return { data: user, loading };
 };
