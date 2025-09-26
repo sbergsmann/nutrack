@@ -23,7 +23,7 @@ import { signInWithGoogle, signOut } from "@/firebase/auth/actions";
 import { FeedbackDialog } from "./FeedbackDialog";
 import { Badge } from "./ui/badge";
 import { DeleteAccountDialog } from "./DeleteAccountDialog";
-import { usePathname, useParams } from "next/navigation";
+import { usePathname, useParams, useRouter } from "next/navigation";
 import { i18n, type Locale } from "@/i18n.config";
 import { cn } from "@/lib/utils";
 import { useFirestore } from "@/firebase/provider";
@@ -35,6 +35,7 @@ export function UserProfile({ dictionary }: { dictionary: any }) {
   const firestore = useFirestore();
   const pathname = usePathname();
   const params = useParams();
+  const router = useRouter();
   const { toast } = useToast();
   const lang = params.lang as Locale;
   const [isLanguageOpen, setLanguageOpen] = useState(false);
@@ -46,8 +47,9 @@ export function UserProfile({ dictionary }: { dictionary: any }) {
     try {
       await updateUserLanguage(firestore, user.uid, newLocale);
       const newPath = pathname.replace(`/${lang}`, `/${newLocale}`);
-      window.location.href = newPath;
+      router.push(newPath);
     } catch (error) {
+      console.error("Failed to change language:", error);
       toast({
         variant: "destructive",
         title: "Failed to change language",

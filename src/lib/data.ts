@@ -462,24 +462,23 @@ export async function updateUserPlan(
   }
 }
 
-export async function updateUserLanguage(
+export function updateUserLanguage(
   firestore: Firestore,
   userId: string,
   language: Locale
 ): Promise<void> {
   const userRef = doc(firestore, 'users', userId);
   const data = { language };
-  try {
-    await updateDoc(userRef, data)
-  } catch (serverError) {
+  return updateDoc(userRef, data).catch((serverError) => {
     const permissionError = new FirestorePermissionError({
       path: userRef.path,
       operation: 'update',
       requestResourceData: data,
     } satisfies SecurityRuleContext);
     errorEmitter.emit('permission-error', permissionError);
-    throw permissionError;
-  };
+    // Re-throw the original error after emitting our custom one
+    throw serverError;
+  });
 }
 
 export async function updateUserProfile(
