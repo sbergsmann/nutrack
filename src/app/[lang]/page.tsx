@@ -20,7 +20,7 @@ import { AddToHomeScreenPrompt } from "@/components/AddToHomeScreenPrompt";
 import { useParams } from "next/navigation";
 import { getDictionary } from "@/lib/get-dictionary";
 
-export default function HomePage({ dictionary }: { dictionary: any }) {
+function HomePageClient({ dictionary }: { dictionary: any }) {
   const { data: user, loading: userLoading } = useUser();
   const firestore = useFirestore();
   const [allEntries, setAllEntries] = useState<DailyEntry[]>([]);
@@ -207,3 +207,10 @@ export default function HomePage({ dictionary }: { dictionary: any }) {
     </div>
   );
 }
+
+export default async function HomePage({ params }: { params: { lang: string } }) {
+  const dictionary = await getDictionary(params.lang as any);
+  return <HomePageClient dictionary={dictionary} />;
+}
+
+    

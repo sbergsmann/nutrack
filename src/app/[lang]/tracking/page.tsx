@@ -73,7 +73,7 @@ function TrackingPage({ dictionary }: { dictionary: any }) {
 }
 
 async function TrackingPageLoader({ params }: { params: { lang: string } }) {
-  const dictionary = await getDictionary(params.lang);
+  const dictionary = await getDictionary(params.lang as any);
   return <TrackingPage dictionary={dictionary.dailyTracker} />;
 }
 

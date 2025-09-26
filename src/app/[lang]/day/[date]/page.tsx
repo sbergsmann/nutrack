@@ -80,7 +80,7 @@ function DayPageClient({ dateString, dictionary }: { dateString: string, diction
 
 // This component is necessary because `use` is not allowed in a client component.
 async function DayPageLoader({ params }: { params: { date: string, lang: string } }) {
-  const dictionary = await getDictionary(params.lang);
+  const dictionary = await getDictionary(params.lang as any);
   return <DayPageClient dateString={params.date} dictionary={dictionary.dailyTracker} />;
 }
 
