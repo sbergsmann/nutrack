@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
+import { FirebaseClientProvider } from "@/firebase/client-provider";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Nutrack9",
@@ -25,9 +27,12 @@ export default function RootLayout({
         <meta name="theme-color" content="#F87171" />
       </head>
       <body className={cn("font-body antialiased h-full")}>
-        {children}
-        <SpeedInsights/>
-        <Analytics />
+        <FirebaseClientProvider>
+          {children}
+          <Toaster />
+          <SpeedInsights/>
+          <Analytics />
+        </FirebaseClientProvider>
       </body>
     </html>
   );
