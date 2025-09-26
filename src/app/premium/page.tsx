@@ -103,17 +103,7 @@ export default function PremiumPage() {
 
   return (
     <div className="container mx-auto max-w-5xl p-4 md:p-8 animate-fade-in">
-      <div className="mb-8">
-        <Link
-          href="/"
-          className="flex items-center text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Dashboard
-        </Link>
-      </div>
-
-      <div className="text-center">
+      <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl font-headline">
           Choose Your Plan
         </h1>
