@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, StarIcon } from "lucide-react";
+import { Check, StarIcon, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -31,6 +31,7 @@ export function PremiumPageClient({ dictionary }: { dictionary: any }) {
   const lang = params.lang;
   const [isPending, setIsPending] = useState<PlanName | null>(null);
 
+  /*
   const plans: {
     name: PlanName;
     price: string;
@@ -99,6 +100,7 @@ export function PremiumPageClient({ dictionary }: { dictionary: any }) {
       setIsPending(null);
     }
   };
+  */
 
   if (!dictionary) {
     return <div className="container mx-auto max-w-5xl p-4 md:p-8 animate-fade-in">
@@ -119,6 +121,15 @@ export function PremiumPageClient({ dictionary }: { dictionary: any }) {
         </p>
       </div>
 
+      <div className="flex flex-col items-center justify-center text-center gap-6">
+        <Rocket className="h-16 w-16 text-primary" />
+        <h2 className="text-3xl font-bold tracking-tighter">Coming Soon!</h2>
+        <p className="max-w-md text-muted-foreground">
+          We're working hard to bring you exciting new features. Premium plans will be available shortly. Stay tuned!
+        </p>
+      </div>
+
+      {/* 
       <div className="grid gap-8 md:grid-cols-3">
         {plans.map((plan) => (
           <Card
@@ -172,6 +183,7 @@ export function PremiumPageClient({ dictionary }: { dictionary: any }) {
           </Card>
         ))}
       </div>
+      */}
     </div>
   );
 }
