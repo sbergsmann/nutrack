@@ -6,7 +6,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { Toaster } from "@/components/ui/toaster";
-import "../globals.css";
+import "../../globals.css";
 
 export async function generateStaticParams() {
   return i18n.locales.map((locale) => ({ lang: locale }));
