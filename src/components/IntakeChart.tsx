@@ -131,7 +131,7 @@ export function IntakeChart({ userProfile, entries }: IntakeChartProps) {
       </CardHeader>
       <CardContent>
         <Tabs value={activeNutrient} onValueChange={(value) => setActiveNutrient(value as NutrientKey)} className="space-y-4">
-          <TabsList>
+          <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4">
             {Object.entries(nutrientConfig).map(([key, { label, icon: TabIcon }]) => (
               <TabsTrigger key={key} value={key} className="flex items-center gap-2">
                 <TabIcon className="h-4 w-4" />

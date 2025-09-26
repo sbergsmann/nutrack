@@ -2,6 +2,7 @@ import { Leaf } from "lucide-react";
 import Link from "next/link";
 import { UserProfile } from "./UserProfile";
 import { Navigation } from "./Navigation";
+import { MobileNavigation } from "./MobileNavigation";
 
 export default function Header() {
   return (
@@ -17,7 +18,10 @@ export default function Header() {
             </Link>
             <Navigation />
         </div>
-        <UserProfile />
+        <div className="flex items-center gap-2">
+            <UserProfile />
+            <MobileNavigation />
+        </div>
       </div>
     </header>
   );
