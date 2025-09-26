@@ -11,12 +11,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LogIn, LogOut, MessageSquare, User as UserIcon, Star, BadgeCheck } from "lucide-react";
+import { LogIn, LogOut, MessageSquare, User as UserIcon, Star, BadgeCheck, Trash2 } from "lucide-react";
 import { useUser } from "@/firebase/auth/use-user";
 import { signInWithGoogle, signOut } from "@/firebase/auth/actions";
 import { FeedbackDialog } from "./FeedbackDialog";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
+import { DeleteAccountDialog } from "./DeleteAccountDialog";
 
 export function UserProfile() {
   const { data: user, loading } = useUser();
@@ -83,11 +84,20 @@ export function UserProfile() {
             <span>Send Feedback</span>
           </DropdownMenuItem>
         </FeedbackDialog>
-        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={signOut}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DeleteAccountDialog>
+            <DropdownMenuItem
+            onSelect={(e) => e.preventDefault()}
+            className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+            >
+            <Trash2 className="mr-2 h-4 w-4" />
+            <span>Delete Account</span>
+            </DropdownMenuItem>
+        </DeleteAccountDialog>
       </DropdownMenuContent>
     </DropdownMenu>
   );
