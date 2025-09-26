@@ -76,7 +76,7 @@ export async function searchFoods(
     return [];
   }
 
-  // Query for new documents with n-grams
+  // Query for new documents with n-grams for substring matching
   const ngramQuery = query(
       foodsRef,
       where("name_ngrams", "array-contains", lowercasedSearchTerm),
@@ -94,7 +94,7 @@ export async function searchFoods(
 
   const [ngramSnapshot, prefixSnapshot] = await Promise.all([
       getDocs(ngramQuery),
-      getDocs(prefixQuery),
+      getDocs(prefixSnapshot),
   ]);
 
   const results = new Map<string, FoodItem>();
@@ -255,9 +255,9 @@ export async function getOrCreateFood(
     }
 
     if (needsUpdate) {
-        updateDoc(foodRef, updatePayload);
+        await updateDoc(foodRef, updatePayload);
     } else {
-        updateDoc(foodRef, { lastAddedAt: serverTimestamp() });
+        await updateDoc(foodRef, { lastAddedAt: serverTimestamp() });
     }
     
     const needsEnrichment = foodData.portion == null || foodData.calories == null || foodData.carbs == null || foodData.proteins == null || foodData.fats == null;
@@ -498,7 +498,7 @@ export async function updateUserProfile(
         }
     });
     
-    updateDoc(userRef, updateData).catch(async (serverError) => {
+    await updateDoc(userRef, updateData).catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
             path: userRef.path,
             operation: 'update',
@@ -521,3 +521,5 @@ export async function getUser(
         return null;
     }
 }
+
+    
