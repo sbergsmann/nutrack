@@ -86,12 +86,6 @@ export function UserProfile() {
             <Badge variant="secondary">{user.plan}</Badge>
           </div>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href={`/${lang}/premium`}>
-            <Star className="mr-2 h-4 w-4" />
-            <span>Go Premium</span>
-          </Link>
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
