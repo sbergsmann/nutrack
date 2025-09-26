@@ -541,48 +541,52 @@ export function DailyTracker({
                               </CardContent>
                           </Card>
                           <PopoverContent className="text-sm max-w-xs w-auto">
-                            <div className="space-y-4">
+                            <div className="space-y-3">
                                 <div>
                                     <h4 className="font-bold">{food.name}</h4>
                                     {food.description && <p className="text-muted-foreground text-xs">{food.description}</p>}
                                 </div>
                                 <div className="space-y-2 text-xs">
                                     <p className="font-medium">{dictionary.nutrients.perPortion} ({food.portion}g)</p>
-                                    <div className="flex items-center gap-2">
-                                        <Sparkles className="h-4 w-4 text-chart-1" />
-                                        <span><b>{dictionary.nutrients.calories}:</b> {food.calories?.toFixed(0) ?? 'N/A'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Flame className="h-4 w-4 text-chart-2" />
-                                        <span><b>{dictionary.nutrients.carbs}:</b> {food.carbs?.toFixed(0) ?? 'N/A'}g</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Beef className="h-4 w-4 text-chart-3" />
-                                        <span><b>{dictionary.nutrients.protein}:</b> {food.proteins?.toFixed(0) ?? 'N/A'}g</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <Droplet className="h-4 w-4 text-chart-4" />
-                                        <span><b>{dictionary.nutrients.fat}:</b> {food.fats?.toFixed(0) ?? 'N/A'}g</span>
+                                    <div className="flex items-center gap-4 text-muted-foreground">
+                                        <div className="flex items-center gap-1" title={dictionary.nutrients.calories}>
+                                            <Sparkles className="h-3 w-3 text-chart-1" />
+                                            <span>{food.calories?.toFixed(0) ?? 'N/A'}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1" title={dictionary.nutrients.carbs}>
+                                            <Flame className="h-3 w-3 text-chart-2" />
+                                            <span>{food.carbs?.toFixed(0) ?? 'N/A'}g</span>
+                                        </div>
+                                        <div className="flex items-center gap-1" title={dictionary.nutrients.protein}>
+                                            <Beef className="h-3 w-3 text-chart-3" />
+                                            <span>{food.proteins?.toFixed(0) ?? 'N/A'}g</span>
+                                        </div>
+                                        <div className="flex items-center gap-1" title={dictionary.nutrients.fat}>
+                                            <Droplet className="h-3 w-3 text-chart-4" />
+                                            <span>{food.fats?.toFixed(0) ?? 'N/A'}g</span>
+                                        </div>
                                     </div>
                                 </div>
                                 {quantity > 1 && (
                                     <div className="space-y-2 text-xs border-t pt-2">
                                         <p className="font-medium">{dictionary.totalPortion} ({quantity}x)</p>
-                                        <div className="flex items-center gap-2">
-                                            <Sparkles className="h-4 w-4 text-chart-1" />
-                                            <span><b>{dictionary.nutrients.calories}:</b> {(food.calories ?? 0) * quantity}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Flame className="h-4 w-4 text-chart-2" />
-                                            <span><b>{dictionary.nutrients.carbs}:</b> {(food.carbs ?? 0) * quantity}g</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Beef className="h-4 w-4 text-chart-3" />
-                                            <span><b>{dictionary.nutrients.protein}:</b> {(food.proteins ?? 0) * quantity}g</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Droplet className="h-4 w-4 text-chart-4" />
-                                            <span><b>{dictionary.nutrients.fat}:</b> {(food.fats ?? 0) * quantity}g</span>
+                                        <div className="flex items-center gap-4 text-muted-foreground">
+                                            <div className="flex items-center gap-1" title={dictionary.nutrients.calories}>
+                                                <Sparkles className="h-3 w-3 text-chart-1" />
+                                                <span>{((food.calories ?? 0) * quantity).toFixed(0)}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1" title={dictionary.nutrients.carbs}>
+                                                <Flame className="h-3 w-3 text-chart-2" />
+                                                <span>{((food.carbs ?? 0) * quantity).toFixed(0)}g</span>
+                                            </div>
+                                            <div className="flex items-center gap-1" title={dictionary.nutrients.protein}>
+                                                <Beef className="h-3 w-3 text-chart-3" />
+                                                <span>{((food.proteins ?? 0) * quantity).toFixed(0)}g</span>
+                                            </div>
+                                            <div className="flex items-center gap-1" title={dictionary.nutrients.fat}>
+                                                <Droplet className="h-3 w-3 text-chart-4" />
+                                                <span>{((food.fats ?? 0) * quantity).toFixed(0)}g</span>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -605,5 +609,7 @@ export function DailyTracker({
     </div>
   );
 }
+
+    
 
     
