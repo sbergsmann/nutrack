@@ -52,7 +52,7 @@ export function HomePageClient({ dictionary }: { dictionary: any }) {
     }
   
     const today = endOfDay(new Date());
-    const createdAt = startOfDay(user.createdAt);
+    const createdAt = startOfDay(new Date(user.createdAt));
     const totalDaysSinceSignup = differenceInCalendarDays(today, createdAt) + 1;
     const daysToCheck = Math.min(9, totalDaysSinceSignup);
   
@@ -134,12 +134,12 @@ export function HomePageClient({ dictionary }: { dictionary: any }) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-2xl font-bold">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="flex items-center gap-2 text-2xl font-bold flex-shrink-0">
               <Flame className={cn("h-7 w-7", streakData.streak > 0 ? "text-primary" : "text-muted-foreground")} />
               <span>{streakData.streak} {dictionary.dashboard.dayStreak}</span>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1 flex-wrap">
               {streakData.days.map((day, index) => (
                 <div key={index} className={cn(
                   "h-5 w-5 rounded-full",

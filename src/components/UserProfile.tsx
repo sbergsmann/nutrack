@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,28 +9,30 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LogIn, LogOut, MessageSquare, User as UserIcon, Star, BadgeCheck, Trash2, Languages } from "lucide-react";
+import { LogIn, LogOut, MessageSquare, User as UserIcon, BadgeCheck, Trash2, Languages, ChevronsUpDown } from "lucide-react";
 import { useUser } from "@/firebase/auth/use-user";
 import { signInWithGoogle, signOut } from "@/firebase/auth/actions";
 import { FeedbackDialog } from "./FeedbackDialog";
-import Link from "next/link";
 import { Badge } from "./ui/badge";
 import { DeleteAccountDialog } from "./DeleteAccountDialog";
 import { usePathname, useParams } from "next/navigation";
 import { i18n } from "@/i18n.config";
+import { cn } from "@/lib/utils";
 
 export function UserProfile({ dictionary }: { dictionary: any }) {
   const { data: user, loading } = useUser();
   const pathname = usePathname();
   const params = useParams();
   const lang = params.lang;
+  const [isLanguageOpen, setLanguageOpen] = useState(false);
 
   const handleLanguageChange = (newLocale: string) => {
     if (!pathname) return;
@@ -87,22 +90,23 @@ export function UserProfile({ dictionary }: { dictionary: any }) {
           </div>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <Languages className="mr-2 h-4 w-4" />
-            <span>{dictionary.language}</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuPortal>
-            <DropdownMenuSubContent>
-              <DropdownMenuItem onClick={() => handleLanguageChange('en')}>
+        <Collapsible open={isLanguageOpen} onOpenChange={setLanguageOpen} className="w-full">
+          <CollapsibleTrigger asChild>
+            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setLanguageOpen(!isLanguageOpen); }}>
+                <Languages className="mr-2 h-4 w-4" />
+                <span>{dictionary.language}</span>
+                <ChevronsUpDown className={cn("ml-auto h-4 w-4 transition-transform", isLanguageOpen && "rotate-180")} />
+            </DropdownMenuItem>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="px-2">
+             <DropdownMenuItem onClick={() => handleLanguageChange('en')} className="pl-6">
                 English
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleLanguageChange('de')}>
+              <DropdownMenuItem onClick={() => handleLanguageChange('de')} className="pl-6">
                 Deutsch
               </DropdownMenuItem>
-            </DropdownMenuSubContent>
-          </DropdownMenuPortal>
-        </DropdownMenuSub>
+          </CollapsibleContent>
+        </Collapsible>
         <FeedbackDialog dictionary={dictionary.feedback}>
           <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
             <MessageSquare className="mr-2 h-4 w-4" />

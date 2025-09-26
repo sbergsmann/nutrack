@@ -116,7 +116,8 @@ export function DailyTracker({
     });
   };
 
-  const handleDeleteFood = (foodId: string) => {
+  const handleDeleteFood = (e: React.MouseEvent, foodId: string) => {
+    e.stopPropagation();
     if (!user || !firestore) return;
     setLoggedFoods(currentFoods => currentFoods.filter(f => f.food.id !== foodId));
     removeFood(firestore, user.uid, entry.date, foodId).then(() => {
@@ -124,7 +125,8 @@ export function DailyTracker({
     });
   }
 
-  const handleQuantityChange = (food: FoodItem, change: 1 | -1) => {
+  const handleQuantityChange = (e: React.MouseEvent, food: FoodItem, change: 1 | -1) => {
+    e.stopPropagation();
     if (!user || !firestore) return;
   
     setIsPending(true);
@@ -469,90 +471,86 @@ export function DailyTracker({
 
                     <div className="flex flex-col gap-2">
                       {sortedLoggedFoods.map(({food, quantity}) => (
-                        <Card key={food.id} className="shadow-sm">
-                          <CardContent className="p-4 flex items-center justify-between gap-4">
-                            <div className="flex items-center gap-4 overflow-hidden flex-1">
-                              <div className="bg-primary/20 text-primary p-2 rounded-full">
-                                  <FoodIcon iconName={food.icon} className="h-5 w-5" />
-                              </div>
-                              
-                              <div className="flex-1 overflow-hidden">
-                                <div className="flex items-center gap-1.5">
-                                  <p className="text-sm font-medium truncate">{food.name}</p>
-                                  {food.description && (
-                                    <Popover>
-                                      <PopoverTrigger>
-                                        <Info className="h-3.5 w-3.5 text-muted-foreground cursor-pointer" />
-                                      </PopoverTrigger>
-                                      <PopoverContent className="text-sm max-w-xs text-center">
-                                        {food.description}
-                                      </PopoverContent>
-                                    </Popover>
-                                  )}
-                                </div>
-                                {(food.portion != null && (food.calories != null || food.carbs != null || food.proteins != null || food.fats != null)) ? (
-                                  <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                                    <div className="flex items-center gap-1" title={dictionary.nutrients.calories}>
-                                      <Sparkles className="h-3 w-3 text-chart-1" />
-                                      <span>{food.calories?.toFixed(0) ?? '–'}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1" title={dictionary.nutrients.carbs}>
-                                      <Flame className="h-3 w-3 text-chart-2" />
-                                      <span>{food.carbs?.toFixed(0) ?? '–'}g</span>
-                                    </div>
-                                    <div className="flex items-center gap-1" title={dictionary.nutrients.protein}>
-                                      <Beef className="h-3 w-3 text-chart-3" />
-                                      <span>{food.proteins?.toFixed(0) ?? '–'}g</span>
-                                    </div>
-                                    <div className="flex items-center gap-1" title={dictionary.nutrients.fat}>
-                                      <Droplet className="h-3 w-3 text-chart-4" />
-                                      <span>{food.fats?.toFixed(0) ?? '–'}g</span>
-                                    </div>
-                                    <div className="flex items-center gap-1 font-bold text-primary/80" title={dictionary.totalPortion}>
-                                        <span>
-                                            {quantity > 1 ? `${quantity}x${food.portion}g` : `${food.portion}g`}
-                                        </span>
+                        <Popover key={food.id}>
+                          <Card className="shadow-sm">
+                            <PopoverTrigger asChild>
+                              <CardContent className="p-4 flex items-center justify-between gap-4 cursor-pointer">
+                                <div className="flex items-center gap-4 overflow-hidden flex-1">
+                                  <div className="bg-primary/20 text-primary p-2 rounded-full">
+                                      <FoodIcon iconName={food.icon} className="h-5 w-5" />
+                                  </div>
+                                  <div className="flex-1 overflow-hidden">
+                                    <p className="text-sm font-medium truncate">{food.name}</p>
+                                    <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
+                                      <div className="flex items-center gap-1" title={dictionary.nutrients.calories}>
+                                        <Sparkles className="h-3 w-3 text-chart-1" />
+                                        <span>{food.calories?.toFixed(0) ?? '–'}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1" title={dictionary.nutrients.carbs}>
+                                        <Flame className="h-3 w-3 text-chart-2" />
+                                        <span>{food.carbs?.toFixed(0) ?? '–'}g</span>
+                                      </div>
+                                      <div className="flex items-center gap-1" title={dictionary.nutrients.protein}>
+                                        <Beef className="h-3 w-3 text-chart-3" />
+                                        <span>{food.proteins?.toFixed(0) ?? '–'}g</span>
+                                      </div>
+                                      <div className="flex items-center gap-1" title={dictionary.nutrients.fat}>
+                                        <Droplet className="h-3 w-3 text-chart-4" />
+                                        <span>{food.fats?.toFixed(0) ?? '–'}g</span>
+                                      </div>
                                     </div>
                                   </div>
-                                ) : <div className="h-4" /> /* Placeholder for height consistency */
-                                }
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={(e) => handleQuantityChange(e, food, -1)}
+                                    disabled={isPending}
+                                    aria-label={`${dictionary.decreaseAria} ${food.name}`}
+                                  >
+                                    <Minus className="h-4 w-4" />
+                                  </Button>
+                                  <span className="font-bold text-sm w-4 text-center">{quantity}</span>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={(e) => handleQuantityChange(e, food, 1)}
+                                    disabled={isPending}
+                                    aria-label={`${dictionary.increaseAria} ${food.name}`}
+                                  >
+                                    <Plus className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7 text-destructive/70 hover:text-destructive"
+                                  onClick={(e) => handleDeleteFood(e, food.id)}
+                                  disabled={isPending}
+                                  aria-label={`${dictionary.deleteAria} ${food.name}`}
+                                >
+                                  <Trash className="h-4 w-4" />
+                                </Button>
+                              </CardContent>
+                            </PopoverTrigger>
+                          </Card>
+                          <PopoverContent className="text-sm max-w-xs w-auto">
+                              <div className="space-y-2">
+                                <h4 className="font-bold">{food.name}</h4>
+                                {food.description && <p className="text-muted-foreground">{food.description}</p>}
+                                <div className="text-xs space-y-1 pt-2">
+                                    <p><b>{dictionary.nutrients.calories}:</b> {food.calories?.toFixed(0) ?? 'N/A'}</p>
+                                    <p><b>{dictionary.nutrients.carbs}:</b> {food.carbs?.toFixed(0) ?? 'N/A'}g</p>
+                                    <p><b>{dictionary.nutrients.protein}:</b> {food.proteins?.toFixed(0) ?? 'N/A'}g</p>
+                                    <p><b>{dictionary.nutrients.fat}:</b> {food.fats?.toFixed(0) ?? 'N/A'}g</p>
+                                    <p><b>{dictionary.totalPortion}:</b> {quantity > 1 ? `${quantity}x${food.portion}g` : `${food.portion}g`}</p>
+                                </div>
                               </div>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7"
-                                onClick={() => handleQuantityChange(food, -1)}
-                                disabled={isPending}
-                                aria-label={`${dictionary.decreaseAria} ${food.name}`}
-                              >
-                                <Minus className="h-4 w-4" />
-                              </Button>
-                              <span className="font-bold text-sm w-4 text-center">{quantity}</span>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7"
-                                onClick={() => handleQuantityChange(food, 1)}
-                                disabled={isPending}
-                                aria-label={`${dictionary.increaseAria} ${food.name}`}
-                              >
-                                <Plus className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 text-destructive/70 hover:text-destructive"
-                              onClick={() => handleDeleteFood(food.id)}
-                              disabled={isPending}
-                              aria-label={`${dictionary.deleteAria} ${food.name}`}
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </CardContent>
-                        </Card>
+                          </PopoverContent>
+                        </Popover>
                       ))}
                     </div>
                   </>
