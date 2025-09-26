@@ -135,7 +135,7 @@ export function SettingsPageClient({ dictionary }: { dictionary: any }) {
     }
   }
 
-  const appVersion = "1.1.2";
+  const appVersion = "1.2.4";
   const hasMeasurements = !!(user?.height || user?.weight || user?.age || user?.gender || user?.activityLevel);
 
   if (!dictionary) {
