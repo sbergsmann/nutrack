@@ -153,6 +153,7 @@
     "loggedFoods": "Logged Foods",
     "noFoodLogged": "No food logged for this day yet.",
     "totalPortion": "Total Portion",
+    "perPortion": "Per Portion",
     "decreaseAria": "Decrease quantity of",
     "increaseAria": "Increase quantity of",
     "deleteAria": "Delete",
@@ -303,3 +304,5 @@
     }
   }
 }
+
+    

@@ -153,6 +153,7 @@
     "loggedFoods": "Protokollierte Lebensmittel",
     "noFoodLogged": "Für diesen Tag wurde noch kein Essen protokolliert.",
     "totalPortion": "Gesamtportion",
+    "perPortion": "Pro Portion",
     "decreaseAria": "Menge von verringern",
     "increaseAria": "Menge von erhöhen",
     "deleteAria": "Löschen",
@@ -303,3 +304,5 @@
     }
   }
 }
+
+    
