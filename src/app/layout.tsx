@@ -9,6 +9,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 export const metadata: Metadata = {
   title: "Nutrack9",
   description: "Track your daily food intake and mood.",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
@@ -22,6 +23,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
+        <link rel="apple-touch-icon" href="/icon.svg" />
+        <meta name="theme-color" content="#F87171" />
       </head>
       <body className={cn("font-body antialiased h-full")}>
         <FirebaseClientProvider>
