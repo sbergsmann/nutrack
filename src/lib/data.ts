@@ -186,7 +186,15 @@ export async function getOrCreateFood(
     const foodDoc = querySnapshot.docs[0];
     const foodData = foodDoc.data();
     const foodRef = doc(foodsRef as Firestore, foodDoc.id);
-    updateDoc(foodRef, { lastAddedAt: serverTimestamp() });
+
+    const updatePayload: { [key: string]: any } = { lastAddedAt: serverTimestamp() };
+    
+    // Backfill name_lowercase if it's missing
+    if (!foodData.name_lowercase) {
+      updatePayload.name_lowercase = foodData.name.toLowerCase();
+    }
+    
+    updateDoc(foodRef, updatePayload);
     
     const needsEnrichment = foodData.portion == null || foodData.calories == null || foodData.carbs == null || foodData.proteins == null || foodData.fats == null;
     if (needsEnrichment) {
