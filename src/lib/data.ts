@@ -54,11 +54,14 @@ async function triggerFoodEnrichment(firestore: Firestore, foodId: string, foodN
 function generateNgrams(name: string): string[] {
     const ngrams = new Set<string>();
     if (!name) return [];
-    const lowerCaseName = name.toLowerCase();
     
-    for (let i = 0; i < lowerCaseName.length; i++) {
-        for (let j = i + 1; j <= lowerCaseName.length; j++) {
-            ngrams.add(lowerCaseName.substring(i, j));
+    const lowerCaseName = name.toLowerCase();
+    const words = lowerCaseName.split(' ');
+
+    for (const word of words) {
+        if(word.length === 0) continue;
+        for (let i = 1; i <= word.length; i++) {
+            ngrams.add(word.substring(0, i));
         }
     }
     
