@@ -18,8 +18,9 @@ import { cn } from "@/lib/utils";
 import { addDays, differenceInCalendarDays, endOfDay, format, startOfDay } from "date-fns";
 import { AddToHomeScreenPrompt } from "@/components/AddToHomeScreenPrompt";
 import { useParams } from "next/navigation";
+import { getDictionary } from "@/lib/get-dictionary";
 
-export default function HomePage() {
+export default function HomePage({ dictionary }: { dictionary: any }) {
   const { data: user, loading: userLoading } = useUser();
   const firestore = useFirestore();
   const [allEntries, setAllEntries] = useState<DailyEntry[]>([]);
@@ -121,23 +122,23 @@ export default function HomePage() {
   }
 
   if (!user) {
-    return <WelcomePage />;
+    return <WelcomePage dictionary={dictionary.welcome} />;
   }
 
   return (
     <div className="container mx-auto space-y-8 p-4 md:p-8">
       <Card>
         <CardHeader>
-          <CardTitle>Welcome, {user.displayName || 'User'}!</CardTitle>
+          <CardTitle>{dictionary.dashboard.welcomeTitle}, {user.displayName || 'User'}!</CardTitle>
           <CardDescription>
-            Here's an overview of your journey with Nutrack9.
+            {dictionary.dashboard.welcomeDescription}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-2xl font-bold">
               <Flame className={cn("h-7 w-7", streakData.streak > 0 ? "text-primary" : "text-muted-foreground")} />
-              <span>{streakData.streak} Day Streak</span>
+              <span>{streakData.streak} {dictionary.dashboard.dayStreak}</span>
             </div>
             <div className="flex gap-1">
               {streakData.days.map((day, index) => (
@@ -152,27 +153,27 @@ export default function HomePage() {
         </CardContent>
       </Card>
       
-      <AddToHomeScreenPrompt />
+      <AddToHomeScreenPrompt dictionary={dictionary.a2hs} />
 
       {profileComplete ? (
         <>
-          <RecommendedIntake userProfile={user} />
+          <RecommendedIntake userProfile={user} dictionary={dictionary.recommendedIntake} />
           {allEntries.length > 1 ? (
-            <IntakeChart userProfile={user} entries={allEntries} />
+            <IntakeChart userProfile={user} entries={allEntries} dictionary={dictionary.intakeChart} />
           ) : (
              <Card>
               <CardHeader>
-                <CardTitle>Start Your Journey</CardTitle>
+                <CardTitle>{dictionary.dashboard.startJourneyTitle}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  {allEntries.length > 0 ? "Log at least one more day to see your progress chart." : "You haven't logged any food yet. Go to the Tracking page to start your first log and see your progress here!"}
+                  {allEntries.length > 0 ? dictionary.dashboard.logOneMoreDay : dictionary.dashboard.noLogsYet}
                 </p>
               </CardContent>
               <CardFooter>
                  <Button asChild>
                     <Link href={`/${lang}/tracking`}>
-                      Go to Tracking
+                      {dictionary.dashboard.goToTracking}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
@@ -183,20 +184,20 @@ export default function HomePage() {
       ) : (
         <Card>
           <CardHeader>
-            <CardTitle>Get Personalized Recommendations</CardTitle>
+            <CardTitle>{dictionary.dashboard.getPersonalizedTitle}</CardTitle>
             <CardDescription>
-              Fill out your personal information to unlock daily nutritional goals tailored just for you.
+              {dictionary.dashboard.getPersonalizedDescription}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              By providing your height, weight, age, gender, and activity level, we can estimate your daily calorie and macronutrient needs to help you reach your goals.
+              {dictionary.dashboard.getPersonalizedContent}
             </p>
           </CardContent>
           <CardFooter>
             <Button asChild>
               <Link href={`/${lang}/settings`}>
-                Go to Settings
+                {dictionary.dashboard.goToSettings}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>

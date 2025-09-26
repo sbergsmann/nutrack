@@ -12,6 +12,7 @@ import { Beef, Droplet, Flame, Sparkles } from "lucide-react";
 type IntakeChartProps = {
   userProfile: UserProfile;
   entries: DailyEntry[];
+  dictionary: any;
 };
 
 type ChartData = {
@@ -22,24 +23,18 @@ type ChartData = {
 
 type NutrientKey = "calories" | "carbs" | "proteins" | "fats";
 
-const nutrientConfig = {
-  calories: { label: "Calories", icon: Sparkles, unit: "", color: "hsl(var(--chart-1))" },
-  carbs: { label: "Carbs", icon: Flame, unit: "g", color: "hsl(var(--chart-2))" },
-  proteins: { label: "Protein", icon: Beef, unit: "g", color: "hsl(var(--chart-3))" },
-  fats: { label: "Fat", icon: Droplet, unit: "g", color: "hsl(var(--chart-4))" },
-};
 
-const CustomTooltip = ({ active, payload, label, unit }: any) => {
+const CustomTooltip = ({ active, payload, label, unit, dictionary }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
       <div className="bg-background/80 backdrop-blur-sm p-3 border rounded-md shadow-sm">
         <p className="font-bold">{label}</p>
         <p style={{ color: payload.find(p => p.dataKey === 'actual')?.stroke }}>
-          Actual: {data.actual.toFixed(0)} {unit}
+          {dictionary.actual}: {data.actual.toFixed(0)} {unit}
         </p>
         <p style={{ color: payload.find(p => p.dataKey === 'recommended')?.stroke }}>
-          Recommended: {data.recommended[0].toFixed(0)} - {data.recommended[1].toFixed(0)} {unit}
+          {dictionary.recommended}: {data.recommended[0].toFixed(0)} - {data.recommended[1].toFixed(0)} {unit}
         </p>
       </div>
     );
@@ -48,8 +43,15 @@ const CustomTooltip = ({ active, payload, label, unit }: any) => {
 };
 
 
-export function IntakeChart({ userProfile, entries }: IntakeChartProps) {
+export function IntakeChart({ userProfile, entries, dictionary }: IntakeChartProps) {
   const [activeNutrient, setActiveNutrient] = useState<NutrientKey>("calories");
+
+  const nutrientConfig = {
+    calories: { label: dictionary.nutrients.calories, icon: Sparkles, unit: "", color: "hsl(var(--chart-1))" },
+    carbs: { label: dictionary.nutrients.carbs, icon: Flame, unit: "g", color: "hsl(var(--chart-2))" },
+    proteins: { label: dictionary.nutrients.protein, icon: Beef, unit: "g", color: "hsl(var(--chart-3))" },
+    fats: { label: dictionary.nutrients.fat, icon: Droplet, unit: "g", color: "hsl(var(--chart-4))" },
+  };
 
   const { nutritionGoals, chartData } = useMemo(() => {
     const { height, weight, age, gender, activityLevel } = userProfile;
@@ -124,9 +126,9 @@ export function IntakeChart({ userProfile, entries }: IntakeChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Nutrient Intake Analysis</CardTitle>
+        <CardTitle>{dictionary.title}</CardTitle>
         <CardDescription>
-          Your daily intake versus your recommended range over time.
+          {dictionary.description}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -158,7 +160,7 @@ export function IntakeChart({ userProfile, entries }: IntakeChartProps) {
                             tickLine={{ stroke: 'hsl(var(--muted-foreground))' }}
                             domain={['dataMin - 20', 'dataMax + 20']}
                         />
-                        <Tooltip content={<CustomTooltip unit={nutrientConfig[key].unit} />} />
+                        <Tooltip content={<CustomTooltip unit={nutrientConfig[key].unit} dictionary={dictionary.tooltip} />} />
                         <Area 
                             type="monotone" 
                             dataKey="recommended" 
@@ -167,14 +169,14 @@ export function IntakeChart({ userProfile, entries }: IntakeChartProps) {
                             fillOpacity={0.2}
                             strokeOpacity={0.4}
                             strokeDasharray="5 5"
-                            name="Recommended Range" 
+                            name={dictionary.legend.recommended}
                         />
                         <Line 
                             type="monotone" 
                             dataKey="actual" 
                             stroke={nutrientConfig[key].color}
                             strokeWidth={2}
-                            name="Actual Intake" 
+                            name={dictionary.legend.actual}
                             dot={{ r: 4 }}
                             activeDot={{ r: 6 }}
                         />

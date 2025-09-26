@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Button } from "./ui/button";
 import { Smartphone, Share, MoreVertical, PlusSquare, X } from "lucide-react";
 
-export function AddToHomeScreenPrompt() {
+export function AddToHomeScreenPrompt({ dictionary }: { dictionary: any }) {
   const [isVisible, setIsVisible] = useState(false);
   const [platform, setPlatform] = useState<"ios" | "android" | "other">("other");
 
@@ -30,18 +30,18 @@ export function AddToHomeScreenPrompt() {
     setIsVisible(false);
   };
 
-  if (!isVisible || platform === 'other') {
+  if (!isVisible || platform === 'other' || !dictionary) {
     return null;
   }
 
   const instructions = {
     ios: [
-      { text: "Tap the Share button", icon: <Share className="h-5 w-5" /> },
-      { text: "Scroll down and select 'Add to Home Screen'", icon: <PlusSquare className="h-5 w-5" /> },
+      { text: dictionary.ios.step1, icon: <Share className="h-5 w-5" /> },
+      { text: dictionary.ios.step2, icon: <PlusSquare className="h-5 w-5" /> },
     ],
     android: [
-      { text: "Tap the Menu button", icon: <MoreVertical className="h-5 w-5" /> },
-      { text: "Select 'Add to Home screen'", icon: <Smartphone className="h-5 w-5" /> },
+      { text: dictionary.android.step1, icon: <MoreVertical className="h-5 w-5" /> },
+      { text: dictionary.android.step2, icon: <Smartphone className="h-5 w-5" /> },
     ],
   };
 
@@ -51,15 +51,15 @@ export function AddToHomeScreenPrompt() {
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                 <Smartphone />
-                Get Quick Access
+                {dictionary.title}
                 </CardTitle>
                 <CardDescription>
-                Add Nutrack9 to your home screen for a faster, app-like experience.
+                {dictionary.description}
                 </CardDescription>
             </CardHeader>
             <CardContent>
                 <p className="font-medium mb-3">
-                    {platform === "ios" ? "On your iPhone or iPad:" : "On your Android device:"}
+                    {platform === "ios" ? dictionary.ios.platform : dictionary.android.platform}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
                 {(instructions[platform] || []).map((step, index) => (
@@ -77,7 +77,7 @@ export function AddToHomeScreenPrompt() {
                 size="icon"
                 className="absolute top-4 right-4 h-6 w-6"
                 onClick={handleDismiss}
-                aria-label="Dismiss"
+                aria-label={dictionary.dismiss}
             >
                 <X className="h-4 w-4" />
             </Button>
@@ -85,5 +85,3 @@ export function AddToHomeScreenPrompt() {
     </div>
   );
 }
-
-

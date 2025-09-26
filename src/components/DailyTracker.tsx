@@ -34,12 +34,12 @@ import { cn } from "@/lib/utils";
 import { FeedbackDialog } from "./FeedbackDialog";
 import FoodIcon from "./FoodIcon";
 
-const moodOptions: { value: Mood; label: string; icon: React.ReactNode }[] = [
-  { value: "Happy", label: "Happy", icon: <Smile className="h-4 w-4" /> },
-  { value: "Neutral", label: "Neutral", icon: <Meh className="h-4 w-4" /> },
-  { value: "Sad", label: "Sad", icon: <Frown className="h-4 w-4" /> },
-  { value: "Energetic", label: "Energetic", icon: <Zap className="h-4 w-4" /> },
-  { value: "Tired", label: "Tired", icon: <Battery className="h-4 w-4" /> },
+const moodOptions: { value: Mood; labelKey: string; icon: React.ReactNode }[] = [
+  { value: "Happy", labelKey: "happy", icon: <Smile className="h-4 w-4" /> },
+  { value: "Neutral", labelKey: "neutral", icon: <Meh className="h-4 w-4" /> },
+  { value: "Sad", labelKey: "sad", icon: <Frown className="h-4 w-4" /> },
+  { value: "Energetic", labelKey: "energetic", icon: <Zap className="h-4 w-4" /> },
+  { value: "Tired", labelKey: "tired", icon: <Battery className="h-4 w-4" /> },
 ];
 
 type SortKey = "calories" | "carbs" | "proteins" | "fats";
@@ -49,11 +49,13 @@ export function DailyTracker({
   isToday,
   isLoading,
   trackedDates = [],
+  dictionary,
 }: {
   entry: DailyEntry;
   isToday: boolean;
   isLoading: boolean;
   trackedDates?: string[];
+  dictionary: any;
 }) {
   const { data: user } = useUser();
   const firestore = useFirestore();
@@ -206,8 +208,8 @@ export function DailyTracker({
       console.error("Failed to log food:", error);
       toast({
         variant: "destructive",
-        title: "Failed to log food",
-        description: "Please try again.",
+        title: dictionary.toasts.logFoodFailed.title,
+        description: dictionary.toasts.logFoodFailed.description,
       });
       setLoggedFoods(entry.foods); // Revert optimistic update on error
     } finally {
@@ -273,7 +275,7 @@ export function DailyTracker({
     );
   };
 
-  if (isLoading) {
+  if (isLoading || !dictionary) {
     return (
       <div className="space-y-6">
         <Card className="shadow-sm">
@@ -312,7 +314,7 @@ export function DailyTracker({
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen}>
+      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} dictionary={dictionary.feedbackDialog}>
         {/* This is a dummy trigger, as the dialog is controlled programmatically */}
         <span />
       </FeedbackDialog>
@@ -341,7 +343,7 @@ export function DailyTracker({
                 {!isToday && (
                   <div className="p-2 border-t">
                     <Button variant="ghost" className="w-full" asChild>
-                      <Link href={`/${lang}/tracking`}>Go to Today</Link>
+                      <Link href={`/${lang}/tracking`}>{dictionary.goToToday}</Link>
                     </Button>
                   </div>
                 )}
@@ -350,7 +352,7 @@ export function DailyTracker({
             <CardTitle className="font-headline">{displayDate}</CardTitle>
           </div>
           <CardDescription>
-            { user ? "Log your food and mood for the day." : "Please log in to track your food and mood."}
+            { user ? dictionary.description : dictionary.loginPrompt }
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -359,7 +361,7 @@ export function DailyTracker({
               <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="font-medium text-sm">
-                    {currentMood ? `You're feeling: ${currentMood}` : "How are you feeling?"}
+                    {currentMood ? `${dictionary.feeling}: ${dictionary.moods[currentMood.toLowerCase()]}` : dictionary.howFeeling}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {moodOptions.map((option) => (
@@ -373,7 +375,7 @@ export function DailyTracker({
                         )}
                       >
                         {option.icon}
-                        <span className="ml-2">{option.label}</span>
+                        <span className="ml-2">{dictionary.moods[option.labelKey]}</span>
                       </Button>
                     ))}
                   </div>
@@ -387,13 +389,13 @@ export function DailyTracker({
                   className="space-y-2"
                 >
                   <label htmlFor="food-input" className="font-medium text-sm">
-                    Add a food item
+                    {dictionary.addFoodLabel}
                   </label>
                   <div className="flex gap-2 relative" ref={containerRef}>
                      <Input
                       id="food-input"
                       name="food"
-                      placeholder="e.g., Avocado toast"
+                      placeholder={dictionary.foodPlaceholder}
                       className="flex-grow"
                       required
                       disabled={isPending}
@@ -402,7 +404,7 @@ export function DailyTracker({
                       onFocus={() => setShowSuggestions(true)}
                       autoComplete="off"
                     />
-                    <Button type="submit" size="icon" aria-label="Add food" disabled={isPending}>
+                    <Button type="submit" size="icon" aria-label={dictionary.addFoodAria} disabled={isPending}>
                       <Plus />
                     </Button>
 
@@ -426,7 +428,7 @@ export function DailyTracker({
               </div>
 
               <div className="space-y-4">
-                <h3 className="font-semibold text-sm">Logged Foods</h3>
+                <h3 className="font-semibold text-sm">{dictionary.loggedFoods}</h3>
 
                 {loggedFoods && loggedFoods.length > 0 ? (
                   <>
@@ -435,7 +437,7 @@ export function DailyTracker({
                         {renderSortIcon('calories')}
                         <Sparkles className="h-5 w-5 text-chart-1" />
                         <div>
-                          <p className="text-xs text-muted-foreground">Calories</p>
+                          <p className="text-xs text-muted-foreground">{dictionary.nutrients.calories}</p>
                           <p className="font-bold">{nutrientTotals.calories.toFixed(0)}</p>
                         </div>
                       </Button>
@@ -443,7 +445,7 @@ export function DailyTracker({
                         {renderSortIcon('carbs')}
                         <Flame className="h-5 w-5 text-chart-2" />
                         <div>
-                          <p className="text-xs text-muted-foreground">Carbs</p>
+                          <p className="text-xs text-muted-foreground">{dictionary.nutrients.carbs}</p>
                           <p className="font-bold">{nutrientTotals.carbs.toFixed(0)}g</p>
                         </div>
                       </Button>
@@ -451,7 +453,7 @@ export function DailyTracker({
                         {renderSortIcon('proteins')}
                         <Beef className="h-5 w-5 text-chart-3" />
                         <div>
-                          <p className="text-xs text-muted-foreground">Protein</p>
+                          <p className="text-xs text-muted-foreground">{dictionary.nutrients.protein}</p>
                           <p className="font-bold">{nutrientTotals.proteins.toFixed(0)}g</p>
                         </div>
                       </Button>
@@ -459,7 +461,7 @@ export function DailyTracker({
                          {renderSortIcon('fats')}
                         <Droplet className="h-5 w-5 text-chart-4" />
                         <div>
-                          <p className="text-xs text-muted-foreground">Fat</p>
+                          <p className="text-xs text-muted-foreground">{dictionary.nutrients.fat}</p>
                           <p className="font-bold">{nutrientTotals.fats.toFixed(0)}g</p>
                         </div>
                       </Button>
@@ -490,23 +492,23 @@ export function DailyTracker({
                                 </div>
                                 {(food.portion != null && (food.calories != null || food.carbs != null || food.proteins != null || food.fats != null)) ? (
                                   <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                                    <div className="flex items-center gap-1" title="Calories">
+                                    <div className="flex items-center gap-1" title={dictionary.nutrients.calories}>
                                       <Sparkles className="h-3 w-3 text-chart-1" />
                                       <span>{food.calories?.toFixed(0) ?? '–'}</span>
                                     </div>
-                                    <div className="flex items-center gap-1" title="Carbs">
+                                    <div className="flex items-center gap-1" title={dictionary.nutrients.carbs}>
                                       <Flame className="h-3 w-3 text-chart-2" />
                                       <span>{food.carbs?.toFixed(0) ?? '–'}g</span>
                                     </div>
-                                    <div className="flex items-center gap-1" title="Protein">
+                                    <div className="flex items-center gap-1" title={dictionary.nutrients.protein}>
                                       <Beef className="h-3 w-3 text-chart-3" />
                                       <span>{food.proteins?.toFixed(0) ?? '–'}g</span>
                                     </div>
-                                    <div className="flex items-center gap-1" title="Fat">
+                                    <div className="flex items-center gap-1" title={dictionary.nutrients.fat}>
                                       <Droplet className="h-3 w-3 text-chart-4" />
                                       <span>{food.fats?.toFixed(0) ?? '–'}g</span>
                                     </div>
-                                    <div className="flex items-center gap-1 font-bold text-primary/80" title="Total Portion">
+                                    <div className="flex items-center gap-1 font-bold text-primary/80" title={dictionary.totalPortion}>
                                         <span>
                                             {quantity > 1 ? `${quantity}x${food.portion}g` : `${food.portion}g`}
                                         </span>
@@ -523,7 +525,7 @@ export function DailyTracker({
                                 className="h-7 w-7"
                                 onClick={() => handleQuantityChange(food, -1)}
                                 disabled={isPending}
-                                aria-label={`Decrease quantity of ${food.name}`}
+                                aria-label={`${dictionary.decreaseAria} ${food.name}`}
                               >
                                 <Minus className="h-4 w-4" />
                               </Button>
@@ -534,7 +536,7 @@ export function DailyTracker({
                                 className="h-7 w-7"
                                 onClick={() => handleQuantityChange(food, 1)}
                                 disabled={isPending}
-                                aria-label={`Increase quantity of ${food.name}`}
+                                aria-label={`${dictionary.increaseAria} ${food.name}`}
                               >
                                 <Plus className="h-4 w-4" />
                               </Button>
@@ -545,7 +547,7 @@ export function DailyTracker({
                               className="h-7 w-7 text-destructive/70 hover:text-destructive"
                               onClick={() => handleDeleteFood(food.id)}
                               disabled={isPending}
-                              aria-label={`Delete ${food.name}`}
+                              aria-label={`${dictionary.deleteAria} ${food.name}`}
                             >
                               <Trash className="h-4 w-4" />
                             </Button>
@@ -556,7 +558,7 @@ export function DailyTracker({
                   </>
                 ) : (
                   <div className="text-center text-muted-foreground text-sm p-4 bg-background/50 border rounded-md">
-                    <p>No food logged for this day yet.</p>
+                    <p>{dictionary.noFoodLogged}</p>
                   </div>
                 )}
               </div>

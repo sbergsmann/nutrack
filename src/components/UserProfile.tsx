@@ -25,7 +25,7 @@ import { DeleteAccountDialog } from "./DeleteAccountDialog";
 import { usePathname, useParams } from "next/navigation";
 import { i18n } from "@/i18n.config";
 
-export function UserProfile() {
+export function UserProfile({ dictionary }: { dictionary: any }) {
   const { data: user, loading } = useUser();
   const pathname = usePathname();
   const params = useParams();
@@ -45,7 +45,7 @@ export function UserProfile() {
     return (
       <Button variant="ghost" onClick={signInWithGoogle}>
         <LogIn className="mr-2 h-4 w-4" />
-        Login
+        {dictionary.login}
       </Button>
     );
   }
@@ -81,7 +81,7 @@ export function UserProfile() {
           <div className="flex justify-between items-center w-full">
             <div className="flex items-center">
               <BadgeCheck className="mr-2 h-4 w-4" />
-              <span>Plan</span>
+              <span>{dictionary.plan}</span>
             </div>
             <Badge variant="secondary">{user.plan}</Badge>
           </div>
@@ -90,7 +90,7 @@ export function UserProfile() {
         <DropdownMenuSub>
           <DropdownMenuSubTrigger>
             <Languages className="mr-2 h-4 w-4" />
-            <span>Language</span>
+            <span>{dictionary.language}</span>
           </DropdownMenuSubTrigger>
           <DropdownMenuPortal>
             <DropdownMenuSubContent>
@@ -103,24 +103,24 @@ export function UserProfile() {
             </DropdownMenuSubContent>
           </DropdownMenuPortal>
         </DropdownMenuSub>
-        <FeedbackDialog>
+        <FeedbackDialog dictionary={dictionary.feedback}>
           <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
             <MessageSquare className="mr-2 h-4 w-4" />
-            <span>Send Feedback</span>
+            <span>{dictionary.sendFeedback}</span>
           </DropdownMenuItem>
         </FeedbackDialog>
         <DropdownMenuItem onClick={signOut}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>{dictionary.logout}</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DeleteAccountDialog>
+        <DeleteAccountDialog dictionary={dictionary.deleteAccount}>
             <DropdownMenuItem
             onSelect={(e) => e.preventDefault()}
             className="text-destructive focus:bg-destructive/10 focus:text-destructive"
             >
             <Trash2 className="mr-2 h-4 w-4" />
-            <span>Delete Account</span>
+            <span>{dictionary.deleteAccount.title}</span>
             </DropdownMenuItem>
         </DeleteAccountDialog>
       </DropdownMenuContent>

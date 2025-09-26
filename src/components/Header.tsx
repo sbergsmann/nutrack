@@ -5,7 +5,7 @@ import { Navigation } from "./Navigation";
 import { MobileNavigation } from "./MobileNavigation";
 import type { Locale } from "@/i18n.config";
 
-export default async function Header({ lang }: { lang: Locale }) {
+export default async function Header({ lang, dictionary }: { lang: Locale, dictionary: any }) {
 
   return (
     <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-10">
@@ -17,11 +17,11 @@ export default async function Header({ lang }: { lang: Locale }) {
             >
             <span className="font-headline">Nutrack<span className="text-primary">9</span></span>
             </Link>
-            <Navigation />
+            <Navigation dictionary={dictionary.nav} />
         </div>
         <div className="flex items-center gap-2">
-            <UserProfile />
-            <MobileNavigation />
+            <UserProfile dictionary={dictionary.userProfile} />
+            <MobileNavigation dictionary={dictionary.nav} />
         </div>
       </div>
     </header>

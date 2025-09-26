@@ -16,19 +16,19 @@ import {
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase/auth/use-user";
 
-const navLinks = [
-  { href: "/", label: "Dashboard" },
-  { href: "/tracking", label: "Tracking" },
-  { href: "/premium", label: "Pricing" },
-  { href: "/settings", label: "Settings" },
-];
-
-export function MobileNavigation() {
+export function MobileNavigation({ dictionary }: { dictionary: any }) {
   const pathname = usePathname();
   const params = useParams();
   const lang = params.lang;
   const { data: user } = useUser();
   const [open, setOpen] = useState(false);
+
+  const navLinks = [
+    { href: "/", label: dictionary.dashboard },
+    { href: "/tracking", label: dictionary.tracking },
+    { href: "/premium", label: dictionary.pricing },
+    { href: "/settings", label: dictionary.settings },
+  ];
 
   if (!user) return null;
 
@@ -38,12 +38,12 @@ export function MobileNavigation() {
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon">
             <Menu className="h-6 w-6" />
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">{dictionary.openMenu}</span>
           </Button>
         </SheetTrigger>
         <SheetContent side="left">
           <SheetHeader>
-            <SheetTitle>Menu</SheetTitle>
+            <SheetTitle>{dictionary.menu}</SheetTitle>
           </SheetHeader>
           <nav className="mt-8 flex flex-col gap-4">
             {navLinks.map(({ href, label }) => {

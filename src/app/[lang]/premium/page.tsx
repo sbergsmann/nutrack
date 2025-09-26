@@ -1,8 +1,7 @@
 
 "use client";
 
-import { ArrowLeft, Check, StarIcon } from "lucide-react";
-import Link from "next/link";
+import { Check, StarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,56 +19,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
 import type { UserProfile } from "@/lib/types";
+import { getDictionary } from "@/lib/get-dictionary";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type PlanName = UserProfile["plan"];
 
-const plans: {
-  name: PlanName;
-  price: string;
-  pricePeriod: string;
-  description: string;
-  features: string[];
-  isPopular: boolean;
-}[] = [
-  {
-    name: "Basic",
-    price: "Free",
-    pricePeriod: "",
-    description: "The essentials for getting started.",
-    features: [
-        "Daily food and mood logging",
-        "Calendar view",
-        "Basic food suggestions"
-    ],
-    isPopular: false,
-  },
-  {
-    name: "Monthly",
-    price: "$10",
-    pricePeriod: "/month",
-    description: "Unlock advanced insights.",
-    features: [
-      "Unlimited daily logs",
-      "Advanced mood analysis",
-      "Export your data",
-    ],
-    isPopular: false,
-  },
-  {
-    name: "Yearly",
-    price: "$100",
-    pricePeriod: "/year",
-    description: "Save 20% and get all features.",
-    features: [
-      "All features from the Monthly plan",
-      "AI-powered meal suggestions",
-      "Priority support",
-    ],
-    isPopular: true,
-  },
-];
-
-export default function PremiumPage() {
+export default function PremiumPage({ dictionary }: { dictionary: any }) {
   const { data: user, loading: userLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -78,6 +33,52 @@ export default function PremiumPage() {
   const lang = params.lang;
   const [isPending, setIsPending] = useState<PlanName | null>(null);
 
+  const plans: {
+    name: PlanName;
+    price: string;
+    pricePeriod: string;
+    description: string;
+    features: string[];
+    isPopular: boolean;
+  }[] = [
+    {
+      name: "Basic",
+      price: dictionary?.basic.price ?? "Free",
+      pricePeriod: "",
+      description: dictionary?.basic.description ?? "The essentials for getting started.",
+      features: dictionary?.basic.features ?? [
+          "Daily food and mood logging",
+          "Calendar view",
+          "Basic food suggestions"
+      ],
+      isPopular: false,
+    },
+    {
+      name: "Monthly",
+      price: "$10",
+      pricePeriod: dictionary?.monthly.pricePeriod ?? "/month",
+      description: dictionary?.monthly.description ?? "Unlock advanced insights.",
+      features: dictionary?.monthly.features ?? [
+        "Unlimited daily logs",
+        "Advanced mood analysis",
+        "Export your data",
+      ],
+      isPopular: false,
+    },
+    {
+      name: "Yearly",
+      price: "$100",
+      pricePeriod: dictionary?.yearly.pricePeriod ?? "/year",
+      description: dictionary?.yearly.description ?? "Save 20% and get all features.",
+      features: dictionary?.yearly.features ?? [
+        "All features from the Monthly plan",
+        "AI-powered meal suggestions",
+        "Priority support",
+      ],
+      isPopular: true,
+    },
+  ];
+
   const handleChoosePlan = async (planName: PlanName) => {
     if (!user || !firestore) return;
     setIsPending(planName);
@@ -85,21 +86,27 @@ export default function PremiumPage() {
     try {
       await updateUserPlan(firestore, user.uid, planName);
       toast({
-        title: "Plan updated!",
-        description: `You are now on the ${planName} plan.`,
+        title: dictionary.toasts.planUpdated.title,
+        description: `${dictionary.toasts.planUpdated.description} ${planName}.`,
       });
       router.push(`/${lang}/`);
     } catch (error) {
       console.error("Failed to update plan:", error);
       toast({
         variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "Could not update your plan.",
+        title: dictionary.toasts.error.title,
+        description: dictionary.toasts.error.planUpdate,
       });
     } finally {
       setIsPending(null);
     }
   };
+
+  if (!dictionary) {
+    return <div className="container mx-auto max-w-5xl p-4 md:p-8 animate-fade-in">
+        <Skeleton className="h-96 w-full" />
+      </div>;
+  }
 
   const isLoading = userLoading || !!isPending;
 
@@ -107,10 +114,10 @@ export default function PremiumPage() {
     <div className="container mx-auto max-w-5xl p-4 md:p-8 animate-fade-in">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl font-headline">
-          Choose Your Plan
+          {dictionary.title}
         </h1>
         <p className="mt-4 max-w-2xl mx-auto text-muted-foreground md:text-xl">
-          Unlock powerful features to supercharge your health journey.
+          {dictionary.subtitle}
         </p>
       </div>
 
@@ -127,7 +134,7 @@ export default function PremiumPage() {
             {plan.isPopular && (
               <div className="py-1 px-4 bg-primary text-primary-foreground text-center text-sm font-semibold rounded-t-lg flex items-center justify-center gap-2">
                 <StarIcon className="h-4 w-4" />
-                Most Popular
+                {dictionary.mostPopular}
               </div>
             )}
             <CardHeader className="items-center text-center">
@@ -156,12 +163,12 @@ export default function PremiumPage() {
                 disabled={isLoading || user?.plan === plan.name}
               >
                 {user?.plan === plan.name
-                  ? "Current Plan"
+                  ? dictionary.buttons.currentPlan
                   : isPending === plan.name
-                  ? "Processing..."
+                  ? dictionary.buttons.processing
                   : plan.name === 'Basic'
-                  ? 'Downgrade to Basic'
-                  : `Upgrade to ${plan.name}`}
+                  ? dictionary.buttons.downgrade
+                  : `${dictionary.buttons.upgrade} ${plan.name}`}
               </Button>
             </CardFooter>
           </Card>
@@ -169,4 +176,9 @@ export default function PremiumPage() {
       </div>
     </div>
   );
+}
+
+async function PremiumPageLoader({ params }: { params: { lang: string } }) {
+  const dictionary = await getDictionary(params.lang);
+  return <PremiumPage dictionary={dictionary.premium} />;
 }

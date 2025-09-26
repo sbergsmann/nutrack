@@ -20,14 +20,14 @@ import { useToast } from "@/hooks/use-toast";
 import { deleteUserAccount } from "@/lib/actions";
 import { signOut } from "@/firebase/auth/actions";
 
-export function DeleteAccountDialog({ children }: { children: React.ReactNode }) {
+export function DeleteAccountDialog({ children, dictionary }: { children: React.ReactNode, dictionary: any }) {
   const { data: user } = useUser();
   const { toast } = useToast();
   const [inputValue, setInputValue] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const confirmationText = "delete";
+  const confirmationText = dictionary.confirmationText;
 
   const handleDelete = async () => {
     if (!user) return;
@@ -36,8 +36,8 @@ export function DeleteAccountDialog({ children }: { children: React.ReactNode })
       const result = await deleteUserAccount(user.uid);
       if (result.success) {
         toast({
-          title: "Account deleted",
-          description: "Your account and all associated data have been permanently deleted.",
+          title: dictionary.toasts.success.title,
+          description: dictionary.toasts.success.description,
         });
         await signOut(); // This will trigger a redirect via useUser hook
       } else {
@@ -46,8 +46,8 @@ export function DeleteAccountDialog({ children }: { children: React.ReactNode })
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Deletion failed",
-        description: error.message || "An unexpected error occurred. Please try again.",
+        title: dictionary.toasts.error.title,
+        description: error.message || dictionary.toasts.error.description,
       });
       setIsDeleting(false);
     }
@@ -60,16 +60,13 @@ export function DeleteAccountDialog({ children }: { children: React.ReactNode })
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>{dictionary.title}</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your account
-            and remove all of your data from our servers.
+            {dictionary.description}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-                To confirm, please type "<b>{confirmationText}</b>" in the box below.
-            </p>
+            <p className="text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: dictionary.confirmPrompt.replace('{confirmationText}', confirmationText) }} />
             <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -77,13 +74,13 @@ export function DeleteAccountDialog({ children }: { children: React.ReactNode })
             />
         </div>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setInputValue("")}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={() => setInputValue("")}>{dictionary.buttons.cancel}</AlertDialogCancel>
           <AlertDialogAction
             disabled={inputValue !== confirmationText || isDeleting}
             onClick={handleDelete}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {isDeleting ? "Deleting..." : "Delete Account"}
+            {isDeleting ? dictionary.buttons.deleting : dictionary.buttons.delete}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

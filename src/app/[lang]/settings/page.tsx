@@ -36,6 +36,7 @@ import { updateUserProfile } from "@/lib/data";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { UserProfile } from "@/lib/types";
+import { getDictionary } from "@/lib/get-dictionary";
 
 const activityLevels: UserProfile['activityLevel'][] = ["Sedentary", "Lightly active", "Moderately active", "Very active", "Extra active"];
 
@@ -58,7 +59,7 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-export default function SettingsPage() {
+function SettingsPage({ dictionary }: { dictionary: any }) {
   const { data: user, loading: userLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -100,14 +101,14 @@ export default function SettingsPage() {
       };
       await updateUserProfile(firestore, user.uid, updateData);
       toast({
-        title: "Profile updated",
-        description: "Your information has been saved successfully.",
+        title: dictionary.toasts.profileUpdated.title,
+        description: dictionary.toasts.profileUpdated.description,
       });
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "Could not save your profile.",
+        title: dictionary.toasts.error.title,
+        description: dictionary.toasts.error.profileSave,
       });
     } finally {
       setIsSaving(false);
@@ -121,14 +122,14 @@ export default function SettingsPage() {
       await updateUserProfile(firestore, user.uid, { height: null, weight: null, age: null, gender: null, activityLevel: null });
       form.reset({ height: null, weight: null, age: null, gender: null, activityLevel: null });
       toast({
-        title: "Profile cleared",
-        description: "Your personal information has been removed.",
+        title: dictionary.toasts.profileCleared.title,
+        description: dictionary.toasts.profileCleared.description,
       });
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "Could not clear your profile.",
+        title: dictionary.toasts.error.title,
+        description: dictionary.toasts.error.profileClear,
       });
     } finally {
       setIsSaving(false);
@@ -138,22 +139,26 @@ export default function SettingsPage() {
   const appVersion = "1.1.2";
   const hasMeasurements = !!(user?.height || user?.weight || user?.age || user?.gender || user?.activityLevel);
 
+  if (!dictionary) {
+    return <div className="container mx-auto max-w-5xl p-4 md:p-8 animate-fade-in"><Skeleton className="w-full h-96" /></div>;
+  }
+
   return (
     <div className="container mx-auto max-w-5xl space-y-8 p-4 md:p-8 animate-fade-in">
       <div className="text-center">
         <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl font-headline">
-          Settings
+          {dictionary.title}
         </h1>
         <p className="mt-4 max-w-2xl mx-auto text-muted-foreground md:text-xl">
-          Manage your account and application settings.
+          {dictionary.subtitle}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
+          <CardTitle>{dictionary.personalInfo.title}</CardTitle>
           <CardDescription>
-            Provide this information to get personalized daily nutritional recommendations.
+            {dictionary.personalInfo.description}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -176,11 +181,11 @@ export default function SettingsPage() {
                     name="height"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Height (cm)</FormLabel>
+                        <FormLabel>{dictionary.fields.height}</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
-                            placeholder="e.g., 175"
+                            placeholder={dictionary.fields.heightPlaceholder}
                             {...field}
                             onChange={(e) => field.onChange(e.target.value)}
                             value={field.value ?? ""}
@@ -195,11 +200,11 @@ export default function SettingsPage() {
                     name="weight"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Weight (kg)</FormLabel>
+                        <FormLabel>{dictionary.fields.weight}</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
-                            placeholder="e.g., 70"
+                            placeholder={dictionary.fields.weightPlaceholder}
                             {...field}
                             onChange={(e) => field.onChange(e.target.value)}
                             value={field.value ?? ""}
@@ -214,11 +219,11 @@ export default function SettingsPage() {
                     name="age"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Age</FormLabel>
+                        <FormLabel>{dictionary.fields.age}</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
-                            placeholder="e.g., 30"
+                            placeholder={dictionary.fields.agePlaceholder}
                             {...field}
                             onChange={(e) => field.onChange(e.target.value)}
                             value={field.value ?? ""}
@@ -233,7 +238,7 @@ export default function SettingsPage() {
                     name="gender"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Gender</FormLabel>
+                        <FormLabel>{dictionary.fields.gender}</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value ?? undefined}
@@ -241,13 +246,13 @@ export default function SettingsPage() {
                          >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select your gender" />
+                              <SelectValue placeholder={dictionary.fields.genderPlaceholder} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="Male">Male</SelectItem>
-                            <SelectItem value="Female">Female</SelectItem>
-                            <SelectItem value="Other">Other</SelectItem>
+                            <SelectItem value="Male">{dictionary.genderOptions.male}</SelectItem>
+                            <SelectItem value="Female">{dictionary.genderOptions.female}</SelectItem>
+                            <SelectItem value="Other">{dictionary.genderOptions.other}</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -260,7 +265,7 @@ export default function SettingsPage() {
                       name="activityLevel"
                       render={({ field }) => (
                           <FormItem>
-                          <FormLabel>Activity Level</FormLabel>
+                          <FormLabel>{dictionary.fields.activityLevel}</FormLabel>
                           <Select 
                               onValueChange={field.onChange}
                               defaultValue={field.value ?? undefined}
@@ -268,12 +273,12 @@ export default function SettingsPage() {
                           >
                               <FormControl>
                               <SelectTrigger>
-                                  <SelectValue placeholder="Select your activity level" />
+                                  <SelectValue placeholder={dictionary.fields.activityLevelPlaceholder} />
                               </SelectTrigger>
                               </FormControl>
                               <SelectContent>
                               {activityLevels.map(level => (
-                                  <SelectItem key={level} value={level}>{level}</SelectItem>
+                                  <SelectItem key={level} value={level}>{dictionary.activityLevelOptions[level.replace(" ", "")]}</SelectItem>
                               ))}
                               </SelectContent>
                           </Select>
@@ -285,7 +290,7 @@ export default function SettingsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Button type="submit" disabled={isSaving || !form.formState.isDirty}>
-                    {isSaving ? "Saving..." : "Save Changes"}
+                    {isSaving ? dictionary.buttons.saving : dictionary.buttons.save}
                   </Button>
                   <Button
                     type="button"
@@ -293,7 +298,7 @@ export default function SettingsPage() {
                     onClick={handleClear}
                     disabled={isSaving || (!hasMeasurements && !form.formState.isDirty)}
                   >
-                    {isSaving ? "Clearing..." : "Clear All"}
+                    {isSaving ? dictionary.buttons.clearing : dictionary.buttons.clear}
                   </Button>
                 </div>
               </form>
@@ -303,8 +308,16 @@ export default function SettingsPage() {
       </Card>
 
       <div className="text-center text-sm text-muted-foreground">
-        <p>Version {appVersion}</p>
+        <p>{dictionary.version} {appVersion}</p>
       </div>
     </div>
   );
 }
+
+
+async function SettingsPageLoader({ params }: { params: { lang: string } }) {
+  const dictionary = await getDictionary(params.lang);
+  return <SettingsPage dictionary={dictionary.settings} />;
+}
+
+export default SettingsPageLoader;

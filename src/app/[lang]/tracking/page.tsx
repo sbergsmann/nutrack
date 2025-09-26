@@ -9,8 +9,9 @@ import { useState, useEffect } from "react";
 import type { DailyEntry } from "@/lib/types";
 import { useFirestore } from "@/firebase/provider";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getDictionary } from "@/lib/get-dictionary";
 
-export default function TrackingPage() {
+function TrackingPage({ dictionary }: { dictionary: any }) {
   const { data: user, loading: userLoading } = useUser();
   const firestore = useFirestore();
   const today = new Date();
@@ -50,7 +51,7 @@ export default function TrackingPage() {
 
   const isLoading = userLoading || loading;
 
-  if (isLoading) {
+  if (isLoading || !dictionary) {
     return (
       <div className="container mx-auto space-y-8 p-4 md:p-8">
         <Skeleton className="h-96 w-full" />
@@ -65,7 +66,15 @@ export default function TrackingPage() {
             isToday={true} 
             isLoading={isLoading}
             trackedDates={trackedDates}
+            dictionary={dictionary}
         />
     </div>
   );
 }
+
+async function TrackingPageLoader({ params }: { params: { lang: string } }) {
+  const dictionary = await getDictionary(params.lang);
+  return <TrackingPage dictionary={dictionary.dailyTracker} />;
+}
+
+export default TrackingPageLoader;

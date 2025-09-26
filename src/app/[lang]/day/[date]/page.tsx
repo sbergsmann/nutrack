@@ -11,8 +11,9 @@ import { getAllEntries, getEntry } from "@/lib/data";
 
 import { notFound } from "next/navigation";
 import { DailyTracker } from "@/components/DailyTracker";
+import { getDictionary } from "@/lib/get-dictionary";
 
-function DayPageClient({ dateString }: { dateString: string }) {
+function DayPageClient({ dateString, dictionary }: { dateString: string, dictionary: any }) {
   const firestore = useFirestore();
   const { data: user, loading: userLoading } = useUser();
 
@@ -70,6 +71,7 @@ function DayPageClient({ dateString }: { dateString: string }) {
           isToday={isToday} 
           isLoading={isLoading}
           trackedDates={trackedDates}
+          dictionary={dictionary}
         />
       </div>
     </div>
@@ -77,9 +79,9 @@ function DayPageClient({ dateString }: { dateString: string }) {
 }
 
 // This component is necessary because `use` is not allowed in a client component.
-function DayPageLoader({ params }: { params: { date: string, lang: string } }) {
-  const resolvedParams = React.use(params);
-  return <DayPageClient dateString={resolvedParams.date} />;
+async function DayPageLoader({ params }: { params: { date: string, lang: string } }) {
+  const dictionary = await getDictionary(params.lang);
+  return <DayPageClient dateString={params.date} dictionary={dictionary.dailyTracker} />;
 }
 
 export default DayPageLoader;

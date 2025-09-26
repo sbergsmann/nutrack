@@ -1,0 +1,301 @@
+
+{
+  "header": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "tracking": "Tracking",
+      "pricing": "Pricing",
+      "settings": "Settings",
+      "menu": "Menu",
+      "openMenu": "Open menu"
+    },
+    "userProfile": {
+      "login": "Login",
+      "plan": "Plan",
+      "language": "Language",
+      "sendFeedback": "Send Feedback",
+      "logout": "Log out",
+      "deleteAccount": {
+        "title": "Delete Account",
+        "description": "This action cannot be undone. This will permanently delete your account and remove all of your data from our servers.",
+        "confirmPrompt": "To confirm, please type \"<b>{confirmationText}</b>\" in the box below.",
+        "confirmationText": "delete",
+        "buttons": {
+          "cancel": "Cancel",
+          "delete": "Delete Account",
+          "deleting": "Deleting..."
+        },
+        "toasts": {
+          "success": {
+            "title": "Account deleted",
+            "description": "Your account and all associated data have been permanently deleted."
+          },
+          "error": {
+            "title": "Deletion failed",
+            "description": "An unexpected error occurred. Please try again."
+          }
+        }
+      },
+      "feedback": {
+        "title": "Send us your feedback",
+        "description": "We'd love to hear what you think about Nutrack9.",
+        "placeholder": "Tell us what you think...",
+        "buttons": {
+          "cancel": "Cancel",
+          "submit": "Submit"
+        },
+        "toasts": {
+          "noRating": "Please select a rating.",
+          "success": {
+            "title": "Feedback sent!",
+            "description": "Thank you for helping us improve."
+          },
+          "error": {
+            "title": "Failed to send feedback",
+            "description": "Please try again later."
+          }
+        }
+      }
+    }
+  },
+  "welcome": {
+    "title": "Unlock the Connection Between Food and Mood",
+    "subtitle": "Nutrack9 is a simple, mindful tool to help you discover how your diet affects your well-being. Track your meals and moods to find patterns and feel your best.",
+    "getStarted": "Get Started for Free",
+    "features": {
+      "nutrition": {
+        "title": "Track Your Nutrition",
+        "description": "Effortlessly log the foods you eat each day. Our smart suggestion tool makes it fast and simple."
+      },
+      "mood": {
+        "title": "Understand Your Mood",
+        "description": "Quickly record your mood throughout the day to see how your emotional state fluctuates."
+      },
+      "connections": {
+        "title": "Discover Connections",
+        "description": "Our calendar view helps you visualize the relationship between what you ate and how you felt."
+      }
+    }
+  },
+  "dashboard": {
+    "welcomeTitle": "Welcome",
+    "welcomeDescription": "Here's an overview of your journey with Nutrack9.",
+    "dayStreak": "Day Streak",
+    "startJourneyTitle": "Start Your Journey",
+    "logOneMoreDay": "Log at least one more day to see your progress chart.",
+    "noLogsYet": "You haven't logged any food yet. Go to the Tracking page to start your first log and see your progress here!",
+    "goToTracking": "Go to Tracking",
+    "getPersonalizedTitle": "Get Personalized Recommendations",
+    "getPersonalizedDescription": "Fill out your personal information to unlock daily nutritional goals tailored just for you.",
+    "getPersonalizedContent": "By providing your height, weight, age, gender, and activity level, we can estimate your daily calorie and macronutrient needs to help you reach your goals.",
+    "goToSettings": "Go to Settings"
+  },
+  "a2hs": {
+    "title": "Get Quick Access",
+    "description": "Add Nutrack9 to your home screen for a faster, app-like experience.",
+    "dismiss": "Dismiss",
+    "ios": {
+      "platform": "On your iPhone or iPad:",
+      "step1": "Tap the Share button",
+      "step2": "Scroll down and select 'Add to Home Screen'"
+    },
+    "android": {
+      "platform": "On your Android device:",
+      "step1": "Tap the Menu button",
+      "step2": "Select 'Add to Home screen'"
+    }
+  },
+  "recommendedIntake": {
+    "title": "Recommended Daily Intake",
+    "description": "Based on your information, here are your estimated daily nutritional goals.",
+    "infoPopover": "These are estimated ranges based on the Mifflin-St Jeor formula for BMR and standard activity multipliers. Your individual needs may vary.",
+    "nutrients": {
+      "calories": "Calories",
+      "carbs": "Carbs",
+      "protein": "Protein",
+      "fat": "Fat"
+    }
+  },
+  "intakeChart": {
+    "title": "Nutrient Intake Analysis",
+    "description": "Your daily intake versus your recommended range over time.",
+    "nutrients": {
+      "calories": "Calories",
+      "carbs": "Carbs",
+      "protein": "Protein",
+      "fat": "Fat"
+    },
+    "tooltip": {
+      "actual": "Actual",
+      "recommended": "Recommended"
+    },
+    "legend": {
+      "actual": "Actual Intake",
+      "recommended": "Recommended Range"
+    }
+  },
+  "dailyTracker": {
+    "description": "Log your food and mood for the day.",
+    "loginPrompt": "Please log in to track your food and mood.",
+    "goToToday": "Go to Today",
+    "feeling": "You're feeling",
+    "howFeeling": "How are you feeling?",
+    "moods": {
+      "happy": "Happy",
+      "neutral": "Neutral",
+      "sad": "Sad",
+      "energetic": "Energetic",
+      "tired": "Tired"
+    },
+    "addFoodLabel": "Add a food item",
+    "foodPlaceholder": "e.g., Avocado toast",
+    "addFoodAria": "Add food",
+    "loggedFoods": "Logged Foods",
+    "noFoodLogged": "No food logged for this day yet.",
+    "totalPortion": "Total Portion",
+    "decreaseAria": "Decrease quantity of",
+    "increaseAria": "Increase quantity of",
+    "deleteAria": "Delete",
+    "nutrients": {
+      "calories": "Calories",
+      "carbs": "Carbs",
+      "protein": "Protein",
+      "fat": "Fat"
+    },
+    "toasts": {
+      "logFoodFailed": {
+        "title": "Failed to log food",
+        "description": "Please try again."
+      }
+    },
+    "feedbackDialog": {
+      "title": "Send us your feedback",
+      "description": "We'd love to hear what you think about Nutrack9.",
+      "placeholder": "Tell us what you think...",
+      "buttons": {
+        "cancel": "Cancel",
+        "submit": "Submit"
+      },
+      "toasts": {
+        "noRating": "Please select a rating.",
+        "success": {
+          "title": "Feedback sent!",
+          "description": "Thank you for helping us improve."
+        },
+        "error": {
+          "title": "Failed to send feedback",
+          "description": "Please try again later."
+        }
+      }
+    }
+  },
+  "premium": {
+    "title": "Choose Your Plan",
+    "subtitle": "Unlock powerful features to supercharge your health journey.",
+    "mostPopular": "Most Popular",
+    "basic": {
+      "price": "Free",
+      "description": "The essentials for getting started.",
+      "features": [
+        "Daily food and mood logging",
+        "Calendar view",
+        "Basic food suggestions"
+      ]
+    },
+    "monthly": {
+      "pricePeriod": "/month",
+      "description": "Unlock advanced insights.",
+      "features": [
+        "Unlimited daily logs",
+        "Advanced mood analysis",
+        "Export your data"
+      ]
+    },
+    "yearly": {
+      "pricePeriod": "/year",
+      "description": "Save 20% and get all features.",
+      "features": [
+        "All features from the Monthly plan",
+        "AI-powered meal suggestions",
+        "Priority support"
+      ]
+    },
+    "buttons": {
+      "currentPlan": "Current Plan",
+      "processing": "Processing...",
+      "downgrade": "Downgrade to Basic",
+      "upgrade": "Upgrade to"
+    },
+    "toasts": {
+      "planUpdated": {
+        "title": "Plan updated!",
+        "description": "You are now on the"
+      },
+      "error": {
+        "title": "Uh oh! Something went wrong.",
+        "planUpdate": "Could not update your plan."
+      }
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account and application settings.",
+    "personalInfo": {
+      "title": "Personal Information",
+      "description": "Provide this information to get personalized daily nutritional recommendations."
+    },
+    "fields": {
+      "height": "Height (cm)",
+      "heightPlaceholder": "e.g., 175",
+      "weight": "Weight (kg)",
+      "weightPlaceholder": "e.g., 70",
+      "age": "Age",
+      "agePlaceholder": "e.g., 30",
+      "gender": "Gender",
+      "genderPlaceholder": "Select your gender",
+      "activityLevel": "Activity Level",
+      "activityLevelPlaceholder": "Select your activity level"
+    },
+    "genderOptions": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "activityLevelOptions": {
+      "Sedentary": "Sedentary",
+      "Lightlyactive": "Lightly active",
+      "Moderatelyactive": "Moderately active",
+      "Veryactive": "Very active",
+      "Extraactive": "Extra active"
+    },
+    "buttons": {
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "clear": "Clear All",
+      "clearing": "Clearing..."
+    },
+    "version": "Version",
+    "toasts": {
+      "profileUpdated": {
+        "title": "Profile updated",
+        "description": "Your information has been saved successfully."
+      },
+      "profileCleared": {
+        "title": "Profile cleared",
+        "description": "Your personal information has been removed."
+      },
+      "error": {
+        "title": "Uh oh! Something went wrong.",
+        "profileSave": "Could not save your profile.",
+        "profileClear": "Could not clear your profile."
+      }
+    }
+  },
+  "toasts": {
+    "error": {
+      "title": "Uh oh! Something went wrong.",
+      "signIn": "Error signing in",
+      "signOut": "Error signing out"
+    }
+  }
+}

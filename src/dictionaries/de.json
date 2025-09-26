@@ -1,0 +1,301 @@
+
+{
+  "header": {
+    "nav": {
+      "dashboard": "Dashboard",
+      "tracking": "Tracking",
+      "pricing": "Preise",
+      "settings": "Einstellungen",
+      "menu": "Menü",
+      "openMenu": "Menü öffnen"
+    },
+    "userProfile": {
+      "login": "Anmelden",
+      "plan": "Abo",
+      "language": "Sprache",
+      "sendFeedback": "Feedback senden",
+      "logout": "Abmelden",
+      "deleteAccount": {
+        "title": "Konto löschen",
+        "description": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird Ihr Konto dauerhaft gelöscht und alle Ihre Daten von unseren Servern entfernt.",
+        "confirmPrompt": "Zur Bestätigung geben Sie bitte \"<b>{confirmationText}</b>\" in das Feld unten ein.",
+        "confirmationText": "löschen",
+        "buttons": {
+          "cancel": "Abbrechen",
+          "delete": "Konto löschen",
+          "deleting": "Wird gelöscht..."
+        },
+        "toasts": {
+          "success": {
+            "title": "Konto gelöscht",
+            "description": "Ihr Konto und alle zugehörigen Daten wurden dauerhaft gelöscht."
+          },
+          "error": {
+            "title": "Löschen fehlgeschlagen",
+            "description": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut."
+          }
+        }
+      },
+      "feedback": {
+        "title": "Senden Sie uns Ihr Feedback",
+        "description": "Wir würden gerne hören, was Sie über Nutrack9 denken.",
+        "placeholder": "Sagen Sie uns, was Sie denken...",
+        "buttons": {
+          "cancel": "Abbrechen",
+          "submit": "Senden"
+        },
+        "toasts": {
+          "noRating": "Bitte wählen Sie eine Bewertung aus.",
+          "success": {
+            "title": "Feedback gesendet!",
+            "description": "Danke, dass Sie uns helfen, uns zu verbessern."
+          },
+          "error": {
+            "title": "Feedback senden fehlgeschlagen",
+            "description": "Bitte versuchen Sie es später erneut."
+          }
+        }
+      }
+    }
+  },
+  "welcome": {
+    "title": "Entdecken Sie die Verbindung zwischen Essen und Stimmung",
+    "subtitle": "Nutrack9 ist ein einfaches, achtsames Werkzeug, das Ihnen hilft herauszufinden, wie sich Ihre Ernährung auf Ihr Wohlbefinden auswirkt. Verfolgen Sie Ihre Mahlzeiten und Stimmungen, um Muster zu finden und sich von Ihrer besten Seite zu fühlen.",
+    "getStarted": "Kostenlos starten",
+    "features": {
+      "nutrition": {
+        "title": "Verfolgen Sie Ihre Ernährung",
+        "description": "Protokollieren Sie mühelos die Lebensmittel, die Sie jeden Tag essen. Unser intelligentes Vorschlagswerkzeug macht es schnell und einfach."
+      },
+      "mood": {
+        "title": "Verstehen Sie Ihre Stimmung",
+        "description": "Zeichnen Sie schnell Ihre Stimmung im Laufe des Tages auf, um zu sehen, wie Ihr emotionaler Zustand schwankt."
+      },
+      "connections": {
+        "title": "Entdecken Sie Verbindungen",
+        "description": "Unsere Kalenderansicht hilft Ihnen, die Beziehung zwischen dem, was Sie gegessen haben, und wie Sie sich gefühlt haben, zu visualisieren."
+      }
+    }
+  },
+  "dashboard": {
+    "welcomeTitle": "Willkommen",
+    "welcomeDescription": "Hier ist ein Überblick über Ihre Reise mit Nutrack9.",
+    "dayStreak": "Tage-Serie",
+    "startJourneyTitle": "Beginnen Sie Ihre Reise",
+    "logOneMoreDay": "Protokollieren Sie noch mindestens einen weiteren Tag, um Ihr Fortschrittsdiagramm zu sehen.",
+    "noLogsYet": "Sie haben noch keine Lebensmittel protokolliert. Gehen Sie zur Tracking-Seite, um Ihr erstes Protokoll zu starten und Ihren Fortschritt hier zu sehen!",
+    "goToTracking": "Zum Tracking gehen",
+    "getPersonalizedTitle": "Erhalten Sie personalisierte Empfehlungen",
+    "getPersonalizedDescription": "Füllen Sie Ihre persönlichen Daten aus, um tägliche Ernährungsziele freizuschalten, die nur auf Sie zugeschnitten sind.",
+    "getPersonalizedContent": "Durch die Angabe von Größe, Gewicht, Alter, Geschlecht und Aktivitätslevel können wir Ihren täglichen Kalorien- und Makronährstoffbedarf schätzen, um Ihnen zu helfen, Ihre Ziele zu erreichen.",
+    "goToSettings": "Zu den Einstellungen gehen"
+  },
+  "a2hs": {
+    "title": "Schnellzugriff erhalten",
+    "description": "Fügen Sie Nutrack9 zu Ihrem Startbildschirm hinzu für ein schnelleres, App-ähnliches Erlebnis.",
+    "dismiss": "Schließen",
+    "ios": {
+      "platform": "Auf Ihrem iPhone oder iPad:",
+      "step1": "Tippen Sie auf die Teilen-Schaltfläche",
+      "step2": "Scrollen Sie nach unten und wählen Sie 'Zum Home-Bildschirm'"
+    },
+    "android": {
+      "platform": "Auf Ihrem Android-Gerät:",
+      "step1": "Tippen Sie auf die Menü-Schaltfläche",
+      "step2": "Wählen Sie 'Zum Startbildschirm hinzufügen'"
+    }
+  },
+  "recommendedIntake": {
+    "title": "Empfohlene tägliche Zufuhr",
+    "description": "Basierend auf Ihren Informationen sind hier Ihre geschätzten täglichen Ernährungsziele.",
+    "infoPopover": "Dies sind geschätzte Bereiche, die auf der Mifflin-St Jeor-Formel für den BMR und Standard-Aktivitätsmultiplikatoren basieren. Ihre individuellen Bedürfnisse können variieren.",
+    "nutrients": {
+      "calories": "Kalorien",
+      "carbs": "Kohlenhydrate",
+      "protein": "Protein",
+      "fat": "Fett"
+    }
+  },
+  "intakeChart": {
+    "title": "Nährstoffzufuhr-Analyse",
+    "description": "Ihre tägliche Zufuhr im Vergleich zu Ihrem empfohlenen Bereich im Zeitverlauf.",
+    "nutrients": {
+      "calories": "Kalorien",
+      "carbs": "Kohlenhydrate",
+      "protein": "Protein",
+      "fat": "Fett"
+    },
+    "tooltip": {
+      "actual": "Tatsächlich",
+      "recommended": "Empfohlen"
+    },
+    "legend": {
+        "actual": "Tatsächliche Zufuhr",
+        "recommended": "Empfohlener Bereich"
+    }
+  },
+  "dailyTracker": {
+    "description": "Protokollieren Sie Ihr Essen und Ihre Stimmung für den Tag.",
+    "loginPrompt": "Bitte melden Sie sich an, um Ihr Essen und Ihre Stimmung zu verfolgen.",
+    "goToToday": "Zum heutigen Tag gehen",
+    "feeling": "Sie fühlen sich",
+    "howFeeling": "Wie fühlen Sie sich?",
+    "moods": {
+      "happy": "Glücklich",
+      "neutral": "Neutral",
+      "sad": "Traurig",
+      "energetic": "Energiegeladen",
+      "tired": "Müde"
+    },
+    "addFoodLabel": "Ein Lebensmittel hinzufügen",
+    "foodPlaceholder": "z.B. Avocado-Toast",
+    "addFoodAria": "Essen hinzufügen",
+    "loggedFoods": "Protokollierte Lebensmittel",
+    "noFoodLogged": "Für diesen Tag wurde noch kein Essen protokolliert.",
+    "totalPortion": "Gesamtportion",
+    "decreaseAria": "Menge von verringern",
+    "increaseAria": "Menge von erhöhen",
+    "deleteAria": "Löschen",
+    "nutrients": {
+      "calories": "Kalorien",
+      "carbs": "Kohlenhydrate",
+      "protein": "Protein",
+      "fat": "Fett"
+    },
+    "toasts": {
+      "logFoodFailed": {
+        "title": "Essen konnte nicht protokolliert werden",
+        "description": "Bitte versuchen Sie es erneut."
+      }
+    },
+    "feedbackDialog": {
+        "title": "Senden Sie uns Ihr Feedback",
+        "description": "Wir würden gerne hören, was Sie über Nutrack9 denken.",
+        "placeholder": "Sagen Sie uns, was Sie denken...",
+        "buttons": {
+          "cancel": "Abbrechen",
+          "submit": "Senden"
+        },
+        "toasts": {
+          "noRating": "Bitte wählen Sie eine Bewertung aus.",
+          "success": {
+            "title": "Feedback gesendet!",
+            "description": "Danke, dass Sie uns helfen, uns zu verbessern."
+          },
+          "error": {
+            "title": "Feedback senden fehlgeschlagen",
+            "description": "Bitte versuchen Sie es später erneut."
+          }
+        }
+      }
+  },
+  "premium": {
+    "title": "Wählen Sie Ihren Plan",
+    "subtitle": "Schalten Sie leistungsstarke Funktionen frei, um Ihre Gesundheitsreise zu beschleunigen.",
+    "mostPopular": "Am beliebtesten",
+    "basic": {
+      "price": "Kostenlos",
+      "description": "Die Grundlagen für den Einstieg.",
+      "features": [
+        "Tägliche Protokollierung von Essen und Stimmung",
+        "Kalenderansicht",
+        "Grundlegende Essensvorschläge"
+      ]
+    },
+    "monthly": {
+      "pricePeriod": "/Monat",
+      "description": "Schalten Sie erweiterte Einblicke frei.",
+      "features": [
+        "Unbegrenzte tägliche Protokolle",
+        "Erweiterte Stimmungsanalyse",
+        "Exportieren Sie Ihre Daten"
+      ]
+    },
+    "yearly": {
+      "pricePeriod": "/Jahr",
+      "description": "Sparen Sie 20% und erhalten Sie alle Funktionen.",
+      "features": [
+        "Alle Funktionen aus dem Monatsplan",
+        "KI-gestützte Essensvorschläge",
+        "Priorisierter Support"
+      ]
+    },
+    "buttons": {
+      "currentPlan": "Aktueller Plan",
+      "processing": "Wird verarbeitet...",
+      "downgrade": "Auf Basic downgraden",
+      "upgrade": "Upgrade auf"
+    },
+     "toasts": {
+        "planUpdated": {
+            "title": "Plan aktualisiert!",
+            "description": "Sie sind jetzt im Plan"
+        },
+        "error": {
+            "title": "Hoppla! Etwas ist schief gelaufen.",
+            "planUpdate": "Ihr Plan konnte nicht aktualisiert werden."
+        }
+    }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "subtitle": "Verwalten Sie Ihr Konto und die Anwendungseinstellungen.",
+    "personalInfo": {
+      "title": "Persönliche Informationen",
+      "description": "Geben Sie diese Informationen an, um personalisierte tägliche Ernährungsempfehlungen zu erhalten."
+    },
+    "fields": {
+      "height": "Größe (cm)",
+      "heightPlaceholder": "z.B. 175",
+      "weight": "Gewicht (kg)",
+      "weightPlaceholder": "z.B. 70",
+      "age": "Alter",
+      "agePlaceholder": "z.B. 30",
+      "gender": "Geschlecht",
+      "genderPlaceholder": "Wählen Sie Ihr Geschlecht",
+      "activityLevel": "Aktivitätslevel",
+      "activityLevelPlaceholder": "Wählen Sie Ihr Aktivitätslevel"
+    },
+    "genderOptions": {
+      "male": "Männlich",
+      "female": "Weiblich",
+      "other": "Andere"
+    },
+    "activityLevelOptions": {
+      "Sedentary": "Sitzend",
+      "Lightlyactive": "Leicht aktiv",
+      "Moderatelyactive": "Mäßig aktiv",
+      "Veryactive": "Sehr aktiv",
+      "Extraactive": "Extra aktiv"
+    },
+    "buttons": {
+      "save": "Änderungen speichern",
+      "saving": "Wird gespeichert...",
+      "clear": "Alles löschen",
+      "clearing": "Wird gelöscht..."
+    },
+    "version": "Version",
+    "toasts": {
+      "profileUpdated": {
+        "title": "Profil aktualisiert",
+        "description": "Ihre Informationen wurden erfolgreich gespeichert."
+      },
+      "profileCleared": {
+        "title": "Profil gelöscht",
+        "description": "Ihre persönlichen Informationen wurden entfernt."
+      },
+      "error": {
+        "title": "Hoppla! Etwas ist schief gelaufen.",
+        "profileSave": "Ihr Profil konnte nicht gespeichert werden.",
+        "profileClear": "Ihr Profil konnte nicht gelöscht werden."
+      }
+    }
+  },
+  "toasts": {
+    "error": {
+        "title": "Hoppla! Etwas ist schief gelaufen.",
+        "signIn": "Fehler beim Anmelden",
+        "signOut": "Fehler beim Abmelden"
+    }
+  }
+}

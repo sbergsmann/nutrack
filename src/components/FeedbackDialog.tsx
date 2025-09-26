@@ -25,9 +25,10 @@ type FeedbackDialogProps = {
   children: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  dictionary: any;
 };
 
-export function FeedbackDialog({ children, open, onOpenChange }: FeedbackDialogProps) {
+export function FeedbackDialog({ children, open, onOpenChange, dictionary }: FeedbackDialogProps) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [feedbackText, setFeedbackText] = useState("");
@@ -55,7 +56,7 @@ export function FeedbackDialog({ children, open, onOpenChange }: FeedbackDialogP
     if (rating === 0) {
       toast({
         variant: "destructive",
-        title: "Please select a rating.",
+        title: dictionary.toasts.noRating,
       });
       return;
     }
@@ -63,15 +64,15 @@ export function FeedbackDialog({ children, open, onOpenChange }: FeedbackDialogP
     try {
       await addFeedback(firestore, user.uid, rating, feedbackText);
       toast({
-        title: "Feedback sent!",
-        description: "Thank you for helping us improve.",
+        title: dictionary.toasts.success.title,
+        description: dictionary.toasts.success.description,
       });
       setDialogOpen(false);
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Failed to send feedback",
-        description: "Please try again later.",
+        title: dictionary.toasts.error.title,
+        description: dictionary.toasts.error.description,
       });
     }
   };
@@ -81,9 +82,9 @@ export function FeedbackDialog({ children, open, onOpenChange }: FeedbackDialogP
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Send us your feedback</DialogTitle>
+          <DialogTitle>{dictionary.title}</DialogTitle>
           <DialogDescription>
-            We'd love to hear what you think about Nutrack9.
+            {dictionary.description}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -104,7 +105,7 @@ export function FeedbackDialog({ children, open, onOpenChange }: FeedbackDialogP
             ))}
           </div>
           <Textarea
-            placeholder="Tell us what you think..."
+            placeholder={dictionary.placeholder}
             value={feedbackText}
             onChange={(e) => setFeedbackText(e.target.value)}
           />
@@ -112,16 +113,14 @@ export function FeedbackDialog({ children, open, onOpenChange }: FeedbackDialogP
         <DialogFooter>
           <DialogClose asChild>
             <Button type="button" variant="outline">
-              Cancel
+              {dictionary.buttons.cancel}
             </Button>
           </DialogClose>
           <Button type="submit" onClick={handleFeedbackSubmit}>
-            Submit
+            {dictionary.buttons.submit}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
-
-    
