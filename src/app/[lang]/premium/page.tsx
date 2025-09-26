@@ -24,7 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 type PlanName = UserProfile["plan"];
 
-export default function PremiumPage({ dictionary }: { dictionary: any }) {
+function PremiumPage({ dictionary }: { dictionary: any }) {
   const { data: user, loading: userLoading } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -178,7 +178,7 @@ export default function PremiumPage({ dictionary }: { dictionary: any }) {
   );
 }
 
-async function PremiumPageLoader({ params }: { params: { lang: string } }) {
+export default async function PremiumPageLoader({ params }: { params: { lang: string } }) {
   const dictionary = await getDictionary(params.lang);
   return <PremiumPage dictionary={dictionary.premium} />;
 }
