@@ -22,19 +22,19 @@ import { FeedbackDialog } from "./FeedbackDialog";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
 import { DeleteAccountDialog } from "./DeleteAccountDialog";
-import { usePathname, useRouter, useParams } from "next/navigation";
+import { usePathname, useParams } from "next/navigation";
 import { i18n } from "@/i18n.config";
 
 export function UserProfile() {
   const { data: user, loading } = useUser();
   const pathname = usePathname();
-  const router = useRouter();
   const params = useParams();
   const lang = params.lang;
 
   const handleLanguageChange = (newLocale: string) => {
+    if (!pathname) return;
     const newPath = pathname.replace(`/${lang}`, `/${newLocale}`);
-    router.replace(newPath);
+    window.location.href = newPath;
   };
 
   if (loading) {
