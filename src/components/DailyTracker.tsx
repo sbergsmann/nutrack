@@ -231,7 +231,7 @@ export function DailyTracker({
   const handleDayClick = (day: Date | undefined) => {
     if (!day) return;
     const formattedDate = format(day, "yyyy-MM-dd");
-    const href = isSameDay(day, new Date()) ? `/` : `/day/${formattedDate}`;
+    const href = isSameDay(day, new Date()) ? `/tracking` : `/day/${formattedDate}`;
     router.push(href, { scroll: false });
     setCalendarOpen(false);
   };
@@ -354,7 +354,7 @@ export function DailyTracker({
                 {!isToday && (
                   <div className="p-2 border-t">
                     <Button variant="ghost" className="w-full" asChild>
-                      <Link href="/">Go to Today</Link>
+                      <Link href="/tracking">Go to Today</Link>
                     </Button>
                   </div>
                 )}
@@ -444,33 +444,33 @@ export function DailyTracker({
                 {loggedFoods && loggedFoods.length > 0 ? (
                   <>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      <Button variant={sortKey === 'calories' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-purple-500/10 border-purple-500/20 hover:bg-purple-500/20" onClick={() => handleSort('calories')}>
+                      <Button variant={sortKey === 'calories' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-chart-1/10 border-chart-1/20 hover:bg-chart-1/20" onClick={() => handleSort('calories')}>
                         {renderSortIcon('calories')}
-                        <Sparkles className="h-5 w-5 text-purple-400" />
+                        <Sparkles className="h-5 w-5 text-chart-1" />
                         <div>
                           <p className="text-xs text-muted-foreground">Calories</p>
                           <p className="font-bold">{nutrientTotals.calories.toFixed(0)}</p>
                         </div>
                       </Button>
-                      <Button variant={sortKey === 'carbs' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-orange-500/10 border-orange-500/20 hover:bg-orange-500/20" onClick={() => handleSort('carbs')}>
+                      <Button variant={sortKey === 'carbs' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-chart-2/10 border-chart-2/20 hover:bg-chart-2/20" onClick={() => handleSort('carbs')}>
                         {renderSortIcon('carbs')}
-                        <Flame className="h-5 w-5 text-orange-400" />
+                        <Flame className="h-5 w-5 text-chart-2" />
                         <div>
                           <p className="text-xs text-muted-foreground">Carbs</p>
                           <p className="font-bold">{nutrientTotals.carbs.toFixed(0)}g</p>
                         </div>
                       </Button>
-                      <Button variant={sortKey === 'proteins' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-red-500/10 border-red-500/20 hover:bg-red-500/20" onClick={() => handleSort('proteins')}>
+                      <Button variant={sortKey === 'proteins' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-chart-3/10 border-chart-3/20 hover:bg-chart-3/20" onClick={() => handleSort('proteins')}>
                         {renderSortIcon('proteins')}
-                        <Beef className="h-5 w-5 text-red-400" />
+                        <Beef className="h-5 w-5 text-chart-3" />
                         <div>
                           <p className="text-xs text-muted-foreground">Protein</p>
                           <p className="font-bold">{nutrientTotals.proteins.toFixed(0)}g</p>
                         </div>
                       </Button>
-                      <Button variant={sortKey === 'fats' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-yellow-500/10 border-yellow-500/20 hover:bg-yellow-500/20" onClick={() => handleSort('fats')}>
+                      <Button variant={sortKey === 'fats' ? 'secondary' : 'outline'} className="h-auto p-3 flex justify-start items-center gap-3 bg-chart-4/10 border-chart-4/20 hover:bg-chart-4/20" onClick={() => handleSort('fats')}>
                          {renderSortIcon('fats')}
-                        <Droplet className="h-5 w-5 text-yellow-400" />
+                        <Droplet className="h-5 w-5 text-chart-4" />
                         <div>
                           <p className="text-xs text-muted-foreground">Fat</p>
                           <p className="font-bold">{nutrientTotals.fats.toFixed(0)}g</p>
@@ -498,19 +498,19 @@ export function DailyTracker({
                                   {(food.portion != null && (food.calories != null || food.carbs != null || food.proteins != null || food.fats != null)) ? (
                                     <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
                                       <div className="flex items-center gap-1" title="Calories">
-                                        <Sparkles className="h-3 w-3 text-purple-400" />
+                                        <Sparkles className="h-3 w-3 text-chart-1" />
                                         <span>{food.calories?.toFixed(0) ?? '–'}</span>
                                       </div>
                                       <div className="flex items-center gap-1" title="Carbs">
-                                        <Flame className="h-3 w-3 text-orange-400" />
+                                        <Flame className="h-3 w-3 text-chart-2" />
                                         <span>{food.carbs?.toFixed(0) ?? '–'}g</span>
                                       </div>
                                       <div className="flex items-center gap-1" title="Protein">
-                                        <Beef className="h-3 w-3 text-red-400" />
+                                        <Beef className="h-3 w-3 text-chart-3" />
                                         <span>{food.proteins?.toFixed(0) ?? '–'}g</span>
                                       </div>
                                       <div className="flex items-center gap-1" title="Fat">
-                                        <Droplet className="h-3 w-3 text-yellow-400" />
+                                        <Droplet className="h-3 w-3 text-chart-4" />
                                         <span>{food.fats?.toFixed(0) ?? '–'}g</span>
                                       </div>
                                       <div className="flex items-center gap-1 font-bold text-primary/80" title="Total Portion">

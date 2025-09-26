@@ -74,23 +74,23 @@ export function RecommendedIntake({ userProfile }: RecommendedIntakeProps) {
         </CardHeader>
         <CardContent>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div className="h-auto p-4 flex flex-col justify-start items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-                    <Sparkles className="h-6 w-6 text-purple-400" />
+                  <div className="h-auto p-4 flex flex-col justify-start items-center gap-2 bg-chart-1/10 border border-chart-1/20 rounded-lg">
+                    <Sparkles className="h-6 w-6 text-chart-1" />
                     <p className="text-sm text-muted-foreground">Calories</p>
                     <p className="font-bold text-lg">{nutritionGoals.calories.min} - {nutritionGoals.calories.max}</p>
                   </div>
-                  <div className="h-auto p-4 flex flex-col justify-start items-center gap-2 bg-orange-500/10 border border-orange-500/20 rounded-lg">
-                    <Flame className="h-6 w-6 text-orange-400" />
+                  <div className="h-auto p-4 flex flex-col justify-start items-center gap-2 bg-chart-2/10 border border-chart-2/20 rounded-lg">
+                    <Flame className="h-6 w-6 text-chart-2" />
                     <p className="text-sm text-muted-foreground">Carbs</p>
                     <p className="font-bold text-lg">{nutritionGoals.carbs.min} - {nutritionGoals.carbs.max}g</p>
                   </div>
-                  <div className="h-auto p-4 flex flex-col justify-start items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg">
-                    <Beef className="h-6 w-6 text-red-400" />
+                  <div className="h-auto p-4 flex flex-col justify-start items-center gap-2 bg-chart-3/10 border border-chart-3/20 rounded-lg">
+                    <Beef className="h-6 w-6 text-chart-3" />
                     <p className="text-sm text-muted-foreground">Protein</p>
                     <p className="font-bold text-lg">{nutritionGoals.proteins.min} - {nutritionGoals.proteins.max}g</p>
                   </div>
-                  <div className="h-auto p-4 flex flex-col justify-start items-center gap-2 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                    <Droplet className="h-6 w-6 text-yellow-400" />
+                  <div className="h-auto p-4 flex flex-col justify-start items-center gap-2 bg-chart-4/10 border border-chart-4/20 rounded-lg">
+                    <Droplet className="h-6 w-6 text-chart-4" />
                     <p className="text-sm text-muted-foreground">Fat</p>
                     <p className="font-bold text-lg">{nutritionGoals.fats.min} - {nutritionGoals.fats.max}g</p>
                   </div>
