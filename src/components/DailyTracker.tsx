@@ -108,10 +108,6 @@ export function DailyTracker({
 
     setCurrentMood(mood);
     setMood(firestore, user.uid, entry.date, mood).then(() => {
-      toast({
-        title: "Mood updated!",
-        description: `Your mood has been set to ${mood}.`,
-      });
       router.refresh();
     });
   };
@@ -203,10 +199,6 @@ export function DailyTracker({
         return newFoods;
       });
 
-      toast({
-        title: "Food logged!",
-        description: `${trimmedFoodName} has been added to your log.`,
-      });
       router.refresh();
     } catch (error) {
       console.error("Failed to log food:", error);
@@ -573,7 +565,3 @@ export function DailyTracker({
     </div>
   );
 }
-
-    
-
-    
