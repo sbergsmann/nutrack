@@ -6,10 +6,14 @@ import { type User as AuthUser, onAuthStateChanged } from "firebase/auth";
 import { useAuth, useFirestore } from "@/firebase/provider";
 import { doc, getDoc, setDoc, onSnapshot, serverTimestamp } from "firebase/firestore";
 import type { UserProfile } from "@/lib/types";
+import { useParams } from "next/navigation";
+import { type Locale } from "@/i18n.config";
 
 export const useUser = () => {
   const auth = useAuth();
   const firestore = useFirestore();
+  const params = useParams();
+  const lang = params.lang as Locale;
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -39,6 +43,7 @@ export const useUser = () => {
               displayName: authUser.displayName,
               photoURL: authUser.photoURL,
               plan: "Basic",
+              language: lang || 'en',
               createdAt: serverTimestamp(),
             };
             await setDoc(userRef, newUser);
@@ -58,7 +63,7 @@ export const useUser = () => {
     });
 
     return () => unsubscribeAuth();
-  }, [auth, firestore]);
+  }, [auth, firestore, lang]);
 
   return { data: user, loading };
 };

@@ -30,6 +30,11 @@
             "enum": ["Basic", "Monthly", "Yearly"],
             "default": "Basic"
         },
+        "language": {
+          "type": "string",
+          "description": "The user's preferred language.",
+          "enum": ["en", "de"]
+        },
         "height": {
           "type": "number",
           "description": "The user's height in centimeters."
@@ -200,4 +205,3 @@
     }
   }
 }
-

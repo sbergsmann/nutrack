@@ -12,6 +12,7 @@ export type FoodItem = {
   proteins?: number;
   fats?: number;
   icon?: string;
+  name_ngrams?: string[];
 };
 
 export type LoggedFood = {
@@ -38,4 +39,5 @@ export type UserProfile = {
   gender?: 'Male' | 'Female' | 'Other' | null;
   activityLevel?: 'Sedentary' | 'Lightly active' | 'Moderately active' | 'Very active' | 'Extra active' | null;
   createdAt: Date;
+  language?: 'en' | 'de' | null;
 };

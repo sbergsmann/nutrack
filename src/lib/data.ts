@@ -1,5 +1,4 @@
 
-
 import {
   doc,
   getDoc,
@@ -26,6 +25,7 @@ import {
   type SecurityRuleContext,
 } from "@/firebase/errors";
 import { enrichFood } from "@/ai/flows/enrich-food-flow";
+import type { Locale } from "@/i18n.config";
 
 const getEntriesCollection = (
   firestore: Firestore | AdminFirestore,
@@ -462,6 +462,23 @@ export async function updateUserPlan(
   }
 }
 
+export async function updateUserLanguage(
+  firestore: Firestore,
+  userId: string,
+  language: Locale
+): Promise<void> {
+  const userRef = doc(firestore, 'users', userId);
+  const data = { language };
+  updateDoc(userRef, data).catch(async (serverError) => {
+    const permissionError = new FirestorePermissionError({
+      path: userRef.path,
+      operation: 'update',
+      requestResourceData: data,
+    } satisfies SecurityRuleContext);
+    errorEmitter.emit('permission-error', permissionError);
+  });
+}
+
 export async function updateUserProfile(
     firestore: Firestore,
     userId: string,
@@ -502,10 +519,3 @@ export async function getUser(
         return null;
     }
 }
-
-    
-
-    
-
-
-

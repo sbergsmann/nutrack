@@ -24,18 +24,26 @@ import { FeedbackDialog } from "./FeedbackDialog";
 import { Badge } from "./ui/badge";
 import { DeleteAccountDialog } from "./DeleteAccountDialog";
 import { usePathname, useParams } from "next/navigation";
-import { i18n } from "@/i18n.config";
+import { i18n, type Locale } from "@/i18n.config";
 import { cn } from "@/lib/utils";
+import { useFirestore } from "@/firebase/provider";
+import { updateUserLanguage } from "@/lib/data";
 
 export function UserProfile({ dictionary }: { dictionary: any }) {
   const { data: user, loading } = useUser();
+  const firestore = useFirestore();
   const pathname = usePathname();
   const params = useParams();
-  const lang = params.lang;
+  const lang = params.lang as Locale;
   const [isLanguageOpen, setLanguageOpen] = useState(false);
 
-  const handleLanguageChange = (newLocale: string) => {
-    if (!pathname) return;
+  const handleLanguageChange = (newLocale: Locale) => {
+    if (!pathname || !user || !firestore) return;
+
+    // Update preference in DB
+    updateUserLanguage(firestore, user.uid, newLocale);
+    
+    // Redirect
     const newPath = pathname.replace(`/${lang}`, `/${newLocale}`);
     window.location.href = newPath;
   };
