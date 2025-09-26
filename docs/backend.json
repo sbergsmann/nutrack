@@ -113,6 +113,13 @@
           "type": "string",
           "description": "The lowercase version of the food name for case-insensitive search."
         },
+        "name_ngrams": {
+            "type": "array",
+            "description": "An array of substrings of the food name for substring matching.",
+            "items": {
+              "type": "string"
+            }
+        },
         "lastAddedAt": {
           "type": "string",
           "format": "date-time",

@@ -51,6 +51,27 @@ async function triggerFoodEnrichment(firestore: Firestore, foodId: string, foodN
     }
 }
 
+function generateNgrams(name: string): string[] {
+    const ngrams = new Set<string>();
+    const lowerCaseName = name.toLowerCase();
+    
+    // Create substrings of length 3 and up
+    for (let i = 0; i < lowerCaseName.length; i++) {
+        for (let j = i + 3; j <= lowerCaseName.length; j++) {
+            ngrams.add(lowerCaseName.substring(i, j));
+        }
+    }
+
+    // Also add the full lowercase name for exact matches
+    ngrams.add(lowerCaseName);
+    
+    // Add prefixes of length 3+
+    for (let i=3; i<=lowerCaseName.length; i++) {
+      ngrams.add(lowerCaseName.substring(0,i));
+    }
+    
+    return Array.from(ngrams);
+}
 
 export async function searchFoods(
   firestore: Firestore,
@@ -59,51 +80,49 @@ export async function searchFoods(
   const foodsRef = getFoodsCollection(firestore);
   const lowercasedSearchTerm = searchTerm.toLowerCase();
 
-  // Query for new documents with name_lowercase
-  const queryNew = query(
-    foodsRef,
-    where("name_lowercase", ">=", lowercasedSearchTerm),
-    where("name_lowercase", "<=", lowercasedSearchTerm + "\uf8ff"),
-    orderBy("name_lowercase"),
-    limit(5)
-  );
+  if (lowercasedSearchTerm.length < 3) {
+      // Fallback to prefix search for short terms to avoid overly broad results
+      const q = query(
+          foodsRef,
+          where("name_lowercase", ">=", lowercasedSearchTerm),
+          where("name_lowercase", "<=", lowercasedSearchTerm + "\uf8ff"),
+          orderBy("name_lowercase"),
+          limit(5)
+      );
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          lastAddedAt: (doc.data().lastAddedAt as Timestamp)?.toDate() ?? new Date(),
+      } as FoodItem));
+  }
 
-  // Fallback query for old documents without name_lowercase
-  const queryOld = query(
-    foodsRef,
-    where("name", ">=", searchTerm),
-    where("name", "<=", searchTerm + "\uf8ff"),
-    orderBy("name"),
-    limit(5)
+  // Use n-gram search for longer terms
+  const q = query(
+      foodsRef,
+      where("name_ngrams", "array-contains", lowercasedSearchTerm),
+      limit(10) // Limit to 10 as array-contains is less specific
   );
   
-  const [snapshotNew, snapshotOld] = await Promise.all([
-    getDocs(queryNew),
-    getDocs(queryOld),
-  ]);
+  const snapshot = await getDocs(q);
 
-  const resultsMap = new Map<string, FoodItem>();
+  const results = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      lastAddedAt: (doc.data().lastAddedAt as Timestamp)?.toDate() ?? new Date(),
+  } as FoodItem));
 
-  const processSnapshot = (snapshot: any) => {
-    snapshot.docs.forEach((doc: any) => {
-      if (!resultsMap.has(doc.id)) {
-        const data = doc.data();
-        // Filter in code for old documents that might not have name_lowercase
-        if (data.name_lowercase || data.name.toLowerCase().startsWith(lowercasedSearchTerm)) {
-          resultsMap.set(doc.id, {
-            id: doc.id,
-            ...data,
-            lastAddedAt: (data.lastAddedAt as Timestamp)?.toDate() ?? new Date(),
-          } as FoodItem);
-        }
-      }
-    });
-  };
-
-  processSnapshot(snapshotNew);
-  processSnapshot(snapshotOld);
-
-  return Array.from(resultsMap.values()).slice(0, 5);
+  // Since array-contains doesn't guarantee order, we sort client-side
+  // to prioritize results that start with the search term.
+  return results
+    .sort((a, b) => {
+        const aStarts = a.name.toLowerCase().startsWith(lowercasedSearchTerm);
+        const bStarts = b.name.toLowerCase().startsWith(lowercasedSearchTerm);
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+        return a.name.localeCompare(b.name); // Alphabetical for others
+    })
+    .slice(0, 5); // Take top 5 after sorting
 }
 
 export async function getFoodItem(
@@ -218,6 +237,10 @@ export async function getOrCreateFood(
     if (!foodData.name_lowercase) {
       updatePayload.name_lowercase = foodData.name.toLowerCase();
     }
+    // Backfill n-grams if they are missing
+    if (!foodData.name_ngrams) {
+        updatePayload.name_ngrams = generateNgrams(foodData.name);
+    }
     
     updateDoc(foodRef, updatePayload);
     
@@ -237,6 +260,7 @@ export async function getOrCreateFood(
     const newFoodData = {
       name: trimmedFoodName,
       name_lowercase: lowercasedFoodName,
+      name_ngrams: generateNgrams(trimmedFoodName),
       lastAddedAt: serverTimestamp(),
     };
     const newFoodDocRef = await addDoc(foodsRef, newFoodData);
