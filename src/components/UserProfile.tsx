@@ -8,19 +8,34 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LogIn, LogOut, MessageSquare, User as UserIcon, Star, BadgeCheck, Trash2 } from "lucide-react";
+import { LogIn, LogOut, MessageSquare, User as UserIcon, Star, BadgeCheck, Trash2, Languages } from "lucide-react";
 import { useUser } from "@/firebase/auth/use-user";
 import { signInWithGoogle, signOut } from "@/firebase/auth/actions";
 import { FeedbackDialog } from "./FeedbackDialog";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
 import { DeleteAccountDialog } from "./DeleteAccountDialog";
+import { usePathname, useRouter, useParams } from "next/navigation";
+import { i18n } from "@/i18n.config";
 
 export function UserProfile() {
   const { data: user, loading } = useUser();
+  const pathname = usePathname();
+  const router = useRouter();
+  const params = useParams();
+  const lang = params.lang;
+
+  const handleLanguageChange = (newLocale: string) => {
+    const newPath = pathname.replace(`/${lang}`, `/${newLocale}`);
+    router.replace(newPath);
+  };
 
   if (loading) {
     return <Button variant="ghost" size="icon" disabled className="animate-pulse" />;
@@ -72,12 +87,28 @@ export function UserProfile() {
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/premium">
+          <Link href={`/${lang}/premium`}>
             <Star className="mr-2 h-4 w-4" />
             <span>Go Premium</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Languages className="mr-2 h-4 w-4" />
+            <span>Language</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuSubContent>
+              <DropdownMenuItem onClick={() => handleLanguageChange('en')}>
+                English
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleLanguageChange('de')}>
+                Deutsch
+              </DropdownMenuItem>
+            </DropdownMenuSubContent>
+          </DropdownMenuPortal>
+        </DropdownMenuSub>
         <FeedbackDialog>
           <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
             <MessageSquare className="mr-2 h-4 w-4" />

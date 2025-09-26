@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { addFood, removeFood, searchFoods, setMood, updateFoodQuantity } from "@/lib/data";
 import type { DailyEntry, FoodItem, LoggedFood, Mood } from "@/lib/types";
@@ -58,6 +58,8 @@ export function DailyTracker({
   const { data: user } = useUser();
   const firestore = useFirestore();
   const router = useRouter();
+  const params = useParams();
+  const lang = params.lang;
   const { toast } = useToast();
 
   const [currentMood, setCurrentMood] = useState<Mood | null>(entry.mood);
@@ -216,7 +218,7 @@ export function DailyTracker({
   const handleDayClick = (day: Date | undefined) => {
     if (!day) return;
     const formattedDate = format(day, "yyyy-MM-dd");
-    const href = isSameDay(day, new Date()) ? `/tracking` : `/day/${formattedDate}`;
+    const href = isSameDay(day, new Date()) ? `/${lang}/tracking` : `/${lang}/day/${formattedDate}`;
     router.push(href, { scroll: false });
     setCalendarOpen(false);
   };
@@ -339,7 +341,7 @@ export function DailyTracker({
                 {!isToday && (
                   <div className="p-2 border-t">
                     <Button variant="ghost" className="w-full" asChild>
-                      <Link href="/tracking">Go to Today</Link>
+                      <Link href={`/${lang}/tracking`}>Go to Today</Link>
                     </Button>
                   </div>
                 )}

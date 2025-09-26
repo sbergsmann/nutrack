@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useParams } from "next/navigation";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +24,8 @@ const navLinks = [
 
 export function MobileNavigation() {
   const pathname = usePathname();
+  const params = useParams();
+  const lang = params.lang;
   const { data: user } = useUser();
   const [open, setOpen] = useState(false);
 
@@ -44,12 +46,13 @@ export function MobileNavigation() {
           </SheetHeader>
           <nav className="mt-8 flex flex-col gap-4">
             {navLinks.map(({ href, label }) => {
+              const fullPath = `/${lang}${href}`;
               const isActive =
-                href === "/" ? pathname === "/" : pathname.startsWith(href);
+                href === "/" ? pathname === `/${lang}` : pathname.startsWith(fullPath);
               return (
                 <Link
                   key={href}
-                  href={href}
+                  href={fullPath}
                   onClick={() => setOpen(false)}
                   className={cn(
                     "text-lg font-medium text-muted-foreground transition-colors hover:text-foreground",
