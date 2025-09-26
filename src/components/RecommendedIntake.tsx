@@ -4,7 +4,11 @@
 import { useMemo } from "react";
 import type { UserProfile } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Beef, Droplet, Flame, Info, Sparkles } from "lucide-react";
 
 type RecommendedIntakeProps = {
@@ -57,16 +61,14 @@ export function RecommendedIntake({ userProfile }: RecommendedIntakeProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             Recommended Daily Intake
-            <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Info className="h-4 w-4 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs text-center">
-                        <p>These are estimated ranges based on the Mifflin-St Jeor formula for BMR and standard activity multipliers. Your individual needs may vary.</p>
-                    </TooltipContent>
-                </Tooltip>
-            </TooltipProvider>
+            <Popover>
+                <PopoverTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                </PopoverTrigger>
+                <PopoverContent className="max-w-xs text-center text-sm">
+                    <p>These are estimated ranges based on the Mifflin-St Jeor formula for BMR and standard activity multipliers. Your individual needs may vary.</p>
+                </PopoverContent>
+            </Popover>
           </CardTitle>
           <CardDescription>
             Based on your information, here are your estimated daily nutritional goals.
