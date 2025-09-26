@@ -11,9 +11,6 @@ export const metadata: Metadata = {
   title: "Nutrack9",
   description: "Track your daily food intake and mood.",
   manifest: "/manifest.json",
-  icons: {
-    icon: '/icon.svg',
-  },
 };
 
 export default function RootLayout({
@@ -24,10 +21,12 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/icon-maskable.svg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet" />
-        <link rel="apple-touch-icon" href="/icon-maskable.svg" />
         <meta name="theme-color" content="#F87171" />
       </head>
       <body className={cn("font-body antialiased h-full")}>
