@@ -239,8 +239,8 @@ export function SettingsPageClient({ dictionary }: { dictionary: any }) {
                       <FormItem>
                         <FormLabel>{dictionary.fields.gender}</FormLabel>
                         <Select
+                          key={field.value}
                           onValueChange={field.onChange}
-                          defaultValue={field.value ?? undefined}
                           value={field.value ?? undefined}
                          >
                           <FormControl>
@@ -265,9 +265,9 @@ export function SettingsPageClient({ dictionary }: { dictionary: any }) {
                       render={({ field }) => (
                           <FormItem>
                           <FormLabel>{dictionary.fields.activityLevel}</FormLabel>
-                          <Select 
+                          <Select
+                              key={field.value}
                               onValueChange={field.onChange}
-                              defaultValue={field.value ?? undefined}
                               value={field.value ?? undefined}
                           >
                               <FormControl>
