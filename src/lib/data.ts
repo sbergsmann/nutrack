@@ -56,7 +56,7 @@ function generateNgrams(name: string): string[] {
     const ngrams = new Set<string>();
     const words = name.toLowerCase().split(/[\s-]+/); // Split by spaces or hyphens
     for (const word of words) {
-      const cleanWord = word.replace(/[^a-z0-9]/g, ''); // Remove non-alphanumeric chars
+      const cleanWord = word.replace(/[^\p{L}\p{N}]/gu, '');
       if (cleanWord.length > 0) {
         for (let i = 1; i <= cleanWord.length; i++) {
           ngrams.add(cleanWord.substring(0, i));
