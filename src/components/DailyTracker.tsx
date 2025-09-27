@@ -546,7 +546,14 @@ export function DailyTracker({
                             <div className="space-y-3">
                                 <div>
                                     <h4 className="font-bold">{food.name}</h4>
-                                    {food.description && <p className="text-muted-foreground text-xs">{food.description}</p>}
+                                    {food.type && (
+                                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                                        {food.type === 'grocery' && <Package className="h-4 w-4 shrink-0" />}
+                                        {food.type === 'meal' && <UtensilsCrossed className="h-4 w-4 shrink-0" />}
+                                        <span>{food.type.charAt(0).toUpperCase() + food.type.slice(1)}</span>
+                                      </div>
+                                    )}
+                                    {food.description && <p className="text-muted-foreground text-xs mt-2">{food.description}</p>}
                                 </div>
                                 {food.portion && (
                                   <div className="space-y-2 text-xs">
@@ -613,3 +620,5 @@ export function DailyTracker({
     </div>
   );
 }
+
+    
