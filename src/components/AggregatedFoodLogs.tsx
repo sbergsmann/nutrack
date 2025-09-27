@@ -7,8 +7,9 @@ import { addDays, isAfter, startOfToday } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import FoodIcon from "./FoodIcon";
-import { ChevronDown, ChevronUp, Package, UtensilsCrossed } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChevronDown, ChevronUp, Package, UtensilsCrossed, SlidersHorizontal } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type AggregatedFood = {
   name: string;
@@ -65,17 +66,32 @@ export function AggregatedFoodLogs({ entries, dictionary }: { entries: DailyEntr
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>{dictionary.title}</CardTitle>
-        <CardDescription>{dictionary.description}</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>{dictionary.title}</CardTitle>
+          <CardDescription>{dictionary.description}</CardDescription>
+        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="icon">
+              <SlidersHorizontal className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-2">
+             <Select value={filter} onValueChange={(value) => setFilter(value as FilterType)}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder={dictionary.filters.all} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{dictionary.filters.all}</SelectItem>
+                  <SelectItem value="meal">{dictionary.filters.meals}</SelectItem>
+                  <SelectItem value="grocery">{dictionary.filters.groceries}</SelectItem>
+                </SelectContent>
+              </Select>
+          </PopoverContent>
+        </Popover>
       </CardHeader>
       <CardContent>
-        <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterType)}>
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="all">{dictionary.filters.all}</TabsTrigger>
-            <TabsTrigger value="meal">{dictionary.filters.meals}</TabsTrigger>
-            <TabsTrigger value="grocery">{dictionary.filters.groceries}</TabsTrigger>
-          </TabsList>
           <div className="space-y-4 mt-4">
             {itemsToShow.length > 0 ? (
               <ul className="space-y-3">
@@ -85,12 +101,10 @@ export function AggregatedFoodLogs({ entries, dictionary }: { entries: DailyEntr
                       <div className="bg-primary/20 text-primary p-2 rounded-full">
                         <FoodIcon iconName={food.icon} className="h-5 w-5" />
                       </div>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm">{food.name}</span>
-                          {food.type === 'grocery' && <Package className="h-4 w-4 text-muted-foreground" title={dictionary.foodTypes?.grocery}/>}
-                          {food.type === 'meal' && <UtensilsCrossed className="h-4 w-4 text-muted-foreground" title={dictionary.foodTypes?.meal} />}
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">{food.name}</span>
+                        {food.type === 'grocery' && <Package className="h-4 w-4 text-muted-foreground" title={dictionary.foodTypes?.grocery}/>}
+                        {food.type === 'meal' && <UtensilsCrossed className="h-4 w-4 text-muted-foreground" title={dictionary.foodTypes?.meal} />}
                       </div>
                     </div>
                     <div className="text-sm text-muted-foreground font-medium">
@@ -118,7 +132,6 @@ export function AggregatedFoodLogs({ entries, dictionary }: { entries: DailyEntr
               </Button>
             )}
           </div>
-        </Tabs>
       </CardContent>
     </Card>
   );
