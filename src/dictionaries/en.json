@@ -116,6 +116,13 @@
       "fat": "Fat"
     }
   },
+  "aggregatedFoodLogs": {
+    "title": "Recent Foods",
+    "description": "A summary of the foods you've logged in the last 9 days.",
+    "showMore": "Show More",
+    "showLess": "Show Less",
+    "noRecentFoods": "No foods logged in the last 9 days."
+  },
   "intakeChart": {
     "title": "Nutrient Intake Analysis",
     "description": "Your daily intake versus your recommended range over time.",
@@ -308,5 +315,3 @@
     }
   }
 }
-
-    

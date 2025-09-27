@@ -18,6 +18,7 @@ import { addDays, differenceInCalendarDays, endOfDay, format, startOfDay } from 
 import { AddToHomeScreenPrompt } from "@/components/AddToHomeScreenPrompt";
 import { useParams } from "next/navigation";
 import { WelcomePage } from "./WelcomePage";
+import { AggregatedFoodLogs } from "./AggregatedFoodLogs";
 
 export function HomePageClient({ dictionary }: { dictionary: any }) {
   const { data: user, loading: userLoading } = useUser();
@@ -157,6 +158,7 @@ export function HomePageClient({ dictionary }: { dictionary: any }) {
       {profileComplete ? (
         <>
           <RecommendedIntake userProfile={user} dictionary={dictionary.recommendedIntake} />
+          {allEntries.length > 0 && <AggregatedFoodLogs entries={allEntries} dictionary={dictionary.aggregatedFoodLogs} />}
           {allEntries.length > 1 ? (
             <IntakeChart userProfile={user} entries={allEntries} dictionary={dictionary.intakeChart} />
           ) : (

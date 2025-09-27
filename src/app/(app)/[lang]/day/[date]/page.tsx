@@ -1,3 +1,4 @@
+
 import { getDictionary } from "@/lib/get-dictionary";
 import { DayPageClient } from "@/components/DayPageClient";
 import type { Locale } from "@/i18n.config";

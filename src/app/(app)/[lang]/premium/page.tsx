@@ -1,3 +1,4 @@
+
 import { getDictionary } from "@/lib/get-dictionary";
 import { PremiumPageClient } from "@/components/PremiumPageClient";
 import type { Locale } from "@/i18n.config";

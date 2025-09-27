@@ -116,6 +116,13 @@
       "fat": "Fett"
     }
   },
+  "aggregatedFoodLogs": {
+    "title": "Letzte Lebensmittel",
+    "description": "Eine Zusammenfassung der in den letzten 9 Tagen protokollierten Lebensmittel.",
+    "showMore": "Mehr anzeigen",
+    "showLess": "Weniger anzeigen",
+    "noRecentFoods": "In den letzten 9 Tagen wurden keine Lebensmittel protokolliert."
+  },
   "intakeChart": {
     "title": "Nährstoffzufuhr-Analyse",
     "description": "Ihre tägliche Zufuhr im Vergleich zu Ihrem empfohlenen Bereich im Zeitverlauf.",
@@ -308,5 +315,3 @@
     }
   }
 }
-
-    
