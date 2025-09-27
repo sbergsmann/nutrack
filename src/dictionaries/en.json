@@ -127,6 +127,7 @@
       "meal": "Meal"
     },
     "filters": {
+      "title": "Filter by",
       "all": "All",
       "meals": "Meals",
       "groceries": "Groceries"

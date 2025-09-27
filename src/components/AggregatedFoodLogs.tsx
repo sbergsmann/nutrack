@@ -8,8 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import FoodIcon from "./FoodIcon";
 import { ChevronDown, ChevronUp, Package, UtensilsCrossed, SlidersHorizontal } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 type AggregatedFood = {
   name: string;
@@ -71,25 +70,22 @@ export function AggregatedFoodLogs({ entries, dictionary }: { entries: DailyEntr
           <CardTitle>{dictionary.title}</CardTitle>
           <CardDescription>{dictionary.description}</CardDescription>
         </div>
-        <Popover>
-          <PopoverTrigger asChild>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon">
               <SlidersHorizontal className="h-4 w-4" />
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-2">
-             <Select value={filter} onValueChange={(value) => setFilter(value as FilterType)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder={dictionary.filters.all} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{dictionary.filters.all}</SelectItem>
-                  <SelectItem value="meal">{dictionary.filters.meals}</SelectItem>
-                  <SelectItem value="grocery">{dictionary.filters.groceries}</SelectItem>
-                </SelectContent>
-              </Select>
-          </PopoverContent>
-        </Popover>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56">
+            <DropdownMenuLabel>{dictionary.filters.title}</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuRadioGroup value={filter} onValueChange={(value) => setFilter(value as FilterType)}>
+              <DropdownMenuRadioItem value="all">{dictionary.filters.all}</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="meal">{dictionary.filters.meals}</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="grocery">{dictionary.filters.groceries}</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </CardHeader>
       <CardContent>
           <div className="space-y-4 mt-4">

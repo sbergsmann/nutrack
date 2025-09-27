@@ -127,6 +127,7 @@
       "meal": "Mahlzeit"
     },
     "filters": {
+      "title": "Filter",
       "all": "Alle",
       "meals": "Mahlzeiten",
       "groceries": "Lebensmittel"
