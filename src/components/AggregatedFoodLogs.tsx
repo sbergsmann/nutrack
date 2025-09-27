@@ -86,14 +86,11 @@ export function AggregatedFoodLogs({ entries, dictionary }: { entries: DailyEntr
                         <FoodIcon iconName={food.icon} className="h-5 w-5" />
                       </div>
                       <div className="flex flex-col">
-                        <span className="font-medium text-sm">{food.name}</span>
-                        {food.type && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            {food.type === 'grocery' && <Package className="h-3 w-3" />}
-                            {food.type === 'meal' && <UtensilsCrossed className="h-3 w-3" />}
-                            <span>{dictionary.foodTypes?.[food.type] ?? food.type}</span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">{food.name}</span>
+                          {food.type === 'grocery' && <Package className="h-4 w-4 text-muted-foreground" title={dictionary.foodTypes?.grocery}/>}
+                          {food.type === 'meal' && <UtensilsCrossed className="h-4 w-4 text-muted-foreground" title={dictionary.foodTypes?.meal} />}
+                        </div>
                       </div>
                     </div>
                     <div className="text-sm text-muted-foreground font-medium">
