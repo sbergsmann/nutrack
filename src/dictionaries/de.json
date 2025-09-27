@@ -157,6 +157,10 @@
     "decreaseAria": "Menge von verringern",
     "increaseAria": "Menge von erhöhen",
     "deleteAria": "Löschen",
+    "foodTypes": {
+      "grocery": "Lebensmittel",
+      "meal": "Mahlzeit"
+    },
     "nutrients": {
       "calories": "Kalorien",
       "carbs": "Kohlenhydrate",

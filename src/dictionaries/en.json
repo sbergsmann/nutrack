@@ -157,6 +157,10 @@
     "decreaseAria": "Decrease quantity of",
     "increaseAria": "Increase quantity of",
     "deleteAria": "Delete",
+    "foodTypes": {
+      "grocery": "Grocery",
+      "meal": "Meal"
+    },
     "nutrients": {
       "calories": "Calories",
       "carbs": "Carbs",

@@ -482,8 +482,8 @@ export function DailyTracker({
                                       <div className="flex-1 overflow-hidden">
                                         <div className="flex items-center gap-2">
                                           <p className="text-sm font-medium truncate">{food.name}</p>
-                                          {food.type === 'grocery' && <Package className="h-4 w-4 text-muted-foreground shrink-0" title="Grocery" />}
-                                          {food.type === 'meal' && <UtensilsCrossed className="h-4 w-4 text-muted-foreground shrink-0" title="Meal" />}
+                                          {food.type === 'grocery' && <Package className="h-4 w-4 text-muted-foreground shrink-0" title={dictionary.foodTypes.grocery} />}
+                                          {food.type === 'meal' && <UtensilsCrossed className="h-4 w-4 text-muted-foreground shrink-0" title={dictionary.foodTypes.meal} />}
                                           <Info className="h-4 w-4 text-muted-foreground shrink-0" />
                                         </div>
                                         <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
@@ -550,7 +550,7 @@ export function DailyTracker({
                                       <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                                         {food.type === 'grocery' && <Package className="h-4 w-4 shrink-0" />}
                                         {food.type === 'meal' && <UtensilsCrossed className="h-4 w-4 shrink-0" />}
-                                        <span>{food.type.charAt(0).toUpperCase() + food.type.slice(1)}</span>
+                                        <span>{dictionary.foodTypes?.[food.type] ?? food.type}</span>
                                       </div>
                                     )}
                                     {food.description && <p className="text-muted-foreground text-xs mt-2">{food.description}</p>}
