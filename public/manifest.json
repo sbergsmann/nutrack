@@ -1,16 +1,22 @@
 {
   "name": "Nutrack9",
   "short_name": "Nutrack9",
-  "description": "Unlock the Connection Between Food and Mood.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F5F5DC",
+  "background_color": "#F0EAE4",
   "theme_color": "#F87171",
+  "description": "Unlock the Connection Between Food and Mood.",
   "icons": [
     {
-      "src": "/icon-maskable.svg",
+      "src": "/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
+    },
+    {
+        "src": "/icon-maskable.svg",
+        "sizes": "any",
+        "type": "image/svg+xml",
+        "purpose": "maskable"
     }
   ]
 }
