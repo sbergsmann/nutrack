@@ -2,21 +2,26 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { DailyEntry, LoggedFood } from "@/lib/types";
+import type { DailyEntry } from "@/lib/types";
 import { addDays, isAfter, startOfToday } from "date-fns";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import FoodIcon from "./FoodIcon";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Package, UtensilsCrossed } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type AggregatedFood = {
   name: string;
   quantity: number;
   icon?: string;
+  type?: "grocery" | "meal";
 };
+
+type FilterType = "all" | "meal" | "grocery";
 
 export function AggregatedFoodLogs({ entries, dictionary }: { entries: DailyEntry[], dictionary: any }) {
   const [showAll, setShowAll] = useState(false);
+  const [filter, setFilter] = useState<FilterType>("all");
 
   const aggregatedFoods = useMemo(() => {
     const nineDaysAgo = addDays(startOfToday(), -8);
@@ -35,20 +40,28 @@ export function AggregatedFoodLogs({ entries, dictionary }: { entries: DailyEntr
               name: food.name,
               quantity: quantity,
               icon: food.icon,
+              type: food.type,
             });
           }
         }
       }
     }
-
+    
     return Array.from(foodMap.values()).sort((a, b) => b.quantity - a.quantity);
   }, [entries]);
+
+  const filteredFoods = useMemo(() => {
+    if (filter === "all") {
+      return aggregatedFoods;
+    }
+    return aggregatedFoods.filter(food => food.type === filter);
+  }, [aggregatedFoods, filter]);
 
   if (aggregatedFoods.length === 0) {
     return null;
   }
 
-  const itemsToShow = showAll ? aggregatedFoods : aggregatedFoods.slice(0, 5);
+  const itemsToShow = showAll ? filteredFoods : filteredFoods.slice(0, 5);
 
   return (
     <Card>
@@ -57,24 +70,42 @@ export function AggregatedFoodLogs({ entries, dictionary }: { entries: DailyEntr
         <CardDescription>{dictionary.description}</CardDescription>
       </CardHeader>
       <CardContent>
-        {itemsToShow.length > 0 ? (
-          <div className="space-y-4">
-            <ul className="space-y-3">
-              {itemsToShow.map((food, index) => (
-                <li key={index} className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="bg-primary/20 text-primary p-2 rounded-full">
-                      <FoodIcon iconName={food.icon} className="h-5 w-5" />
+        <Tabs value={filter} onValueChange={(value) => setFilter(value as FilterType)}>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="all">{dictionary.filters.all}</TabsTrigger>
+            <TabsTrigger value="meal">{dictionary.filters.meals}</TabsTrigger>
+            <TabsTrigger value="grocery">{dictionary.filters.groceries}</TabsTrigger>
+          </TabsList>
+          <div className="space-y-4 mt-4">
+            {itemsToShow.length > 0 ? (
+              <ul className="space-y-3">
+                {itemsToShow.map((food, index) => (
+                  <li key={index} className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-primary/20 text-primary p-2 rounded-full">
+                        <FoodIcon iconName={food.icon} className="h-5 w-5" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm">{food.name}</span>
+                        {food.type && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            {food.type === 'grocery' && <Package className="h-3 w-3" />}
+                            {food.type === 'meal' && <UtensilsCrossed className="h-3 w-3" />}
+                            <span>{dictionary.foodTypes?.[food.type] ?? food.type}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <span className="font-medium text-sm">{food.name}</span>
-                  </div>
-                  <div className="text-sm text-muted-foreground font-medium">
-                    x{food.quantity}
-                  </div>
-                </li>
-              ))}
-            </ul>
-            {aggregatedFoods.length > 5 && (
+                    <div className="text-sm text-muted-foreground font-medium">
+                      x{food.quantity}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+                <p className="text-center text-sm text-muted-foreground p-4">{dictionary.noItemsFound}</p>
+            )}
+            {filteredFoods.length > 5 && (
               <Button variant="ghost" onClick={() => setShowAll(!showAll)} className="w-full">
                 {showAll ? (
                   <>
@@ -90,9 +121,7 @@ export function AggregatedFoodLogs({ entries, dictionary }: { entries: DailyEntr
               </Button>
             )}
           </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">{dictionary.noRecentFoods}</p>
-        )}
+        </Tabs>
       </CardContent>
     </Card>
   );

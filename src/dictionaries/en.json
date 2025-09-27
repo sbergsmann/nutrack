@@ -121,7 +121,17 @@
     "description": "A summary of the foods you've logged in the last 9 days.",
     "showMore": "Show More",
     "showLess": "Show Less",
-    "noRecentFoods": "No foods logged in the last 9 days."
+    "noRecentFoods": "No foods logged in the last 9 days.",
+    "foodTypes": {
+      "grocery": "Grocery",
+      "meal": "Meal"
+    },
+    "filters": {
+      "all": "All",
+      "meals": "Meals",
+      "groceries": "Groceries"
+    },
+    "noItemsFound": "No items found for this filter."
   },
   "intakeChart": {
     "title": "Nutrient Intake Analysis",

@@ -121,7 +121,17 @@
     "description": "Eine Zusammenfassung der in den letzten 9 Tagen protokollierten Lebensmittel.",
     "showMore": "Mehr anzeigen",
     "showLess": "Weniger anzeigen",
-    "noRecentFoods": "In den letzten 9 Tagen wurden keine Lebensmittel protokolliert."
+    "noRecentFoods": "In den letzten 9 Tagen wurden keine Lebensmittel protokolliert.",
+    "foodTypes": {
+      "grocery": "Lebensmittel",
+      "meal": "Mahlzeit"
+    },
+    "filters": {
+      "all": "Alle",
+      "meals": "Mahlzeiten",
+      "groceries": "Lebensmittel"
+    },
+    "noItemsFound": "Keine Artikel für diesen Filter gefunden."
   },
   "intakeChart": {
     "title": "Nährstoffzufuhr-Analyse",
