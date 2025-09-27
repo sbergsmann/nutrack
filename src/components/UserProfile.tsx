@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { LogIn, LogOut, MessageSquare, User as UserIcon, BadgeCheck, Trash2, Languages, ChevronsUpDown } from "lucide-react";
+import { LogIn, LogOut, MessageSquare, User as UserIcon, BadgeCheck, Trash2, Languages, ChevronsUpDown, GitCommit } from "lucide-react";
 import { useUser } from "@/firebase/auth/use-user";
 import { signInWithGoogle, signOut } from "@/firebase/auth/actions";
 import { FeedbackDialog } from "./FeedbackDialog";
@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 import { useFirestore } from "@/firebase/provider";
 import { updateUserLanguage } from "@/lib/data";
 import { useToast } from "@/hooks/use-toast";
+import { appVersion } from "@/config/version";
 
 export function UserProfile({ dictionary }: { dictionary: any }) {
   const { data: user, loading } = useUser();
@@ -145,6 +146,16 @@ export function UserProfile({ dictionary }: { dictionary: any }) {
             <span>{dictionary.deleteAccount.title}</span>
             </DropdownMenuItem>
         </DeleteAccountDialog>
+        <DropdownMenuSeparator />
+         <DropdownMenuItem disabled>
+          <div className="flex justify-between items-center w-full text-xs text-muted-foreground">
+            <div className="flex items-center">
+              <GitCommit className="mr-2 h-3 w-3" />
+              <span>{dictionary.version}</span>
+            </div>
+            <span>{appVersion}</span>
+          </div>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

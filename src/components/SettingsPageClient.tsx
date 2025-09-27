@@ -135,7 +135,6 @@ export function SettingsPageClient({ dictionary }: { dictionary: any }) {
     }
   }
 
-  const appVersion = "1.2.7";
   const hasMeasurements = !!(user?.height || user?.weight || user?.age || user?.gender || user?.activityLevel);
 
   if (!dictionary) {
@@ -305,10 +304,6 @@ export function SettingsPageClient({ dictionary }: { dictionary: any }) {
           )}
         </CardContent>
       </Card>
-
-      <div className="text-center text-sm text-muted-foreground">
-        <p>{dictionary.version} {appVersion}</p>
-      </div>
     </div>
   );
 }

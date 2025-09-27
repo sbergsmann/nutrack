@@ -15,6 +15,7 @@
       "language": "Language",
       "sendFeedback": "Send Feedback",
       "logout": "Log out",
+      "version": "Version",
       "deleteAccount": {
         "title": "Delete Account",
         "description": "This action cannot be undone. This will permanently delete your account and remove all of your data from our servers.",
@@ -301,7 +302,6 @@
       "clear": "Clear All",
       "clearing": "Clearing..."
     },
-    "version": "Version",
     "toasts": {
       "profileUpdated": {
         "title": "Profile updated",

@@ -15,6 +15,7 @@
       "language": "Sprache",
       "sendFeedback": "Feedback senden",
       "logout": "Abmelden",
+      "version": "Version",
       "deleteAccount": {
         "title": "Konto löschen",
         "description": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird Ihr Konto dauerhaft gelöscht und alle Ihre Daten von unseren Servern entfernt.",
@@ -127,7 +128,7 @@
       "meal": "Mahlzeit"
     },
     "filters": {
-      "title": "Filter",
+      "title": "Filtern nach",
       "all": "Alle",
       "meals": "Mahlzeiten",
       "groceries": "Lebensmittel"
@@ -301,7 +302,6 @@
       "clear": "Alles löschen",
       "clearing": "Wird gelöscht..."
     },
-    "version": "Version",
     "toasts": {
       "profileUpdated": {
         "title": "Profil aktualisiert",
