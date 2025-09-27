@@ -45,13 +45,9 @@ export function UserProfile({ dictionary }: { dictionary: any }) {
     if (newLocale === lang) return;
 
     try {
-      // Wait for the database update to complete
       await updateUserLanguage(firestore, user.uid, newLocale);
-      
-      // Then navigate
       const newPath = pathname.replace(`/${lang}`, `/${newLocale}`);
-      router.push(newPath);
-
+      window.location.assign(newPath);
     } catch (error) {
       console.error("Failed to change language:", error);
       toast({
