@@ -25,6 +25,7 @@ const EnrichFoodOutputSchema = z.object({
   proteins: z.number().describe('Grams of protein per portion.'),
   fats: z.number().describe('Grams of fat per portion.'),
   icon: z.string().describe('The most appropriate lucide-react icon name for this food (e.g., "Apple", "Sandwich", "GlassWater"). The name must be in PascalCase.'),
+  type: z.enum(['grocery', 'meal']).describe('The type of food item. A "grocery" is a single ingredient (e.g., "Apple", "Flour", "Chicken Breast"). A "meal" is a prepared dish made of multiple ingredients (e.g., "Chicken Soup", "Avocado Toast", "Caesar Salad").'),
 });
 export type EnrichFoodOutput = z
 .infer<typeof EnrichFoodOutputSchema>;
@@ -47,6 +48,7 @@ Provide the following details:
 - The number of calories for that portion size.
 - The grams of carbohydrates, protein, and fat for that portion size.
 - The name of a single, relevant icon from the lucide-react library. The icon name must be in PascalCase.
+- The type of food item: "grocery" for a single ingredient or "meal" for a prepared dish.
 
 Only return the JSON object.`,
 });

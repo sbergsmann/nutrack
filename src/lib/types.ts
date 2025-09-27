@@ -12,6 +12,7 @@ export type FoodItem = {
   proteins?: number;
   fats?: number;
   icon?: string;
+  type?: "grocery" | "meal";
   name_ngrams?: string[];
 };
 

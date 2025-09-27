@@ -241,7 +241,7 @@ export async function getOrCreateFood(
         await updateDoc(foodRef, { lastAddedAt: serverTimestamp() });
     }
     
-    const needsEnrichment = foodData.portion == null || foodData.calories == null;
+    const needsEnrichment = foodData.portion == null || foodData.calories == null || foodData.type == null;
     if (needsEnrichment) {
       triggerFoodEnrichment(firestore, foodDoc.id, trimmedFoodName);
     }

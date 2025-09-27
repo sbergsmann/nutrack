@@ -29,7 +29,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Smile, Meh, Frown, Zap, Battery, Trash, Minus, Calendar as CalendarIcon, Flame, Beef, Droplet, Sparkles, ArrowDownUp, SortDesc, Info } from "lucide-react";
+import { Plus, Smile, Meh, Frown, Zap, Battery, Trash, Minus, Calendar as CalendarIcon, Flame, Beef, Droplet, Sparkles, ArrowDownUp, SortDesc, Info, Package, UtensilsCrossed } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FeedbackDialog } from "./FeedbackDialog";
 import FoodIcon from "./FoodIcon";
@@ -482,6 +482,8 @@ export function DailyTracker({
                                       <div className="flex-1 overflow-hidden">
                                         <div className="flex items-center gap-2">
                                           <p className="text-sm font-medium truncate">{food.name}</p>
+                                          {food.type === 'grocery' && <Package className="h-4 w-4 text-muted-foreground shrink-0" title="Grocery" />}
+                                          {food.type === 'meal' && <UtensilsCrossed className="h-4 w-4 text-muted-foreground shrink-0" title="Meal" />}
                                           <Info className="h-4 w-4 text-muted-foreground shrink-0" />
                                         </div>
                                         <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
@@ -611,9 +613,3 @@ export function DailyTracker({
     </div>
   );
 }
-
-    
-
-    
-
-    
